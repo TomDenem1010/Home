@@ -1,0 +1,12 @@
+version: 2
+
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      timezone: "Europe/Budapest"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      
