@@ -68,7 +68,7 @@
 			<artifactId>flyway-core</artifactId>
 			<version>12.5.0</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
@@ -79,6 +79,13 @@
 			<groupId>com.oracle.database.jdbc</groupId>
 			<artifactId>ojdbc11</artifactId>
 			<version>23.26.1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>6.1.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
