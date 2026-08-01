@@ -48,13 +48,24 @@ jobs:
                     $counts = $mutations | Group-Object -Property status
                     $killed = ($counts | Where-Object Name -eq 'KILLED').Count
                     $survived = ($counts | Where-Object Name -eq 'SURVIVED').Count
+                    $notKilled = $total - $killed
                     $mutationScore = if ($total) { [math]::Round((100 * $killed / $total), 2) } else { 0 }
                     $testStrengthDenominator = $killed + $survived
                     $testStrength = if ($testStrengthDenominator) { [math]::Round((100 * $killed / $testStrengthDenominator), 2) } else { 0 }
+                    $report = Get-Content (Join-Path $csv.DirectoryName 'index.html') -Raw
+                    $lineCoverage = [regex]::Match($report, '(?s)<h3>Project Summary</h3>.*?<td>\d+</td>\s*<td>\s*(?<percentage>\d+)%.*?coverage_legend">(?<covered>\d+)/(?<total>\d+)')
+
+                    if (-not $lineCoverage.Success) {
+                        throw "Could not read line coverage from the PIT HTML report."
+                    }
+
+                    $lineCoverageValue = "$($lineCoverage.Groups['percentage'].Value)% ($($lineCoverage.Groups['covered'].Value)/$($lineCoverage.Groups['total'].Value))"
 
                     Write-Host "PIT mutation score: $mutationScore%"
                     Write-Host "PIT test strength: $testStrength%"
+                    Write-Host "Line coverage: $lineCoverageValue"
                     Write-Host "Total mutations: $total"
+                    Write-Host "Not KILLED: $notKilled"
                     $counts | Sort-Object Name | ForEach-Object {
                         Write-Host "$($_.Name): $($_.Count)"
                     }
@@ -66,11 +77,9 @@ jobs:
                     | --- | ---: |
                     | Mutation score | $mutationScore% |
                     | Test strength | $testStrength% |
+                    | Line coverage | $lineCoverageValue |
                     | Total mutations | $total |
+                    | KILLED | $killed |
+                    | Not KILLED | $notKilled |
 
-                    ### Mutation statuses
-
-                    | Status | Count |
-                    | --- | ---: |
-                    $($counts | Sort-Object Name | ForEach-Object { "| $($_.Name) | $($_.Count) |" })
                     "@ | Add-Content $env:GITHUB_STEP_SUMMARY
