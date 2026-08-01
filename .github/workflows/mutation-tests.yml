@@ -1,0 +1,76 @@
+name: Mutation Tests
+
+on:
+    push:
+        branches:
+            - main
+    workflow_dispatch:
+        inputs:
+            branch:
+                description: 'Branch to test'
+                required: true
+                default: 'main'
+
+permissions:
+    contents: read
+
+jobs:
+    mutation-tests:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: ./.github/actions/checkout-repository
+              with:
+                  ref: ${{ inputs.branch || 'main' }}
+
+            - name: Set up JDK 25
+              uses: ./.github/actions/setup-jdk-25
+
+            - name: Run mutation tests
+              run: mvn -B test-compile org.pitest:pitest-maven:mutationCoverage
+
+            - name: Print mutation-test summary
+              shell: pwsh
+              run: |
+                  $csv = Get-ChildItem -Path target/pit-reports -Recurse -Filter mutations.csv |
+                      Sort-Object LastWriteTime |
+                      Select-Object -Last 1
+
+                  if (-not $csv) {
+                      throw "PIT CSV report was not generated."
+                  }
+
+                  # PIT's CSV output intentionally has no header row.
+                  $headers = 'sourceFile', 'mutatedClass', 'mutator', 'mutatedMethod', 'lineNumber', 'status', 'killingTest'
+                  $mutations = Get-Content $csv.FullName | ConvertFrom-Csv -Header $headers
+                  $total = $mutations.Count
+                  $counts = $mutations | Group-Object -Property status
+                  $killed = ($counts | Where-Object Name -eq 'KILLED').Count
+                  $survived = ($counts | Where-Object Name -eq 'SURVIVED').Count
+                  $mutationScore = if ($total) { [math]::Round((100 * $killed / $total), 2) } else { 0 }
+                  $testStrengthDenominator = $killed + $survived
+                  $testStrength = if ($testStrengthDenominator) { [math]::Round((100 * $killed / $testStrengthDenominator), 2) } else { 0 }
+
+                  Write-Host "PIT mutation score: $mutationScore%"
+                  Write-Host "PIT test strength: $testStrength%"
+                  Write-Host "Total mutations: $total"
+                  $counts | Sort-Object Name | ForEach-Object {
+                      Write-Host "$($_.Name): $($_.Count)"
+                  }
+
+                  @"
+                  ## PIT mutation-test report
+
+                  | Metric | Value |
+                  | --- | ---: |
+                  | Mutation score | $mutationScore% |
+                  | Test strength | $testStrength% |
+                  | Total mutations | $total |
+
+                  ### Mutation statuses
+
+                  | Status | Count |
+                  | --- | ---: |
+                  $($counts | Sort-Object Name | ForEach-Object { "| $($_.Name) | $($_.Count) |" })
+                  "@ | Add-Content $env:GITHUB_STEP_SUMMARY
