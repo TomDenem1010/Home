@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
+import trd.home.tcg.dao.CardmarketCard;
 
 class CardmarketCardDtoTest {
 
@@ -23,21 +24,28 @@ class CardmarketCardDtoTest {
             String expectedExpansion,
             String expectedName,
             CardLanguage expectedCardLanguage) {
-        CardmarketCardDto dto = new CardmarketCardDto("card-id", link);
+        CardmarketCardDto dto = CardmarketCardDto.from(cardWithLink(link));
 
         assertAll(
-                () -> assertEquals("card-id", dto.getId()),
-                () -> assertEquals(link, dto.getLink()),
-                () -> assertEquals(expectedCardGameType, dto.getCardGameType()),
-                () -> assertEquals(expectedExpansion, dto.getExpansion()),
-                () -> assertEquals(expectedName, dto.getName()),
-                () -> assertEquals(expectedCardLanguage, dto.getCardLanguage()));
+                () -> assertEquals("card-id", dto.id()),
+                () -> assertEquals(link, dto.link()),
+                () -> assertEquals(expectedCardGameType, dto.cardGameType()),
+                () -> assertEquals(expectedExpansion, dto.expansion()),
+                () -> assertEquals(expectedName, dto.name()),
+                () -> assertEquals(expectedCardLanguage, dto.cardLanguage()));
     }
 
     @ParameterizedTest
     @MethodSource("invalidLinks")
     void throwsExceptionForInvalidUri(String link) {
-        assertThrows(IllegalArgumentException.class, () -> new CardmarketCardDto("card-id", link));
+        assertThrows(IllegalArgumentException.class, () -> CardmarketCardDto.from(cardWithLink(link)));
+    }
+
+    private static CardmarketCard cardWithLink(String link) {
+        CardmarketCard card = new CardmarketCard();
+        card.setId("card-id");
+        card.setLink(link);
+        return card;
     }
 
     private static Stream<Arguments> cardmarketLinks() {

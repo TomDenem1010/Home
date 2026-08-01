@@ -3,43 +3,37 @@ package trd.home.tcg.dto;
 import java.net.URI;
 import java.util.Objects;
 
-import lombok.Getter;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
+import trd.home.tcg.dao.CardmarketCard;
 
-@Getter
-public class CardmarketCardDto {
+public record CardmarketCardDto(
+        String id,
+        String link,
+        CardGameType cardGameType,
+        String expansion,
+        String name,
+        CardLanguage cardLanguage) {
 
-    private final String id;
-    private final String link;
-    private final CardGameType cardGameType;
-    private final String expansion;
-    private final String name;
-    private final CardLanguage cardLanguage;
-
-    public CardmarketCardDto(String id, String link) {
-        this.id = id;
-        this.link = link;
-
-        if (Objects.isNull(link) || link.trim().isEmpty()) {
-            this.expansion = null;
-            this.name = null;
-            this.cardLanguage = null;
-            this.cardGameType = null;
-            return;
-        } else {
-            URI uri = URI.create(link.trim());
-            String[] parts = uri.getPath().split("/");
-            int productsIndex = findPartIndex(parts, "Products");
-            int singlesIndex = findPartIndex(parts, "Singles");
-
-            this.cardGameType = productsIndex > 0
-                    ? CardGameType.findByCardmarketUrlPart(parts[productsIndex - 1])
-                    : null;
-            this.expansion = singlesIndex >= 0 && parts.length > singlesIndex + 1 ? parts[singlesIndex + 1] : null;
-            this.name = singlesIndex >= 0 && parts.length > singlesIndex + 2 ? parts[singlesIndex + 2] : null;
-            this.cardLanguage = findLanguage(uri.getQuery());
+    public static CardmarketCardDto from(CardmarketCard card) {
+        String link = card.getLink();
+        if (Objects.isNull(link) || link.isBlank()) {
+            return new CardmarketCardDto(card.getId(), link, null, null, null, null);
         }
+
+        URI uri = URI.create(link.trim());
+        String[] parts = uri.getPath().split("/");
+        int productsIndex = findPartIndex(parts, "Products");
+        int singlesIndex = findPartIndex(parts, "Singles");
+
+        CardGameType cardGameType = productsIndex > 0
+                ? CardGameType.findByCardmarketUrlPart(parts[productsIndex - 1])
+                : null;
+        String expansion = singlesIndex >= 0 && parts.length > singlesIndex + 1 ? parts[singlesIndex + 1] : null;
+        String name = singlesIndex >= 0 && parts.length > singlesIndex + 2 ? parts[singlesIndex + 2] : null;
+        CardLanguage cardLanguage = findLanguage(uri.getQuery());
+
+        return new CardmarketCardDto(card.getId(), link, cardGameType, expansion, name, cardLanguage);
     }
 
     private static int findPartIndex(String[] parts, String expectedPart) {
@@ -60,7 +54,7 @@ public class CardmarketCardDto {
             String[] keyValue = parameter.split("=", 2);
             if (keyValue.length == 2 && "language".equals(keyValue[0])) {
                 try {
-                    return CardLanguage.findByCardmarketUrlPart(Integer.valueOf(keyValue[1]));
+                    return CardLanguage.findByCardmarketUrlPart(Integer.parseInt(keyValue[1]));
                 } catch (NumberFormatException ignored) {
                     return null;
                 }
