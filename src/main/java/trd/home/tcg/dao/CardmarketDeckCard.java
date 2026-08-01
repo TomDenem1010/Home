@@ -11,20 +11,21 @@ import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
 import lombok.Getter;
 import lombok.Setter;
+import trd.home.common.dao.AuditedEntity;
 
 @Entity
-@Table(name = "cardmarket_deck_card")
+@Table(name = "cardmarket_deck_version_card")
 @Getter
 @Setter
-public class CardmarketDeckCard {
+public class CardmarketDeckCard extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "deck_id", nullable = false)
-    private CardmarketDeck deck;
+    @JoinColumn(name = "deck_version_id", nullable = false)
+    private CardmarketDeckVersion deckVersion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "card_id", nullable = false)

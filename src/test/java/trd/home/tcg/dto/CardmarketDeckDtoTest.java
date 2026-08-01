@@ -10,15 +10,17 @@ import org.junit.jupiter.api.Test;
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckCard;
+import trd.home.tcg.dao.CardmarketDeckVersion;
 
 class CardmarketDeckDtoTest {
 
     @Test
     void mapsDeckAndItsCards() {
         CardmarketDeck deck = deck("deck-id", "My deck");
-        CardmarketDeckCard firstDeckCard = deckCard("deck-card-1", deck, "card-id-1", 4);
-        CardmarketDeckCard secondDeckCard = deckCard("deck-card-2", deck, "card-id-2", 2);
-        deck.setCards(Set.of(firstDeckCard, secondDeckCard));
+        CardmarketDeckVersion version = deck.getCurrentVersion();
+        CardmarketDeckCard firstDeckCard = deckCard("deck-card-1", version, "card-id-1", 4);
+        CardmarketDeckCard secondDeckCard = deckCard("deck-card-2", version, "card-id-2", 2);
+        version.setCards(Set.of(firstDeckCard, secondDeckCard));
 
         CardmarketDeckDto dto = CardmarketDeckDto.from(deck);
 
@@ -44,16 +46,19 @@ class CardmarketDeckDtoTest {
         CardmarketDeck deck = new CardmarketDeck();
         deck.setId(id);
         deck.setName(name);
+        CardmarketDeckVersion version = new CardmarketDeckVersion();
+        version.setVersionNumber(1);
+        deck.addVersion(version);
         return deck;
     }
 
-    private static CardmarketDeckCard deckCard(String id, CardmarketDeck deck, String cardId, int quantity) {
+    private static CardmarketDeckCard deckCard(String id, CardmarketDeckVersion version, String cardId, int quantity) {
         CardmarketCard card = new CardmarketCard();
         card.setId(cardId);
 
         CardmarketDeckCard deckCard = new CardmarketDeckCard();
         deckCard.setId(id);
-        deckCard.setDeck(deck);
+        deckCard.setDeckVersion(version);
         deckCard.setCard(card);
         deckCard.setQuantity(quantity);
         return deckCard;

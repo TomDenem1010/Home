@@ -8,7 +8,7 @@ import trd.home.tcg.dao.CardmarketDeck;
 public record CardmarketDeckDto(String id, String name, Set<CardmarketDeckCardDto> cards) {
 
     public static CardmarketDeckDto from(CardmarketDeck deck) {
-        Set<CardmarketDeckCardDto> cards = deck.getCards().stream()
+        Set<CardmarketDeckCardDto> cards = deck.getCurrentVersion().getCards().stream()
                 .map(deckCard -> new CardmarketDeckCardDto(
                         deckCard.getId(),
                         deck.getId(),

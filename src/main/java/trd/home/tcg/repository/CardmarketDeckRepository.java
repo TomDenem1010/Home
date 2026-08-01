@@ -10,7 +10,7 @@ import trd.home.tcg.dto.CardmarketDeckDto;
 
 public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, String> {
 
-    @EntityGraph(attributePaths = { "cards", "cards.card" })
+    @EntityGraph(attributePaths = { "currentVersion", "currentVersion.cards", "currentVersion.cards.card" })
     Optional<CardmarketDeck> findEntityById(String id);
 
     default Optional<CardmarketDeckDto> findByUuid(String uuid) {
