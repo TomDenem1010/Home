@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.time.Instant;
-
 import org.junit.jupiter.api.Test;
-
 import trd.home.tcg.constant.DeckStatus;
 
 class CardmarketDeckTest {

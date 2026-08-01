@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.stream.Stream;
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
@@ -122,6 +120,7 @@ class CardmarketCardDtoTest {
     }
 
     private static Stream<String> invalidLinks() {
-        return Stream.of("not a valid URI", "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language=1%ZZ");
+        return Stream.of(
+                "not a valid URI", "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language=1%ZZ");
     }
 }

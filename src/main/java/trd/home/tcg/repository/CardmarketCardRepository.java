@@ -1,9 +1,7 @@
 package trd.home.tcg.repository;
 
 import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dto.CardmarketCardDto;
 

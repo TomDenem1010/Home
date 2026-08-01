@@ -2,13 +2,11 @@ package trd.home.tcg.dao;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.Instant;
-
 import org.junit.jupiter.api.Test;
-
 import trd.home.tcg.constant.DeckStatus;
 
 class CardmarketDeckVersionTest {
@@ -32,8 +30,10 @@ class CardmarketDeckVersionTest {
         assertAll(
                 () -> assertSame(secondVersion, deck.getCurrentVersion()),
                 () -> assertEquals(2, deck.getVersions().size()),
-                () -> assertEquals(removedCard, firstVersion.getCards().iterator().next().getCard()),
-                () -> assertEquals(addedCard, secondVersion.getCards().iterator().next().getCard()));
+                () -> assertEquals(
+                        removedCard, firstVersion.getCards().iterator().next().getCard()),
+                () -> assertEquals(
+                        addedCard, secondVersion.getCards().iterator().next().getCard()));
     }
 
     @Test

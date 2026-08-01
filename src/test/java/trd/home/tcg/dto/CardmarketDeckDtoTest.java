@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
-
 import org.junit.jupiter.api.Test;
-
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckCard;
@@ -27,9 +25,11 @@ class CardmarketDeckDtoTest {
         assertAll(
                 () -> assertEquals("deck-id", dto.id()),
                 () -> assertEquals("My deck", dto.name()),
-                () -> assertEquals(Set.of(
-                        new CardmarketDeckCardDto("deck-card-1", "deck-id", "card-id-1", 4),
-                        new CardmarketDeckCardDto("deck-card-2", "deck-id", "card-id-2", 2)), dto.cards()));
+                () -> assertEquals(
+                        Set.of(
+                                new CardmarketDeckCardDto("deck-card-1", "deck-id", "card-id-1", 4),
+                                new CardmarketDeckCardDto("deck-card-2", "deck-id", "card-id-2", 2)),
+                        dto.cards()));
     }
 
     @Test

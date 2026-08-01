@@ -18,7 +18,7 @@ class CardLanguageTest {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(ints = { 0, 2 })
+    @ValueSource(ints = {0, 2})
     void returnsNullForUnknownCardLanguage(Integer urlPart) {
         assertNull(CardLanguage.findByCardmarketUrlPart(urlPart));
     }
