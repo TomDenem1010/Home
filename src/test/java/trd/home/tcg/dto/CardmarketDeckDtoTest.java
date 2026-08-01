@@ -47,7 +47,7 @@ class CardmarketDeckDtoTest {
         deck.setId(id);
         deck.setName(name);
         CardmarketDeckVersion version = new CardmarketDeckVersion();
-        version.setVersionNumber(1);
+        version.setVersion("v1");
         deck.addVersion(version);
         return deck;
     }

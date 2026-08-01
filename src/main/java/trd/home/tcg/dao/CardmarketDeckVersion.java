@@ -30,7 +30,7 @@ public class CardmarketDeckVersion extends AuditedEntity {
     @JoinColumn(name = "deck_id", nullable = false)
     private CardmarketDeck deck;
 
-    private int versionNumber;
+    private String version;
 
     @OneToMany(mappedBy = "deckVersion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardmarketDeckCard> cards = new LinkedHashSet<>();

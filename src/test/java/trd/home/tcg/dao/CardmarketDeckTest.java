@@ -16,7 +16,7 @@ class CardmarketDeckTest {
     void addingAVersionSetsBothSidesOfTheRelationshipAndMakesItCurrent() {
         CardmarketDeck deck = new CardmarketDeck();
         CardmarketDeckVersion version = new CardmarketDeckVersion();
-        version.setVersionNumber(1);
+        version.setVersion("v1");
 
         deck.addVersion(version);
 

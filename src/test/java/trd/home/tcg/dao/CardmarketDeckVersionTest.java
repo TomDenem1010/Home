@@ -20,12 +20,12 @@ class CardmarketDeckVersionTest {
         CardmarketCard addedCard = card("added-card");
 
         CardmarketDeckVersion firstVersion = new CardmarketDeckVersion();
-        firstVersion.setVersionNumber(1);
+        firstVersion.setVersion("v1");
         firstVersion.addCard(removedCard, 1);
         deck.addVersion(firstVersion);
 
         CardmarketDeckVersion secondVersion = new CardmarketDeckVersion();
-        secondVersion.setVersionNumber(2);
+        secondVersion.setVersion("v2");
         secondVersion.addCard(addedCard, 2);
         deck.addVersion(secondVersion);
 
@@ -40,7 +40,7 @@ class CardmarketDeckVersionTest {
     void softDeletePreservesTheDeckAndVersions() {
         CardmarketDeck deck = new CardmarketDeck();
         CardmarketDeckVersion version = new CardmarketDeckVersion();
-        version.setVersionNumber(1);
+        version.setVersion("v1");
         deck.addVersion(version);
         Instant deletedAt = Instant.parse("2026-08-01T12:00:00Z");
 
