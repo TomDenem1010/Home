@@ -22,9 +22,7 @@ public class ResourceDeckNameValidator implements ResourceValidator {
     }
 
     private void checkNameAndVersionSeparator(String filename) {
-        int versionSeparator = filename.lastIndexOf('_');
-
-        if (versionSeparator != 1) {
+        if (filename.chars().filter(character -> character == '_').count() != 1) {
             throw new WrongDeckNameException(
                     "Deck filename must contain a name and version separated by an underscore and nothing else: name_version.csv");
         }
