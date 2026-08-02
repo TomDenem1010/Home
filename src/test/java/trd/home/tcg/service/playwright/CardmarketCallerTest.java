@@ -1,0 +1,67 @@
+package trd.home.tcg.service.playwright;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Page;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import trd.home.tcg.exception.FailedToLaunchBrowser;
+
+@ExtendWith(MockitoExtension.class)
+class CardmarketCallerTest {
+
+    private final CardmarketCaller caller = new CardmarketCaller();
+
+    @Mock
+    private Browser browser;
+
+    @Mock
+    private BrowserContext context;
+
+    @Mock
+    private Page page;
+
+    @Test
+    void opensPageInFirstContextAndParsesItsHtml() {
+        when(browser.contexts()).thenReturn(List.of(context));
+        when(context.pages()).thenReturn(List.of());
+        when(context.newPage()).thenReturn(page);
+        when(page.content()).thenReturn("<html><body><p>Card price</p></body></html>");
+
+        assertEquals(
+                "Card price",
+                caller.callWithPlaywright("https://example.test/card", browser).text());
+
+        verify(context).newPage();
+        verify(page).navigate("https://example.test/card");
+        verify(page).waitForLoadState();
+    }
+
+    @Test
+    void reusesFirstExistingPage() {
+        when(browser.contexts()).thenReturn(List.of(context));
+        when(context.pages()).thenReturn(List.of(page));
+        when(page.content()).thenReturn("<html />");
+
+        caller.callWithPlaywright("https://example.test/card", browser);
+
+        verify(page).navigate("https://example.test/card");
+        verify(page).waitForLoadState();
+    }
+
+    @Test
+    void wrapsBrowserFailures() {
+        when(browser.contexts()).thenThrow(new IllegalStateException("Browser unavailable"));
+
+        assertThrows(
+                FailedToLaunchBrowser.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
+    }
+}

@@ -27,7 +27,7 @@ class DeckFileReaderTest {
                 () -> assertEquals(99, deck.getCurrentVersion().getCards().size()),
                 () -> assertEquals(1, firstCard.getQuantity()),
                 () -> assertEquals(
-                        "https://www.cardmarket.com/en/Magic/Products/Singles/Commander-Edge-of-Eternities/Kilo-Apogee-Mind?language=1",
+                        "https://www.cardmarket.com/en/Magic/Products/Singles/Commander-Edge-of-Eternities/Kilo-Apogee-Mind?language=1&isFoil=Y",
                         firstCard.getCard().getLink()),
                 () -> assertEquals(CardFoilType.FOIL, firstCard.getCard().getFoilType()));
     }

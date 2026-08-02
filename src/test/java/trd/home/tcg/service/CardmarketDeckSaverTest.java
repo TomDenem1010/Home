@@ -89,6 +89,22 @@ class CardmarketDeckSaverTest {
     }
 
     @Test
+    void doesNotSaveAnOlderOrEqualVersionForAnExistingDeck() {
+        CardmarketDeck existingDeck = deckWithCard(card("https://www.cardmarket.com/current", CardFoilType.FOIL));
+        existingDeck.getCurrentVersion().setVersion("v2");
+        CardmarketDeck importedDeck = deckWithCard(card("https://www.cardmarket.com/imported", CardFoilType.FOIL));
+        importedDeck.getCurrentVersion().setVersion("v2");
+        when(deckRepository.existsByName(importedDeck.getName())).thenReturn(true);
+        when(deckRepository.findByName(importedDeck.getName())).thenReturn(Optional.of(existingDeck));
+
+        saver.save(importedDeck);
+
+        assertEquals(1, existingDeck.getVersions().size());
+        verify(deckRepository, never()).save(any());
+        verifyNoInteractions(cardRepository);
+    }
+
+    @Test
     void savesCardThatDoesNotExistYetBeforeSavingDeck() {
         CardmarketCard importedCard = card("https://www.cardmarket.com/card", CardFoilType.ETCHED_FOIL);
         CardmarketDeck deck = deckWithCard(importedCard);
