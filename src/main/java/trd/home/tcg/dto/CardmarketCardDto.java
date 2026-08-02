@@ -2,17 +2,24 @@ package trd.home.tcg.dto;
 
 import java.net.URI;
 import java.util.Objects;
+import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
 
 public record CardmarketCardDto(
-        String id, String link, CardGameType cardGameType, String expansion, String name, CardLanguage cardLanguage) {
+        String id,
+        String link,
+        CardFoilType foilType,
+        CardGameType cardGameType,
+        String expansion,
+        String name,
+        CardLanguage cardLanguage) {
 
     public static CardmarketCardDto from(CardmarketCard card) {
         String link = card.getLink();
         if (Objects.isNull(link) || link.isBlank()) {
-            return new CardmarketCardDto(card.getId(), link, null, null, null, null);
+            return new CardmarketCardDto(card.getId(), link, card.getFoilType(), null, null, null, null);
         }
 
         URI uri = URI.create(link.trim());
@@ -26,7 +33,8 @@ public record CardmarketCardDto(
         String name = singlesIndex >= 0 && parts.length > singlesIndex + 2 ? parts[singlesIndex + 2] : null;
         CardLanguage cardLanguage = findLanguage(uri.getQuery());
 
-        return new CardmarketCardDto(card.getId(), link, cardGameType, expansion, name, cardLanguage);
+        return new CardmarketCardDto(
+                card.getId(), link, card.getFoilType(), cardGameType, expansion, name, cardLanguage);
     }
 
     private static int findPartIndex(String[] parts, String expectedPart) {
