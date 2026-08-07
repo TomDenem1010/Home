@@ -3,6 +3,7 @@ package trd.home.frontend.tcg;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import trd.home.tcg.service.TcgService;
@@ -38,6 +39,12 @@ public class TcgFrontendController {
     public String statistics(Model model) {
         model.addAttribute("deckPriceSummaries", tcgService.getDeckPriceSummary());
         return renderPage(model, "/tcg/statistics", "Statistics", "Az aktív deckek aktuális összértéke.");
+    }
+
+    @GetMapping("/statistic/{deckId}")
+    public String deckPriceHistory(@PathVariable String deckId, Model model) {
+        model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));
+        return renderPage(model, "/tcg/statistics", "Deck price history", "A deck első és legutolsó ismert árai.");
     }
 
     private String renderPage(Model model, String activePath, String title, String content) {

@@ -123,6 +123,117 @@ table {
     box-shadow: 0 0.25rem 1rem rgb(23 32 51 / 8%);
 }
 
+.deck-history {
+    max-width: 1200px;
+    margin-top: 2rem;
+}
+
+.section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-heading h2 {
+    margin: 0.25rem 0 0;
+    font-size: 1.75rem;
+}
+
+.eyebrow {
+    color: #2d6cdf;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.back-link {
+    color: #2d6cdf;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.price-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.price-card {
+    padding: 1.1rem 1.25rem;
+    border: 1px solid #dce3ed;
+    border-top: 4px solid #8290a6;
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 0.25rem 1rem rgb(23 32 51 / 7%);
+}
+
+.price-card--latest {
+    border-top-color: #2d6cdf;
+}
+
+.price-card span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: #667085;
+    font-size: 0.82rem;
+}
+
+.price-card strong {
+    font-size: 1.35rem;
+}
+
+.history-table-container {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 1rem rgb(23 32 51 / 8%);
+}
+
+.history-table {
+    max-width: none;
+    box-shadow: none;
+}
+
+.history-table .card-name {
+    min-width: 14rem;
+    font-weight: 650;
+}
+
+.history-table .quantity {
+    width: 4rem;
+    text-align: center;
+}
+
+.price-pair {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    white-space: nowrap;
+}
+
+.price-pair span {
+    display: grid;
+    gap: 0.15rem;
+}
+
+.price-pair small,
+.price-date {
+    color: #7a8495;
+    font-size: 0.72rem;
+}
+
+.price-date {
+    display: block;
+    margin-top: 0.5rem;
+    white-space: nowrap;
+}
+
 th,
 td {
     padding: 0.85rem 1rem;
@@ -133,6 +244,47 @@ td {
 th {
     color: white;
     background: #25324a;
+}
+
+.sort-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: inherit;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-align: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+th:not(:first-child) .sort-button {
+    justify-content: flex-end;
+}
+
+.sort-button::after {
+    content: "↕";
+    color: #aebbd0;
+    font-size: 0.85rem;
+}
+
+th[aria-sort="ascending"] .sort-button::after {
+    content: "↑";
+    color: white;
+}
+
+th[aria-sort="descending"] .sort-button::after {
+    content: "↓";
+    color: white;
+}
+
+.sort-button:hover,
+.sort-button:focus-visible {
+    color: #d9e7ff;
 }
 
 td:not(:first-child),
@@ -151,5 +303,20 @@ th:not(:first-child) {
 
     main {
         padding: 2rem;
+    }
+
+    .section-heading {
+        align-items: start;
+        flex-direction: column;
+    }
+
+    .price-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1000px) {
+    .price-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${pageTitle} + ' | Home'">Home</title>
     <link rel="stylesheet" th:href="@{/css/home.css}" href="/css/home.css">
+    <script defer th:src="@{/js/sortable-tables.js}" src="/js/sortable-tables.js"></script>
 </head>
 <body>
 <aside class="sidebar">
@@ -18,6 +19,9 @@
     <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
     <th:block th:if="${deckPriceSummaries != null}">
         <th:block th:replace="~{tcg/statistics :: deckPriceStatistics(${deckPriceSummaries})}"/>
+    </th:block>
+    <th:block th:if="${deckPriceHistorySummary != null}">
+        <th:block th:replace="~{tcg/statistics :: deckPriceHistory(${deckPriceHistorySummary})}"/>
     </th:block>
 </main>
 </body>
