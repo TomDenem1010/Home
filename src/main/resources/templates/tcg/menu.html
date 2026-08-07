@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+<body>
+<ul class="main-menu" th:fragment="menu(menuItems, activePath)">
+    <li th:each="menuItem : ${menuItems}" th:if="${menuItem.authorized}">
+        <details class="menu-group"
+                 th:open="${activePath == '/tcg' or activePath == '/tcg/statistics'}">
+            <summary class="main-menu-item">
+                <span th:text="${menuItem.label}">Menüpont</span>
+                <span class="menu-chevron" aria-hidden="true"></span>
+            </summary>
+            <ul class="submenu">
+                <li th:each="submenuItem : ${menuItem.submenuItems}"
+                    th:if="${submenuItem.authorized}">
+                    <form th:if="${submenuItem.type.name() == 'ACTION'}"
+                          th:action="@{${submenuItem.path}}"
+                          method="post">
+                        <button type="submit" th:text="${submenuItem.label}">Művelet</button>
+                    </form>
+                    <a th:if="${submenuItem.type.name() == 'PAGE'}"
+                       th:href="@{${submenuItem.path}}"
+                       th:text="${submenuItem.label}"
+                       th:classappend="${submenuItem.path == activePath} ? 'active'"
+                       th:attr="aria-current=${submenuItem.path == activePath} ? 'page' : null">
+                        Aloldal
+                    </a>
+                </li>
+            </ul>
+        </details>
+    </li>
+</ul>
+</body>
+</html>

@@ -30,23 +30,74 @@ body {
     text-decoration: none;
 }
 
-nav ul {
+.main-menu,
+.submenu {
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-nav a {
+.main-menu-item,
+.submenu a,
+.submenu button {
     display: block;
+    width: 100%;
     margin-bottom: 0.25rem;
     padding: 0.75rem;
+    border: 0;
     border-radius: 0.5rem;
     color: #dbe3f0;
+    font: inherit;
+    text-align: left;
     text-decoration: none;
+    background: transparent;
+    cursor: pointer;
 }
 
-nav a:hover,
-nav a.active {
+.main-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-weight: 600;
+    background: #25324a;
+}
+
+.main-menu-item::-webkit-details-marker {
+    display: none;
+}
+
+.main-menu-item::marker {
+    content: "";
+}
+
+.menu-chevron {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
+    transition: transform 150ms ease;
+}
+
+.menu-group[open] .menu-chevron {
+    transform: rotate(225deg);
+}
+
+.submenu {
+    margin-top: 0.25rem;
+    padding-left: 1rem;
+    border-left: 2px solid #34445f;
+}
+
+.submenu form {
+    margin: 0;
+}
+
+.main-menu-item:hover,
+.submenu a:hover,
+.submenu button:hover,
+.submenu a.active {
     color: white;
     background: #2d6cdf;
 }
@@ -58,6 +109,35 @@ main {
 
 h1 {
     margin-top: 0;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    max-width: 900px;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 0.25rem 1rem rgb(23 32 51 / 8%);
+}
+
+th,
+td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #e2e7ef;
+    text-align: left;
+}
+
+th {
+    color: white;
+    background: #25324a;
+}
+
+td:not(:first-child),
+th:not(:first-child) {
+    text-align: right;
 }
 
 @media (max-width: 640px) {

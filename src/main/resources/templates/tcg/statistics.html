@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="deckPriceStatistics(deckPriceSummaries)"
+         aria-labelledby="deck-price-summary-title">
+    <h2 id="deck-price-summary-title">Deck prices</h2>
+    <div class="table-container" th:if="${!deckPriceSummaries.empty}">
+        <table>
+            <thead>
+            <tr>
+                <th scope="col">Deck neve</th>
+                <th scope="col">Sum From ár</th>
+                <th scope="col">Sum Trend ár</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="summary : ${deckPriceSummaries}">
+                <td th:text="${summary.deckName}">Deck</td>
+                <td th:text="${#numbers.formatDecimal(summary.sumFromInEuro, 1, 2)} + ' €'">0,00 €</td>
+                <td th:text="${#numbers.formatDecimal(summary.sumTrendInEuro, 1, 2)} + ' €'">0,00 €</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <p th:if="${deckPriceSummaries.empty}">Nincs megjeleníthető aktív deck.</p>
+</section>
+</body>
+</html>

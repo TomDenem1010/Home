@@ -10,21 +10,15 @@
 <aside class="sidebar">
     <a class="brand" th:href="@{/}">Home</a>
     <nav aria-label="Főmenü">
-        <ul>
-            <li th:each="menuItem : ${menuItems}">
-                <a th:href="@{${menuItem.path}}"
-                   th:text="${menuItem.label}"
-                   th:classappend="${menuItem.path == activePath} ? 'active'"
-                   th:attr="aria-current=${menuItem.path == activePath} ? 'page' : null">
-                    Menüpont
-                </a>
-            </li>
-        </ul>
+        <th:block th:replace="~{tcg/menu :: menu(${menuItems}, ${activePath})}"/>
     </nav>
 </aside>
 <main>
     <h1 th:text="${pageTitle}">Kezdőlap</h1>
     <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
+    <th:block th:if="${deckPriceSummaries != null}">
+        <th:block th:replace="~{tcg/statistics :: deckPriceStatistics(${deckPriceSummaries})}"/>
+    </th:block>
 </main>
 </body>
 </html>

@@ -1,3 +1,5 @@
 package trd.home.frontend;
 
-public record MenuItem(String label, String path) {}
+import java.util.List;
+
+public record MenuItem(String label, boolean authorized, List<SubmenuItem> submenuItems) {}
