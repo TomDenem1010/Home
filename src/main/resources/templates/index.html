@@ -15,11 +15,13 @@
     </nav>
 </aside>
 <main>
-    <h1 th:text="${pageTitle}">Kezdőlap</h1>
-    <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
-    <th:block th:if="${contentTemplate != null}">
-        <th:block th:replace="~{${contentTemplate} :: content}"/>
-    </th:block>
+    <div class="page-content">
+        <h1 th:text="${pageTitle}">Kezdőlap</h1>
+        <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
+        <th:block th:if="${contentTemplate != null}">
+            <th:block th:replace="~{${contentTemplate} :: content}"/>
+        </th:block>
+    </div>
 </main>
 </body>
 </html>

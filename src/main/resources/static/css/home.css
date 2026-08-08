@@ -104,7 +104,14 @@ body {
 
 main {
     flex: 1;
+    min-width: 0;
     padding: 3rem;
+}
+
+.page-content {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
 }
 
 h1 {
