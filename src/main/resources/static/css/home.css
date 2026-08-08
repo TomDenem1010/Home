@@ -111,6 +111,98 @@ h1 {
     margin-top: 0;
 }
 
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 28rem));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.form-card {
+    padding: 1.5rem;
+    border: 1px solid #dce3ed;
+    border-radius: 0.75rem;
+    background: white;
+    box-shadow: 0 0.25rem 1rem rgb(23 32 51 / 7%);
+}
+
+.form-card h2 {
+    margin-top: 0;
+}
+
+.form-card form,
+.form-card label {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.form-card form {
+    gap: 1rem;
+}
+
+.form-card input {
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #b8c2d1;
+    border-radius: 0.45rem;
+    font: inherit;
+}
+
+.form-card select {
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid #b8c2d1;
+    border-radius: 0.45rem;
+    font: inherit;
+    background: white;
+}
+
+.auth-form-card {
+    max-width: 36rem;
+    margin-top: 2rem;
+}
+
+.form-card fieldset {
+    border: 1px solid #dce3ed;
+    border-radius: 0.45rem;
+}
+
+.role-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.role-option {
+    display: flex !important;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+}
+
+.primary-button {
+    padding: 0.75rem 1rem;
+    border: 0;
+    border-radius: 0.45rem;
+    color: white;
+    font: inherit;
+    font-weight: 700;
+    background: #2d6cdf;
+    cursor: pointer;
+}
+
+.form-result {
+    min-height: 1.25rem;
+    margin: 0;
+}
+
+.success {
+    color: #18743a;
+}
+
+.error {
+    color: #b42318;
+}
+
 .table-container {
     overflow-x: auto;
 }
@@ -311,6 +403,10 @@ th:not(:first-child) {
     }
 
     .price-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-grid {
         grid-template-columns: 1fr;
     }
 }

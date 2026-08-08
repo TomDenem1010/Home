@@ -38,12 +38,14 @@ public class TcgFrontendController {
     @GetMapping("/statistics")
     public String statistics(Model model) {
         model.addAttribute("deckPriceSummaries", tcgService.getDeckPriceSummary());
+        model.addAttribute("contentTemplate", "tcg/statistics");
         return renderPage(model, "/tcg/statistics", "Statistics", "Az aktív deckek aktuális összértéke.");
     }
 
     @GetMapping("/statistic/{deckId}")
     public String deckPriceHistory(@PathVariable String deckId, Model model) {
         model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));
+        model.addAttribute("contentTemplate", "tcg/statistics-uuid");
         return renderPage(model, "/tcg/statistics", "Deck price history", "A deck első és legutolsó ismert árai.");
     }
 

@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
+import trd.home.frontend.MenuModelAdvice;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.TcgService;
@@ -51,6 +52,7 @@ class TcgFrontendControllerTest {
         assertEquals("Statistics", model.getAttribute("pageTitle"));
         assertEquals(summaries, model.getAttribute("deckPriceSummaries"));
         assertEquals("/tcg/statistics", model.getAttribute("activePath"));
+        assertEquals("tcg/statistics", model.getAttribute("contentTemplate"));
         verify(tcgService).getDeckPriceSummary();
     }
 
@@ -65,16 +67,26 @@ class TcgFrontendControllerTest {
         assertEquals("Deck price history", model.getAttribute("pageTitle"));
         assertEquals(summary, model.getAttribute("deckPriceHistorySummary"));
         assertEquals("/tcg/statistics", model.getAttribute("activePath"));
+        assertEquals("tcg/statistics-uuid", model.getAttribute("contentTemplate"));
         verify(tcgService).getDeckPriceHistorySummary("deck-id");
     }
 
     @Test
     void menuContainsTcgAndItsSubmenuItems() {
-        var menuItems = new TcgMenuModelAdvice().menuItems();
+        var menuItems = new MenuModelAdvice().menuItems();
+        var tcgMenu = menuItems.stream()
+                .filter(item -> item.label().equals("TCG"))
+                .findFirst()
+                .orElseThrow();
+        var authMenu = menuItems.stream()
+                .filter(item -> item.label().equals("Auth"))
+                .findFirst()
+                .orElseThrow();
 
-        assertEquals(1, menuItems.size());
-        assertEquals("TCG", menuItems.getFirst().label());
-        assertEquals(3, menuItems.getFirst().submenuItems().size());
-        assertEquals(true, menuItems.getFirst().authorized());
+        assertEquals(2, menuItems.size());
+        assertEquals(3, tcgMenu.submenuItems().size());
+        assertEquals(true, tcgMenu.authorized());
+        assertEquals(3, authMenu.submenuItems().size());
+        assertEquals("/auth/users", authMenu.submenuItems().getFirst().path());
     }
 }

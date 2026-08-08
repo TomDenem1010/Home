@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="hu" xmlns:th="http://www.thymeleaf.org">
 <body>
-<section th:fragment="deckPriceStatistics(deckPriceSummaries)"
+<section th:fragment="content"
          aria-labelledby="deck-price-summary-title">
     <h2 id="deck-price-summary-title">Deck prices</h2>
     <div class="table-container" th:if="${!deckPriceSummaries.empty}">
@@ -28,74 +28,6 @@
         </table>
     </div>
     <p th:if="${deckPriceSummaries.empty}">Nincs megjeleníthető aktív deck.</p>
-</section>
-
-<section th:fragment="deckPriceHistory(deckPriceHistorySummary)"
-         class="deck-history" aria-labelledby="deck-price-history-title">
-    <div class="section-heading">
-        <div>
-            <span class="eyebrow">Árváltozás</span>
-            <h2 id="deck-price-history-title">Deck price history</h2>
-        </div>
-        <a class="back-link" th:href="@{/tcg/statistics}">← Vissza a deckekhez</a>
-    </div>
-
-    <div class="price-summary-grid">
-        <article class="price-card price-card--first">
-            <span>Első From összeg</span>
-            <strong th:text="${#numbers.formatDecimal(deckPriceHistorySummary.sumFirstFromInEuro, 1, 2)} + ' €'">0,00 €</strong>
-        </article>
-        <article class="price-card price-card--first">
-            <span>Első Trend összeg</span>
-            <strong th:text="${#numbers.formatDecimal(deckPriceHistorySummary.sumFirstTrendInEuro, 1, 2)} + ' €'">0,00 €</strong>
-        </article>
-        <article class="price-card price-card--latest">
-            <span>Legutolsó From összeg</span>
-            <strong th:text="${#numbers.formatDecimal(deckPriceHistorySummary.sumLatestFromInEuro, 1, 2)} + ' €'">0,00 €</strong>
-        </article>
-        <article class="price-card price-card--latest">
-            <span>Legutolsó Trend összeg</span>
-            <strong th:text="${#numbers.formatDecimal(deckPriceHistorySummary.sumLatestTrendInEuro, 1, 2)} + ' €'">0,00 €</strong>
-        </article>
-    </div>
-
-    <div class="table-container history-table-container" th:if="${!deckPriceHistorySummary.cards.empty}">
-        <table class="history-table" data-sortable-table>
-            <thead>
-            <tr>
-                <th scope="col" data-sort-type="text"><button class="sort-button" type="button">Kártya</button></th>
-                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Db</button></th>
-                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Első ismert ár</button></th>
-                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Legutolsó ismert ár</button></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="card : ${deckPriceHistorySummary.cards}">
-                <td class="card-name" th:attr="data-sort-value=${card.cardName}" th:text="${card.cardName}">Card name</td>
-                <td class="quantity" th:attr="data-sort-value=${card.quantity}" th:text="${card.quantity}">0</td>
-                <td th:attr="data-sort-value=${card.firstFromInEuro == null ? '' : card.firstFromInEuro}">
-                    <div class="price-pair">
-                        <span><small>From</small> <strong th:text="${card.firstFromInEuro == null ? '-' : #numbers.formatDecimal(card.firstFromInEuro, 1, 2) + ' €'}">-</strong></span>
-                        <span><small>Trend</small> <strong th:text="${card.firstTrendInEuro == null ? '-' : #numbers.formatDecimal(card.firstTrendInEuro, 1, 2) + ' €'}">-</strong></span>
-                    </div>
-                    <time class="price-date" th:if="${card.firstPriceCreatedAt != null}"
-                          th:datetime="${card.firstPriceCreatedAt}"
-                          th:text="${card.firstPriceCreatedAt}">2026-01-01T10:00:00Z</time>
-                </td>
-                <td th:attr="data-sort-value=${card.latestFromInEuro == null ? '' : card.latestFromInEuro}">
-                    <div class="price-pair">
-                        <span><small>From</small> <strong th:text="${card.latestFromInEuro == null ? '-' : #numbers.formatDecimal(card.latestFromInEuro, 1, 2) + ' €'}">-</strong></span>
-                        <span><small>Trend</small> <strong th:text="${card.latestTrendInEuro == null ? '-' : #numbers.formatDecimal(card.latestTrendInEuro, 1, 2) + ' €'}">-</strong></span>
-                    </div>
-                    <time class="price-date" th:if="${card.latestPriceCreatedAt != null}"
-                          th:datetime="${card.latestPriceCreatedAt}"
-                          th:text="${card.latestPriceCreatedAt}">2026-01-01T10:00:00Z</time>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-    <p th:if="${deckPriceHistorySummary.cards.empty}">A deck nem tartalmaz kártyát.</p>
 </section>
 </body>
 </html>

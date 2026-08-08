@@ -11,17 +11,14 @@
 <aside class="sidebar">
     <a class="brand" th:href="@{/}">Home</a>
     <nav aria-label="Főmenü">
-        <th:block th:replace="~{tcg/menu :: menu(${menuItems}, ${activePath})}"/>
+        <th:block th:replace="~{menu :: menu(${menuItems}, ${activePath})}"/>
     </nav>
 </aside>
 <main>
     <h1 th:text="${pageTitle}">Kezdőlap</h1>
     <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
-    <th:block th:if="${deckPriceSummaries != null}">
-        <th:block th:replace="~{tcg/statistics :: deckPriceStatistics(${deckPriceSummaries})}"/>
-    </th:block>
-    <th:block th:if="${deckPriceHistorySummary != null}">
-        <th:block th:replace="~{tcg/statistics :: deckPriceHistory(${deckPriceHistorySummary})}"/>
+    <th:block th:if="${contentTemplate != null}">
+        <th:block th:replace="~{${contentTemplate} :: content}"/>
     </th:block>
 </main>
 </body>

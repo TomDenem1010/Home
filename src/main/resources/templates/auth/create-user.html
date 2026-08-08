@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="form-card auth-form-card" th:fragment="content">
+    <form th:action="@{/auth/create-user}" method="post">
+        <label>
+            Username
+            <input name="username" autocomplete="username" required>
+        </label>
+        <label>
+            Password
+            <input name="password" type="password" autocomplete="new-password" required>
+        </label>
+        <fieldset>
+            <legend>Roles</legend>
+            <div class="role-options">
+                <label class="role-option" th:each="role : ${availableRoles}">
+                    <input type="checkbox" name="roles" th:value="${role}">
+                    <span th:text="${role}">ROLE</span>
+                </label>
+            </div>
+        </fieldset>
+        <button class="primary-button" type="submit">Create user</button>
+    </form>
+</section>
+</body>
+</html>

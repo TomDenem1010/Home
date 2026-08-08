@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="table-container" th:fragment="content">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Roles</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">user-id</td>
+                <td th:text="${user.username}">username</td>
+                <td th:text="${user.roles}">ADMIN</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(users)}">
+                <td colspan="3">No users found.</td>
+            </tr>
+            </tbody>
+        </table>
+</section>
+</body>
+</html>

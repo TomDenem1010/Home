@@ -3,8 +3,9 @@
 <body>
 <ul class="main-menu" th:fragment="menu(menuItems, activePath)">
     <li th:each="menuItem : ${menuItems}" th:if="${menuItem.authorized}">
-        <details class="menu-group"
-                 th:open="${activePath == '/tcg' or activePath == '/tcg/statistics'}">
+        <details class="menu-group" name="main-menu"
+                 th:open="${(menuItem.label == 'TCG' and #strings.startsWith(activePath, '/tcg'))
+                           or (menuItem.label == 'Auth' and #strings.startsWith(activePath, '/auth'))}">
             <summary class="main-menu-item">
                 <span th:text="${menuItem.label}">Menüpont</span>
                 <span class="menu-chevron" aria-hidden="true"></span>
