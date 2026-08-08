@@ -9,8 +9,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.Objects;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 
 @Entity
@@ -35,18 +38,29 @@ public class ApplicationEvent extends AuditedEntity {
     @Column(name = "ERROR_MESSAGE", length = MAX_ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "STATUS", nullable = false, length = 20)
+    private EventStatus status;
+
     public ApplicationEvent(EventType type) {
         this.type = type;
+        this.status = EventStatus.TO_DO;
     }
 
-    public void markProcessed() {
+    public void markProcessing() {
+        status = EventStatus.PROCESSING;
+    }
+
+    public void markDone() {
+        status = EventStatus.DONE;
         processedAt = Instant.now();
         errorMessage = null;
     }
 
     public void markFailed(Throwable throwable) {
+        status = EventStatus.ERROR;
         String message = throwable.getMessage();
-        if (message == null || message.isBlank()) {
+        if (Objects.isNull(message) || message.isBlank()) {
             message = throwable.getClass().getSimpleName();
         }
         errorMessage = message.substring(0, Math.min(message.length(), MAX_ERROR_MESSAGE_LENGTH));
