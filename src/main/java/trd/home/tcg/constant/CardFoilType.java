@@ -16,4 +16,13 @@ public enum CardFoilType {
     public static boolean isFoil(CardFoilType type) {
         return Objects.nonNull(type) && type != NO;
     }
+
+    public static CardFoilType fromString(String value) {
+        for (CardFoilType type : CardFoilType.values()) {
+            if (type.name().equalsIgnoreCase(value)) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

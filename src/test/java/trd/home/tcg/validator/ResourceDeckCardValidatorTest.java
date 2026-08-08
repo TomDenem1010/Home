@@ -26,6 +26,20 @@ class ResourceDeckCardValidatorTest {
         org.junit.jupiter.api.Assertions.assertTrue(exception.getMessage().contains("line 3"));
     }
 
+    @Test
+    void rejectsZeroQuantity() {
+        assertThrows(
+                WrongCardLineException.class,
+                () -> validator.validateResource(resource("0,https://www.cardmarket.com/card,FOIL")));
+    }
+
+    @Test
+    void rejectsUnknownFoilType() {
+        assertThrows(
+                WrongCardLineException.class,
+                () -> validator.validateResource(resource("1,https://www.cardmarket.com/card,UNKNOWN")));
+    }
+
     private static ByteArrayResource resource(String content) {
         return new ByteArrayResource(content.getBytes(UTF_8)) {
             @Override

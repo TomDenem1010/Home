@@ -186,6 +186,7 @@ class UserServiceTest {
         assertEquals(new UserDto("user-1", "alice", Set.of(UserRole.TCG)), result);
         verify(passwordEncoder).encode("new-password");
         verify(userRepository).save(user);
+        verify(userSessionService).expireSessions("alice");
     }
 
     @Test

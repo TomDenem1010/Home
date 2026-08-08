@@ -4,13 +4,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.exception.UnableToReadResourcesException;
 import trd.home.tcg.exception.WrongCardLineException;
 
-@Service
 public class ResourceDeckCardValidator implements ResourceValidator {
 
     @Override
@@ -36,7 +34,7 @@ public class ResourceDeckCardValidator implements ResourceValidator {
                     "Deck line " + lineNumber + " must contain quantity, link and foil type: " + line);
         }
 
-        if (!values[0].matches("\\d+")) {
+        if (!values[0].matches("[1-9]\\d*")) {
             throw new WrongCardLineException("Deck line " + lineNumber + " must contain a valid quantity: " + line);
         }
 
@@ -44,7 +42,7 @@ public class ResourceDeckCardValidator implements ResourceValidator {
             throw new WrongCardLineException("Deck line " + lineNumber + " must contain a valid link: " + line);
         }
 
-        if (values[2].isBlank() || CardFoilType.valueOf(values[2]) == null) {
+        if (values[2].isBlank() || CardFoilType.fromString(values[2]) == null) {
             throw new WrongCardLineException("Deck line " + lineNumber + " must contain a valid foil type: " + line);
         }
     }

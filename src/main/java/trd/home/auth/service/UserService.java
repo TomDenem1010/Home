@@ -75,7 +75,9 @@ public class UserService {
 
         User user = findUserById(userId);
         user.setPassword(passwordEncoder.encode(password));
-        return UserDto.from(userRepository.save(user));
+        UserDto updatedUser = UserDto.from(userRepository.save(user));
+        userSessionService.expireSessions(user.getUsername());
+        return updatedUser;
     }
 
     private void validateCredentials(String username, String password) {
