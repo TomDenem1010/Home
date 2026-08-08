@@ -48,15 +48,15 @@ public class AuthFrontendController {
     }
 
     @GetMapping("/update-roles")
-    public String updateUser(Model model) {
+    public String updateRoles(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("availableRoles", userService.getAvailableRoles());
         return renderPage(
-                model, "/auth/update-roles", "Update roles", "Update a user's roles by user ID.", "auth/update-user");
+                model, "/auth/update-roles", "Update roles", "Update a user's roles by user ID.", "auth/update-roles");
     }
 
-    @PostMapping("/update-user")
-    public String updateUser(@RequestParam String userId, @RequestParam(required = false) Set<UserRole> roles) {
+    @PostMapping("/update-roles")
+    public String updateRoles(@RequestParam String userId, @RequestParam(required = false) Set<UserRole> roles) {
         userService.updateRoles(userId, roles == null ? Set.of() : roles);
         return "redirect:/auth/users";
     }

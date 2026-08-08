@@ -60,16 +60,16 @@ class AuthFrontendControllerTest {
         when(userService.getAllUsers()).thenReturn(users);
         when(userService.getAvailableRoles()).thenReturn(Set.of(UserRole.ADMIN, UserRole.TCG));
 
-        assertEquals("index", controller.updateUser(model));
+        assertEquals("index", controller.updateRoles(model));
         assertEquals(users, model.getAttribute("users"));
         assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG), model.getAttribute("availableRoles"));
         assertEquals("/auth/update-roles", model.getAttribute("activePath"));
-        assertEquals("auth/update-user", model.getAttribute("contentTemplate"));
+        assertEquals("auth/update-roles", model.getAttribute("contentTemplate"));
     }
 
     @Test
     void updatesUserByIdAndRedirectsToList() {
-        assertEquals("redirect:/auth/users", controller.updateUser("user-1", Set.of(UserRole.ADMIN)));
+        assertEquals("redirect:/auth/users", controller.updateRoles("user-1", Set.of(UserRole.ADMIN)));
 
         verify(userService).updateRoles("user-1", Set.of(UserRole.ADMIN));
     }
