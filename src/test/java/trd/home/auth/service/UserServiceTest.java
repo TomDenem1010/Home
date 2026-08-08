@@ -39,6 +39,9 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private UserSessionService userSessionService;
+
     @InjectMocks
     private UserService userService;
 
@@ -149,6 +152,7 @@ class UserServiceTest {
         assertEquals(newRoles, user.getRoles());
         assertNotSame(newRoles, user.getRoles());
         verify(userRepository).save(user);
+        verify(userSessionService).expireSessions("alice");
     }
 
     @Test

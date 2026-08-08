@@ -21,6 +21,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final UserSessionService userSessionService;
 
     public Set<UserRole> getAvailableRoles() {
         return EnumSet.allOf(UserRole.class);
@@ -62,7 +63,9 @@ public class UserService {
 
         User user = findUserById(userId);
         user.setRoles(new HashSet<>(roles));
-        return UserDto.from(userRepository.save(user));
+        UserDto updatedUser = UserDto.from(userRepository.save(user));
+        userSessionService.expireSessions(user.getUsername());
+        return updatedUser;
     }
 
     @Transactional
