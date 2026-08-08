@@ -1,24 +1,26 @@
 package trd.home.tcg.service.playwright;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Browser;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.junit.jupiter.MockitoExtension;
-import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketCardPrice;
 import trd.home.tcg.dto.CardmarketCardDto;
-import trd.home.tcg.repository.CardmarketCardPriceRepository;
-import trd.home.tcg.repository.CardmarketCardRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CardmarketCardPriceSaverTest {
@@ -27,10 +29,10 @@ class CardmarketCardPriceSaverTest {
     private CardmarketCardPriceGatherer gatherer;
 
     @Mock
-    private CardmarketCardRepository cardRepository;
+    private CardmarketRequestThrottler throttler;
 
     @Mock
-    private CardmarketCardPriceRepository priceRepository;
+    private CardmarketCardPricePersister persister;
 
     @Mock
     private Browser browser;
@@ -39,23 +41,54 @@ class CardmarketCardPriceSaverTest {
     private CardmarketCardPriceSaver saver;
 
     @Test
-    void associatesAndSavesEachGatheredPrice() {
-        CardmarketCardDto cardDto =
-                new CardmarketCardDto("card-1", "https://example.test/card", null, null, null, null, null);
-        CardmarketCard card = new CardmarketCard();
-        CardmarketCardPrice price = new CardmarketCardPrice();
-        price.setFromInEuro(BigDecimal.ONE);
-        when(gatherer.getCardmarketCardPrice(cardDto.link(), browser)).thenReturn(price);
-        when(cardRepository.getReferenceById(cardDto.id())).thenReturn(card);
+    @SuppressWarnings("unchecked")
+    void gathersEveryPriceBeforePersistingThemTogether() {
+        CardmarketCardDto firstCard = card("card-1");
+        CardmarketCardDto secondCard = card("card-2");
+        CardmarketCardPrice firstPrice = new CardmarketCardPrice();
+        CardmarketCardPrice secondPrice = new CardmarketCardPrice();
+        when(gatherer.getCardmarketCardPrice(firstCard.link(), browser)).thenReturn(firstPrice);
+        when(gatherer.getCardmarketCardPrice(secondCard.link(), browser)).thenReturn(secondPrice);
 
-        try (MockedConstruction<PlaywrightBrowserContext> contexts =
-                mockConstruction(PlaywrightBrowserContext.class, (mock, ignored) -> when(mock.getBrowser())
-                        .thenReturn(browser))) {
-            saver.updateCardPrice(List.of(cardDto));
+        try (MockedConstruction<PlaywrightBrowserContext> contexts = browserContext()) {
+            saver.updateCardPrice(List.of(firstCard, secondCard));
 
-            assertSame(card, price.getCard());
-            verify(priceRepository).save(price);
+            InOrder order = inOrder(gatherer, throttler, persister);
+            order.verify(gatherer).getCardmarketCardPrice(firstCard.link(), browser);
+            order.verify(throttler).waitBeforeNextRequest();
+            order.verify(gatherer).getCardmarketCardPrice(secondCard.link(), browser);
+            ArgumentCaptor<List<GatheredCardmarketPrice>> captor = ArgumentCaptor.forClass(List.class);
+            order.verify(persister).saveAll(captor.capture());
+            assertEquals(
+                    List.of(
+                            new GatheredCardmarketPrice("card-1", firstPrice),
+                            new GatheredCardmarketPrice("card-2", secondPrice)),
+                    captor.getValue());
             verify(contexts.constructed().getFirst()).close();
         }
+    }
+
+    @Test
+    void doesNotPersistAnyPriceWhenGatheringFails() {
+        CardmarketCardDto firstCard = card("card-1");
+        CardmarketCardDto secondCard = card("card-2");
+        when(gatherer.getCardmarketCardPrice(firstCard.link(), browser)).thenReturn(new CardmarketCardPrice());
+        when(gatherer.getCardmarketCardPrice(secondCard.link(), browser))
+                .thenThrow(new IllegalStateException("Rate limited"));
+
+        try (MockedConstruction<PlaywrightBrowserContext> ignored = browserContext()) {
+            assertThrows(IllegalStateException.class, () -> saver.updateCardPrice(List.of(firstCard, secondCard)));
+        }
+
+        verify(persister, never()).saveAll(anyList());
+    }
+
+    private MockedConstruction<PlaywrightBrowserContext> browserContext() {
+        return mockConstruction(PlaywrightBrowserContext.class, (mock, ignored) -> when(mock.getBrowser())
+                .thenReturn(browser));
+    }
+
+    private static CardmarketCardDto card(String id) {
+        return new CardmarketCardDto(id, "https://example.test/" + id, null, null, null, null, null);
     }
 }

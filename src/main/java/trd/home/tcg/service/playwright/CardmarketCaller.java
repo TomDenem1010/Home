@@ -3,11 +3,13 @@ package trd.home.tcg.service.playwright;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Response;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
+import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
 
@@ -23,16 +25,25 @@ public class CardmarketCaller {
                     ? context.newPage()
                     : context.pages().get(0);
 
-            page.navigate(url);
+            Response response = page.navigate(url);
             page.waitForLoadState();
 
-            return parseHtml(page.content());
-        } catch (HtmlParseException exception) {
+            Document document = parseHtml(page.content());
+            if ((response != null && response.status() == 429) || isRateLimitPage(document)) {
+                throw new CardmarketRateLimitException("Cardmarket rate limit reached");
+            }
+            return document;
+        } catch (HtmlParseException | CardmarketRateLimitException exception) {
             throw exception;
         } catch (Exception e) {
             log.error("Unexpected error occurred while calling URL: {}", url, e);
             throw new FailedToLaunchBrowser("Failed to launch browser", e);
         }
+    }
+
+    private boolean isRateLimitPage(Document document) {
+        String text = document.text();
+        return text.contains("You are being rate limited") || text.contains("Error 1015");
     }
 
     private Document parseHtml(String html) {

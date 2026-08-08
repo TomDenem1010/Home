@@ -8,11 +8,13 @@ import static org.mockito.Mockito.when;
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Response;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
 
@@ -29,6 +31,9 @@ class CardmarketCallerTest {
 
     @Mock
     private Page page;
+
+    @Mock
+    private Response response;
 
     @Test
     void opensPageInFirstContextAndParsesItsHtml() {
@@ -73,5 +78,29 @@ class CardmarketCallerTest {
         when(page.content()).thenReturn(null);
 
         assertThrows(HtmlParseException.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
+    }
+
+    @Test
+    void rejectsHttpRateLimitResponse() {
+        when(browser.contexts()).thenReturn(List.of(context));
+        when(context.pages()).thenReturn(List.of(page));
+        when(page.navigate("https://example.test/card")).thenReturn(response);
+        when(response.status()).thenReturn(429);
+        when(page.content()).thenReturn("<html />");
+
+        assertThrows(
+                CardmarketRateLimitException.class,
+                () -> caller.callWithPlaywright("https://example.test/card", browser));
+    }
+
+    @Test
+    void rejectsCloudflareRateLimitPage() {
+        when(browser.contexts()).thenReturn(List.of(context));
+        when(context.pages()).thenReturn(List.of(page));
+        when(page.content()).thenReturn("<h1>You are being rate limited</h1><p>Error 1015</p>");
+
+        assertThrows(
+                CardmarketRateLimitException.class,
+                () -> caller.callWithPlaywright("https://example.test/card", browser));
     }
 }

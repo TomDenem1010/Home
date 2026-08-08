@@ -4,11 +4,14 @@ import com.microsoft.playwright.Browser;
 import java.math.BigDecimal;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 import trd.home.tcg.dao.CardmarketCardPrice;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class CardmarketCardPriceGatherer {
@@ -31,10 +34,18 @@ public class CardmarketCardPriceGatherer {
                 .findFirst()
                 .orElse(null);
 
-        return Objects.nonNull(dt)
-                ? new BigDecimal(
-                        parseEuroToDoubleString(dt.nextElementSibling().text().trim()))
-                : BigDecimal.ZERO;
+        if (Objects.isNull(dt)) {
+            log.debug("Missing Cardmarket price label: {}", label);
+            return BigDecimal.ZERO;
+        }
+
+        Element value = dt.nextElementSibling();
+        if (Objects.isNull(value)) {
+            log.debug("Missing Cardmarket price value for label: {}", label);
+            return BigDecimal.ZERO;
+        }
+
+        return new BigDecimal(parseEuroToDoubleString(value.text().trim()));
     }
 
     private String parseEuroToDoubleString(String value) {

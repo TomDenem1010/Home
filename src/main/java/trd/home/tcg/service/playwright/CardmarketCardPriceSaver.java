@@ -1,35 +1,34 @@
 package trd.home.tcg.service.playwright;
 
 import com.microsoft.playwright.Browser;
-import jakarta.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import trd.home.tcg.dao.CardmarketCardPrice;
 import trd.home.tcg.dto.CardmarketCardDto;
-import trd.home.tcg.repository.CardmarketCardPriceRepository;
-import trd.home.tcg.repository.CardmarketCardRepository;
 
 @Service
 @AllArgsConstructor
 public class CardmarketCardPriceSaver {
 
     private final CardmarketCardPriceGatherer cardmarketCardPriceGatherer;
-    private final CardmarketCardRepository cardmarketCardRepository;
-    private final CardmarketCardPriceRepository cardmarketCardPriceRepository;
+    private final CardmarketRequestThrottler requestThrottler;
+    private final CardmarketCardPricePersister pricePersister;
 
-    @Transactional
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
+        List<GatheredCardmarketPrice> gatheredPrices = new ArrayList<>();
         try (PlaywrightBrowserContext playwrightBrowserContext = new PlaywrightBrowserContext()) {
-            cardmarketCardDtos.stream()
-                    .map(cardDto -> getCardPrice(cardDto, playwrightBrowserContext.getBrowser()))
-                    .forEach(cardPrice -> cardmarketCardPriceRepository.save(cardPrice));
+            Browser browser = playwrightBrowserContext.getBrowser();
+            for (int index = 0; index < cardmarketCardDtos.size(); index++) {
+                if (index > 0) {
+                    requestThrottler.waitBeforeNextRequest();
+                }
+                CardmarketCardDto cardDto = cardmarketCardDtos.get(index);
+                gatheredPrices.add(new GatheredCardmarketPrice(
+                        cardDto.id(), cardmarketCardPriceGatherer.getCardmarketCardPrice(cardDto.link(), browser)));
+            }
         }
-    }
 
-    private CardmarketCardPrice getCardPrice(CardmarketCardDto cardDto, Browser browser) {
-        CardmarketCardPrice cardPrice = cardmarketCardPriceGatherer.getCardmarketCardPrice(cardDto.link(), browser);
-        cardPrice.setCard(cardmarketCardRepository.getReferenceById(cardDto.id()));
-        return cardPrice;
+        pricePersister.saveAll(gatheredPrices);
     }
 }
