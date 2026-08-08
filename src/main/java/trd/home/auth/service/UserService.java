@@ -60,14 +60,27 @@ public class UserService {
         validateUserId(userId);
         validateRoles(roles);
 
-        User user =
-                userRepository.findById(userId).orElseThrow(() -> new InvalidCredentialException("Invalid user id"));
+        User user = findUserById(userId);
         user.setRoles(new HashSet<>(roles));
+        return UserDto.from(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserDto updatePassword(String userId, String password) {
+        validateUserId(userId);
+        validatePassword(password);
+
+        User user = findUserById(userId);
+        user.setPassword(passwordEncoder.encode(password));
         return UserDto.from(userRepository.save(user));
     }
 
     private void validateCredentials(String username, String password) {
         validateUsername(username);
+        validatePassword(password);
+    }
+
+    private void validatePassword(String password) {
         if (Objects.isNull(password) || password.isBlank()) {
             throw new InvalidCredentialException("Password must not be blank");
         }
@@ -95,5 +108,9 @@ public class UserService {
         if (userRepository.existsByUsername(username)) {
             throw new InvalidCredentialException("Invalid username");
         }
+    }
+
+    private User findUserById(String userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new InvalidCredentialException("Invalid user id"));
     }
 }

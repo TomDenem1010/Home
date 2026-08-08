@@ -30,6 +30,25 @@ body {
     text-decoration: none;
 }
 
+.logout-form {
+    margin-top: 2rem;
+}
+
+.logout-form button {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #65738d;
+    border-radius: 0.5rem;
+    color: white;
+    font: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+.logout-form button:hover {
+    background: #b42318;
+}
+
 .main-menu,
 .submenu {
     margin: 0;

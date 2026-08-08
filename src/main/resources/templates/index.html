@@ -13,6 +13,9 @@
     <nav aria-label="Főmenü">
         <th:block th:replace="~{menu :: menu(${menuItems}, ${activePath})}"/>
     </nav>
+    <form class="logout-form" th:action="@{/logout}" method="post">
+        <button type="submit">Logout</button>
+    </form>
 </aside>
 <main>
     <div class="page-content">

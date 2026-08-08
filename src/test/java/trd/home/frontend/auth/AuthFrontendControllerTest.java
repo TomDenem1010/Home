@@ -63,7 +63,7 @@ class AuthFrontendControllerTest {
         assertEquals("index", controller.updateUser(model));
         assertEquals(users, model.getAttribute("users"));
         assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG), model.getAttribute("availableRoles"));
-        assertEquals("/auth/update-user", model.getAttribute("activePath"));
+        assertEquals("/auth/update-roles", model.getAttribute("activePath"));
         assertEquals("auth/update-user", model.getAttribute("contentTemplate"));
     }
 
@@ -72,5 +72,24 @@ class AuthFrontendControllerTest {
         assertEquals("redirect:/auth/users", controller.updateUser("user-1", Set.of(UserRole.ADMIN)));
 
         verify(userService).updateRoles("user-1", Set.of(UserRole.ADMIN));
+    }
+
+    @Test
+    void showsUpdatePasswordPageWithUsers() {
+        var users = List.of(new UserDto("user-1", "alice", Set.of(UserRole.TCG)));
+        var model = new ConcurrentModel();
+        when(userService.getAllUsers()).thenReturn(users);
+
+        assertEquals("index", controller.updatePassword(model));
+        assertEquals(users, model.getAttribute("users"));
+        assertEquals("/auth/update-password", model.getAttribute("activePath"));
+        assertEquals("auth/update-password", model.getAttribute("contentTemplate"));
+    }
+
+    @Test
+    void updatesPasswordByUserIdAndRedirectsToList() {
+        assertEquals("redirect:/auth/users", controller.updatePassword("user-1", "new-password"));
+
+        verify(userService).updatePassword("user-1", "new-password");
     }
 }

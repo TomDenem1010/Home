@@ -168,6 +168,42 @@ class UserServiceTest {
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
+    @Test
+    void hashesAndUpdatesPasswordByUserId() {
+        User user = user("alice", "old-hash", Set.of(UserRole.TCG));
+        user.setId("user-1");
+        when(userRepository.findById("user-1")).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode("new-password")).thenReturn("new-hash");
+        when(userRepository.save(user)).thenReturn(user);
+
+        UserDto result = userService.updatePassword("user-1", "new-password");
+
+        assertEquals("new-hash", user.getPassword());
+        assertEquals(new UserDto("user-1", "alice", Set.of(UserRole.TCG)), result);
+        verify(passwordEncoder).encode("new-password");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void rejectsPasswordUpdateForUnknownUserId() {
+        when(userRepository.findById("unknown-id")).thenReturn(Optional.empty());
+
+        InvalidCredentialException exception = assertThrows(
+                InvalidCredentialException.class, () -> userService.updatePassword("unknown-id", "new-password"));
+
+        assertEquals("Invalid user id", exception.getMessage());
+        verify(passwordEncoder, never()).encode(any());
+        verify(userRepository, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void rejectsInvalidPasswordWhenUpdating(String password) {
+        assertThrows(InvalidCredentialException.class, () -> userService.updatePassword("user-1", password));
+        verifyNoInteractions(passwordEncoder, userRepository);
+    }
+
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"", " "})
