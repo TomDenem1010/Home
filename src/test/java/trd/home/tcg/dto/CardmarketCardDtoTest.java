@@ -114,6 +114,10 @@ class CardmarketCardDtoTest {
                         "Set",
                         "Card",
                         null),
+                Arguments.of("Products/Singles/Set/Card", null, "Set", "Card", null),
+                Arguments.of("Singles/Set/Card", null, "Set", "Card", null),
+                Arguments.of("Singles", null, null, null, null),
+                Arguments.of("Singles/Set", null, "Set", null, null),
                 Arguments.of("   ", null, null, null, null),
                 Arguments.of("", null, null, null, null),
                 Arguments.of((String) null, null, null, null, null));

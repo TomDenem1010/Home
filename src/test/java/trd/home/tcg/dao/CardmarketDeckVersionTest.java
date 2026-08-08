@@ -55,6 +55,7 @@ class CardmarketDeckVersionTest {
     @Test
     void addsCardWithBackReferenceAndQuantity() {
         CardmarketDeckVersion version = new CardmarketDeckVersion();
+        version.setId("version-id");
         CardmarketCard card = card("card-1");
 
         version.addCard(card, 3);
@@ -62,6 +63,7 @@ class CardmarketDeckVersionTest {
         CardmarketDeckCard deckCard = version.getCards().iterator().next();
         assertAll(
                 () -> assertEquals(1, version.getCards().size()),
+                () -> assertEquals("version-id", version.getId()),
                 () -> assertSame(version, deckCard.getDeckVersion()),
                 () -> assertSame(card, deckCard.getCard()),
                 () -> assertEquals(3, deckCard.getQuantity()));

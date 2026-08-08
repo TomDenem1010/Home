@@ -28,6 +28,7 @@ class PlaywrightBrowserContextTest {
             PlaywrightBrowserContext context = new PlaywrightBrowserContext();
 
             assertSame(browser, context.getBrowser());
+            assertSame(playwright, context.getPlaywright());
             context.close();
         }
 

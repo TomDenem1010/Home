@@ -107,14 +107,19 @@ class CardmarketDeckSaverTest {
     @Test
     void savesCardThatDoesNotExistYetBeforeSavingDeck() {
         CardmarketCard importedCard = card("https://www.cardmarket.com/card", CardFoilType.ETCHED_FOIL);
+        CardmarketCard persistedCard = card("https://www.cardmarket.com/card", CardFoilType.ETCHED_FOIL);
         CardmarketDeck deck = deckWithCard(importedCard);
         when(deckRepository.existsByName(deck.getName())).thenReturn(false);
         when(cardRepository.findByLinkAndFoilType(importedCard.getLink(), importedCard.getFoilType()))
                 .thenReturn(Optional.empty());
+        when(cardRepository.save(importedCard)).thenReturn(persistedCard);
 
         saver.save(deck);
 
         verify(cardRepository).save(importedCard);
+        assertSame(
+                persistedCard,
+                deck.getCurrentVersion().getCards().iterator().next().getCard());
         verify(deckRepository).save(deck);
     }
 

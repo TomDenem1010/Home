@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
+import trd.home.tcg.exception.HtmlParseException;
 
 @ExtendWith(MockitoExtension.class)
 class CardmarketCallerTest {
@@ -63,5 +64,14 @@ class CardmarketCallerTest {
 
         assertThrows(
                 FailedToLaunchBrowser.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
+    }
+
+    @Test
+    void propagatesHtmlParseFailures() {
+        when(browser.contexts()).thenReturn(List.of(context));
+        when(context.pages()).thenReturn(List.of(page));
+        when(page.content()).thenReturn(null);
+
+        assertThrows(HtmlParseException.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
     }
 }
