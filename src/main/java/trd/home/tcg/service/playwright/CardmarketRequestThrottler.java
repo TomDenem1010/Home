@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import trd.home.tcg.exception.ThrottlerException;
 
 @Component
@@ -22,8 +21,7 @@ public class CardmarketRequestThrottler {
             throw new ThrottlerException("Minimum Cardmarket request delay must not be negative");
         }
         if (maximumDelayMillis < minimumDelayMillis) {
-            throw new ThrottlerException(
-                    "Maximum Cardmarket request delay must not be less than the minimum delay");
+            throw new ThrottlerException("Maximum Cardmarket request delay must not be less than the minimum delay");
         }
     }
 

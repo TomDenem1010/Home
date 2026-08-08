@@ -65,7 +65,7 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
     }
 
     @Query(value = """
-            WITH ordered_card_prices AS (
+            WITH latest_card_prices AS (
                 SELECT
                     price.card_id,
                     price.from_in_euro,
@@ -73,23 +73,9 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                     price.created_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY price.card_id
-                        ORDER BY price.created_at, price.id
-                    ) AS first_price_order,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY price.card_id
                         ORDER BY price.created_at DESC, price.id DESC
-                    ) AS latest_price_order
+                    ) AS price_order
                 FROM cardmarket_card_price price
-            ),
-            first_card_prices AS (
-                SELECT card_id, from_in_euro, trend_in_euro, created_at
-                FROM ordered_card_prices
-                WHERE first_price_order = 1
-            ),
-            latest_card_prices AS (
-                SELECT card_id, from_in_euro, trend_in_euro, created_at
-                FROM ordered_card_prices
-                WHERE latest_price_order = 1
             )
             SELECT
                 deck.id AS "deckId",
@@ -98,9 +84,6 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                     '[^/]+$'
                 ) AS "cardName",
                 deck_card.quantity AS "quantity",
-                first_price.from_in_euro AS "firstFromInEuro",
-                first_price.trend_in_euro AS "firstTrendInEuro",
-                first_price.created_at AS "firstPriceCreatedAt",
                 latest_price.from_in_euro AS "latestFromInEuro",
                 latest_price.trend_in_euro AS "latestTrendInEuro",
                 latest_price.created_at AS "latestPriceCreatedAt"
@@ -111,10 +94,9 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                 ON deck_card.deck_version_id = current_version.id
             JOIN cardmarket_card card
                 ON card.id = deck_card.card_id
-            LEFT JOIN first_card_prices first_price
-                ON first_price.card_id = deck_card.card_id
             LEFT JOIN latest_card_prices latest_price
                 ON latest_price.card_id = deck_card.card_id
+                AND latest_price.price_order = 1
             WHERE deck.id = :deckId
             ORDER BY "cardName"
             """, nativeQuery = true)
@@ -125,30 +107,17 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                 .map(projection -> new CardmarketDeckCardPriceSummary(
                         projection.getCardName(),
                         projection.getQuantity(),
-                        projection.getFirstFromInEuro(),
-                        projection.getFirstTrendInEuro(),
-                        projection.getFirstPriceCreatedAt(),
                         projection.getLatestFromInEuro(),
                         projection.getLatestTrendInEuro(),
                         projection.getLatestPriceCreatedAt()))
                 .toList();
 
-        BigDecimal sumFirstFromInEuro = BigDecimal.ZERO;
-        BigDecimal sumFirstTrendInEuro = BigDecimal.ZERO;
         BigDecimal sumLatestFromInEuro = BigDecimal.ZERO;
         BigDecimal sumLatestTrendInEuro = BigDecimal.ZERO;
         for (CardmarketDeckCardPriceSummary card : cards) {
             BigDecimal quantity = BigDecimal.valueOf(card.quantity());
-            BigDecimal firstFromInEuro = card.firstFromInEuro();
-            BigDecimal firstTrendInEuro = card.firstTrendInEuro();
             BigDecimal latestFromInEuro = card.latestFromInEuro();
             BigDecimal latestTrendInEuro = card.latestTrendInEuro();
-            if (firstFromInEuro != null) {
-                sumFirstFromInEuro = sumFirstFromInEuro.add(firstFromInEuro.multiply(quantity));
-            }
-            if (firstTrendInEuro != null) {
-                sumFirstTrendInEuro = sumFirstTrendInEuro.add(firstTrendInEuro.multiply(quantity));
-            }
             if (latestFromInEuro != null) {
                 sumLatestFromInEuro = sumLatestFromInEuro.add(latestFromInEuro.multiply(quantity));
             }
@@ -157,8 +126,7 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
             }
         }
 
-        return new CardmarketDeckPriceHistorySummary(
-                deckId, cards, sumFirstFromInEuro, sumFirstTrendInEuro, sumLatestFromInEuro, sumLatestTrendInEuro);
+        return new CardmarketDeckPriceHistorySummary(deckId, cards, sumLatestFromInEuro, sumLatestTrendInEuro);
     }
 
     default Optional<CardmarketDeckDto> findByUuid(String uuid) {
@@ -183,12 +151,6 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
         String getCardName();
 
         int getQuantity();
-
-        BigDecimal getFirstFromInEuro();
-
-        BigDecimal getFirstTrendInEuro();
-
-        Instant getFirstPriceCreatedAt();
 
         BigDecimal getLatestFromInEuro();
 

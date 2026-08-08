@@ -58,8 +58,7 @@ class TcgFrontendControllerTest {
     @Test
     void deckPriceHistoryReturnsSummaryForDeckId() {
         var model = new ConcurrentModel();
-        var summary = new CardmarketDeckPriceHistorySummary(
-                "deck-id", List.of(), BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+        var summary = new CardmarketDeckPriceHistorySummary("deck-id", List.of(), BigDecimal.ZERO, BigDecimal.ZERO);
         when(tcgService.getDeckPriceHistorySummary("deck-id")).thenReturn(summary);
 
         assertEquals("index", controller.deckPriceHistory("deck-id", model));

@@ -7,15 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.time.Duration;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
-
 import trd.home.tcg.exception.ThrottlerException;
 
 class CardmarketRequestThrottlerTest {
 
     @Test
     void generatesDelayBetweenConfiguredThresholds() {
-        CardmarketRequestThrottler throttler = new CardmarketRequestThrottler(Duration.ofSeconds(5),
-                Duration.ofSeconds(10));
+        CardmarketRequestThrottler throttler =
+                new CardmarketRequestThrottler(Duration.ofSeconds(5), Duration.ofSeconds(10));
 
         IntStream.range(0, 100).forEach(ignored -> {
             long delay = throttler.nextDelayMillis();
@@ -26,8 +25,8 @@ class CardmarketRequestThrottlerTest {
 
     @Test
     void usesExactDelayWhenThresholdsAreEqual() {
-        CardmarketRequestThrottler throttler = new CardmarketRequestThrottler(Duration.ofSeconds(5),
-                Duration.ofSeconds(5));
+        CardmarketRequestThrottler throttler =
+                new CardmarketRequestThrottler(Duration.ofSeconds(5), Duration.ofSeconds(5));
 
         assertEquals(5_000, throttler.nextDelayMillis());
     }

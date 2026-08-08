@@ -41,9 +41,6 @@ class CardmarketDeckRepositoryTest {
         Instant createdAt = Instant.parse("2026-01-01T00:00:00Z");
         when(projection.getCardName()).thenReturn("Card");
         when(projection.getQuantity()).thenReturn(2);
-        when(projection.getFirstFromInEuro()).thenReturn(new BigDecimal("1.00"));
-        when(projection.getFirstTrendInEuro()).thenReturn(new BigDecimal("2.00"));
-        when(projection.getFirstPriceCreatedAt()).thenReturn(createdAt);
         when(projection.getLatestFromInEuro()).thenReturn(new BigDecimal("3.00"));
         when(projection.getLatestTrendInEuro()).thenReturn(new BigDecimal("4.00"));
         when(projection.getLatestPriceCreatedAt()).thenReturn(createdAt);
@@ -53,8 +50,6 @@ class CardmarketDeckRepositoryTest {
 
         assertEquals("deck-id", result.deckId());
         assertEquals(1, result.cards().size());
-        assertEquals(new BigDecimal("2.00"), result.sumFirstFromInEuro());
-        assertEquals(new BigDecimal("4.00"), result.sumFirstTrendInEuro());
         assertEquals(new BigDecimal("6.00"), result.sumLatestFromInEuro());
         assertEquals(new BigDecimal("8.00"), result.sumLatestTrendInEuro());
     }

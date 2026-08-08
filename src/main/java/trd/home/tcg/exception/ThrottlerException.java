@@ -11,5 +11,4 @@ public class ThrottlerException extends HomeException {
     public ThrottlerException(String message) {
         super(message);
     }
-
 }
