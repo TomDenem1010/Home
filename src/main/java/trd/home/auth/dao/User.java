@@ -20,7 +20,7 @@ import trd.home.auth.constant.UserRole;
 import trd.home.common.dao.AuditedEntity;
 
 @Entity
-@Table(name = "APP_USER")
+@Table(name = "APPLICATION_USER")
 @Getter
 @Setter
 public class User extends AuditedEntity {
@@ -34,7 +34,7 @@ public class User extends AuditedEntity {
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "APP_USER_ROLE", joinColumns = @JoinColumn(name = "USER_ID"))
+    @CollectionTable(name = "APPLICATION_USER_ROLE", joinColumns = @JoinColumn(name = "USER_ID"))
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false, length = 32)
     private Set<UserRole> roles = new HashSet<>();
