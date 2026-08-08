@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hu" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <section th:fragment="content"
          aria-labelledby="deck-price-summary-title">
@@ -8,9 +8,9 @@
         <table data-sortable-table>
             <thead>
             <tr>
-                <th scope="col" data-sort-type="text"><button class="sort-button" type="button">Deck neve</button></th>
-                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Sum From ár</button></th>
-                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Sum Trend ár</button></th>
+                <th scope="col" data-sort-type="text"><button class="sort-button" type="button">Deck name</button></th>
+                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Total From</button></th>
+                <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Total Trend</button></th>
             </tr>
             </thead>
             <tbody>
@@ -20,14 +20,14 @@
                        th:text="${summary.deckName}">Deck</a>
                 </td>
                 <td th:attr="data-sort-value=${summary.sumFromInEuro}"
-                    th:text="${#numbers.formatDecimal(summary.sumFromInEuro, 1, 2)} + ' €'">0,00 €</td>
+                    th:text="${#numbers.formatDecimal(summary.sumFromInEuro, 1, 2)} + ' €'">0.00 €</td>
                 <td th:attr="data-sort-value=${summary.sumTrendInEuro}"
-                    th:text="${#numbers.formatDecimal(summary.sumTrendInEuro, 1, 2)} + ' €'">0,00 €</td>
+                    th:text="${#numbers.formatDecimal(summary.sumTrendInEuro, 1, 2)} + ' €'">0.00 €</td>
             </tr>
             </tbody>
         </table>
     </div>
-    <p th:if="${deckPriceSummaries.empty}">Nincs megjeleníthető aktív deck.</p>
+    <p th:if="${deckPriceSummaries.empty}">There are no active decks to display.</p>
 </section>
 </body>
 </html>

@@ -23,8 +23,8 @@ class MenuModelAdviceTest {
         assertAll(
                 () -> assertTrue(authMenu.authorized()),
                 () -> assertFalse(tcgMenu.authorized()),
-                () -> assertTrue(authMenu.submenuItems().stream().allMatch(SubmenuItem::authorized)),
-                () -> assertTrue(tcgMenu.submenuItems().stream().noneMatch(SubmenuItem::authorized)));
+                () -> assertTrue(authMenu.submenuItems().stream().allMatch(item -> item.authorized())),
+                () -> assertTrue(tcgMenu.submenuItems().stream().noneMatch(item -> item.authorized())));
     }
 
     @Test
@@ -36,8 +36,8 @@ class MenuModelAdviceTest {
         assertAll(
                 () -> assertFalse(authMenu.authorized()),
                 () -> assertTrue(tcgMenu.authorized()),
-                () -> assertTrue(authMenu.submenuItems().stream().noneMatch(SubmenuItem::authorized)),
-                () -> assertTrue(tcgMenu.submenuItems().stream().allMatch(SubmenuItem::authorized)));
+                () -> assertTrue(authMenu.submenuItems().stream().noneMatch(item -> item.authorized())),
+                () -> assertTrue(tcgMenu.submenuItems().stream().allMatch(item -> item.authorized())));
     }
 
     @Test
@@ -62,14 +62,14 @@ class MenuModelAdviceTest {
                 () -> assertFalse(menu(menus, "TCG").authorized()),
                 () -> assertTrue(menus.stream()
                         .flatMap(item -> item.submenuItems().stream())
-                        .noneMatch(SubmenuItem::authorized)));
+                        .noneMatch(item -> item.authorized())));
     }
 
     @Test
     void unknownRoleCannotSeeProtectedMenus() {
         var menus = advice.menuItems(authentication("ROLE_UNKNOWN"));
 
-        assertTrue(menus.stream().noneMatch(MenuItem::authorized));
+        assertTrue(menus.stream().noneMatch(menu -> menu.authorized()));
     }
 
     @Test
@@ -80,17 +80,17 @@ class MenuModelAdviceTest {
         assertEquals(
                 List.of("/auth/users", "/auth/create-user", "/auth/update-roles", "/auth/update-password"),
                 menu(menus, "Auth").submenuItems().stream()
-                        .map(SubmenuItem::path)
+                        .map(item -> item.path())
                         .toList());
         assertEquals(
                 List.of("/tcg/save-decks-from-resource", "/tcg/refresh-deck-prices", "/tcg/statistics"),
                 menu(menus, "TCG").submenuItems().stream()
-                        .map(SubmenuItem::path)
+                        .map(item -> item.path())
                         .toList());
         assertEquals(
                 List.of(SubmenuItem.Type.ACTION, SubmenuItem.Type.ACTION, SubmenuItem.Type.PAGE),
                 menu(menus, "TCG").submenuItems().stream()
-                        .map(SubmenuItem::type)
+                        .map(item -> item.type())
                         .toList());
     }
 

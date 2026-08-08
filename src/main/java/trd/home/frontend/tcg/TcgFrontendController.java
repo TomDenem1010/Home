@@ -39,14 +39,14 @@ public class TcgFrontendController {
     public String statistics(Model model) {
         model.addAttribute("deckPriceSummaries", tcgService.getDeckPriceSummary());
         model.addAttribute("contentTemplate", "tcg/statistics");
-        return renderPage(model, "/tcg/statistics", "Statistics", "Az aktív deckek aktuális összértéke.");
+        return renderPage(model, "/tcg/statistics", "Statistics", "Current total value of active decks.");
     }
 
     @GetMapping("/statistic/{deckId}")
     public String deckPriceHistory(@PathVariable String deckId, Model model) {
         model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));
         model.addAttribute("contentTemplate", "tcg/statistics-uuid");
-        return renderPage(model, "/tcg/statistics", "Deck price history", "A deck első és legutolsó ismert árai.");
+        return renderPage(model, "/tcg/statistics", "Deck price history", "Latest known card prices for this deck.");
     }
 
     private String renderPage(Model model, String activePath, String title, String content) {

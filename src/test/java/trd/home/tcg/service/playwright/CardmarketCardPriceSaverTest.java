@@ -76,7 +76,8 @@ class CardmarketCardPriceSaverTest {
         when(gatherer.getCardmarketCardPrice(secondCard.link(), browser))
                 .thenThrow(new IllegalStateException("Rate limited"));
 
-        try (MockedConstruction<PlaywrightBrowserContext> ignored = browserContext()) {
+        try (@SuppressWarnings("unused")
+                MockedConstruction<PlaywrightBrowserContext> ignored = browserContext()) {
             assertThrows(IllegalStateException.class, () -> saver.updateCardPrice(List.of(firstCard, secondCard)));
         }
 

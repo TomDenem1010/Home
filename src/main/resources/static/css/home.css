@@ -284,6 +284,14 @@ table {
     margin-bottom: 1.5rem;
 }
 
+.price-summary-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
 .price-card {
     padding: 1.1rem 1.25rem;
     border: 1px solid #dce3ed;
@@ -429,6 +437,10 @@ th:not(:first-child) {
     }
 
     .price-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .price-summary-row {
         grid-template-columns: 1fr;
     }
 
