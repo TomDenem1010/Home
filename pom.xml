@@ -93,7 +93,7 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
-			<version>13.1.0</version>
+			<version>13.2.0</version>
 		</dependency>
 
 		<dependency>
