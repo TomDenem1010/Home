@@ -6,10 +6,18 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
+import trd.home.common.dao.ApplicationLog;
+import trd.home.common.repository.ApplicationLogRepository;
 
 @Aspect
 @Component
 public class MethodCallLoggingAspect {
+
+    private final ApplicationLogRepository applicationLogRepository;
+
+    public MethodCallLoggingAspect(ApplicationLogRepository applicationLogRepository) {
+        this.applicationLogRepository = applicationLogRepository;
+    }
 
     @Around("@annotation(trd.home.common.logging.LogMethodCall)")
     public Object logMethodCall(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -17,15 +25,17 @@ public class MethodCallLoggingAspect {
         String input = Arrays.deepToString(joinPoint.getArgs());
         long startedAt = System.nanoTime();
 
+        Object output;
         try {
-            Object output = joinPoint.proceed();
-            long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
-            System.out.printf("method=%s, input=%s, output=%s, durationMs=%d%n", method, input, output, durationMs);
-            return output;
+            output = joinPoint.proceed();
         } catch (Throwable throwable) {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
-            System.out.printf("method=%s, input=%s, error=%s, durationMs=%d%n", method, input, throwable, durationMs);
+            applicationLogRepository.save(ApplicationLog.failed(method, input, throwable, durationMs));
             throw throwable;
         }
+
+        long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
+        applicationLogRepository.save(ApplicationLog.successful(method, input, output, durationMs));
+        return output;
     }
 }

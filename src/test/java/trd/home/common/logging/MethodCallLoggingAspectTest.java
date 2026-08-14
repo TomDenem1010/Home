@@ -1,21 +1,23 @@
 package trd.home.common.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import trd.home.common.dao.ApplicationLog;
+import trd.home.common.repository.ApplicationLogRepository;
 
 class MethodCallLoggingAspectTest {
 
-    private final MethodCallLoggingAspect aspect = new MethodCallLoggingAspect();
+    private final ApplicationLogRepository repository = mock(ApplicationLogRepository.class);
+    private final MethodCallLoggingAspect aspect = new MethodCallLoggingAspect(repository);
     private final ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
     private final Signature signature = mock(Signature.class);
 
@@ -26,12 +28,13 @@ class MethodCallLoggingAspectTest {
         when(joinPoint.getArgs()).thenReturn(new Object[] {"card"});
         when(joinPoint.proceed()).thenReturn("result");
 
-        String output = captureOutput(() -> assertEquals("result", aspect.logMethodCall(joinPoint)));
+        assertEquals("result", aspect.logMethodCall(joinPoint));
 
-        assertTrue(output.contains("method=String Example.find(String)"));
-        assertTrue(output.contains("input=[card]"));
-        assertTrue(output.contains("output=result"));
-        assertTrue(output.matches("(?s).*durationMs=\\d+.*"));
+        ApplicationLog log = savedLog();
+        assertEquals("String Example.find(String)", log.getMethod());
+        assertEquals("[card]", log.getInput());
+        assertEquals("result", log.getOutput());
+        assertNull(log.getError());
     }
 
     @Test
@@ -42,28 +45,18 @@ class MethodCallLoggingAspectTest {
         when(joinPoint.getArgs()).thenReturn(new Object[0]);
         when(joinPoint.proceed()).thenThrow(error);
 
-        String output = captureOutput(() ->
-                assertEquals(error, assertThrows(IllegalStateException.class, () -> aspect.logMethodCall(joinPoint))));
+        assertEquals(error, assertThrows(IllegalStateException.class, () -> aspect.logMethodCall(joinPoint)));
 
-        assertTrue(output.contains("input=[]"));
-        assertTrue(output.contains("error=java.lang.IllegalStateException: failed"));
-        assertTrue(output.matches("(?s).*durationMs=\\d+.*"));
+        ApplicationLog log = savedLog();
+        assertEquals("void Example.save() ", log.getMethod());
+        assertEquals("[]", log.getInput());
+        assertNull(log.getOutput());
+        assertEquals("java.lang.IllegalStateException: failed", log.getError());
     }
 
-    private String captureOutput(ThrowingRunnable invocation) throws Throwable {
-        PrintStream originalOut = System.out;
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (PrintStream printStream = new PrintStream(output, true, StandardCharsets.UTF_8)) {
-            System.setOut(printStream);
-            invocation.run();
-        } finally {
-            System.setOut(originalOut);
-        }
-        return output.toString(StandardCharsets.UTF_8);
-    }
-
-    @FunctionalInterface
-    private interface ThrowingRunnable {
-        void run() throws Throwable;
+    private ApplicationLog savedLog() {
+        ArgumentCaptor<ApplicationLog> captor = ArgumentCaptor.forClass(ApplicationLog.class);
+        verify(repository).save(captor.capture());
+        return captor.getValue();
     }
 }
