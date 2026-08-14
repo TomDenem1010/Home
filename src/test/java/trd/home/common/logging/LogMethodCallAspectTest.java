@@ -25,7 +25,7 @@ class LogMethodCallAspectTest {
     void logsMethodInputAndOutput() throws Throwable {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toLongString()).thenReturn("String Example.find(String)");
-        when(joinPoint.getArgs()).thenReturn(new Object[] { "card" });
+        when(joinPoint.getArgs()).thenReturn(new Object[] {"card"});
         when(joinPoint.proceed()).thenReturn("result");
 
         assertEquals("result", aspect.logMethodCall(joinPoint));
@@ -49,7 +49,7 @@ class LogMethodCallAspectTest {
 
         ApplicationLog log = savedLog();
         assertEquals("void Example.save() ", log.getMethod());
-        assertEquals("[]", log.getInput());
+        assertNull(log.getInput());
         assertNull(log.getOutput());
         assertEquals("java.lang.IllegalStateException: failed", log.getError());
     }

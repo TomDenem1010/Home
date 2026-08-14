@@ -22,7 +22,7 @@ public class LogMethodCallAspect {
     @Around("@annotation(trd.home.common.logging.LogMethodCall)")
     public Object logMethodCall(ProceedingJoinPoint joinPoint) throws Throwable {
         String method = joinPoint.getSignature().toLongString();
-        String input = Arrays.deepToString(joinPoint.getArgs());
+        String input = formatInput(joinPoint.getArgs());
         long startedAt = System.nanoTime();
 
         Object output;
@@ -36,5 +36,9 @@ public class LogMethodCallAspect {
             applicationLogRepository.save(ApplicationLog.failed(method, input, throwable, durationMs));
             throw throwable;
         }
+    }
+
+    private String formatInput(Object[] arguments) {
+        return arguments.length == 0 ? null : Arrays.deepToString(arguments);
     }
 }

@@ -1,5 +1,7 @@
 package trd.home.common.dao;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -47,7 +49,7 @@ public class ApplicationLog extends AuditedEntity {
     }
 
     public static ApplicationLog successful(String method, String input, Object output, long durationMs) {
-        return new ApplicationLog(method, input, String.valueOf(output), null, durationMs);
+        return new ApplicationLog(method, input, Objects.isNull(output) ? null : output.toString(), null, durationMs);
     }
 
     public static ApplicationLog failed(String method, String input, Throwable throwable, long durationMs) {
