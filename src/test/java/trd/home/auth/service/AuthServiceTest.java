@@ -31,7 +31,7 @@ import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class AuthServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -40,14 +40,14 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private UserSessionService userSessionService;
+    private AuthSessionService userSessionService;
 
     @InjectMocks
-    private UserService userService;
+    private AuthService authService;
 
     @Test
     void returnsEveryAvailableRole() {
-        assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG), userService.getAvailableRoles());
+        assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG), authService.getAvailableRoles());
     }
 
     @Test
@@ -58,7 +58,7 @@ class UserServiceTest {
         bob.setId("user-2");
         when(userRepository.findAll()).thenReturn(List.of(alice, bob));
 
-        List<UserDto> users = userService.getAllUsers();
+        List<UserDto> users = authService.getAllUsers();
 
         assertEquals(
                 List.of(
@@ -78,7 +78,7 @@ class UserServiceTest {
             return user;
         });
 
-        UserDto userDto = userService.save("alice", "plain-password", roles);
+        UserDto userDto = authService.save("alice", "plain-password", roles);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -98,7 +98,7 @@ class UserServiceTest {
 
         InvalidCredentialException exception = assertThrows(
                 InvalidCredentialException.class,
-                () -> userService.save("alice", "plain-password", Set.of(UserRole.TCG)));
+                () -> authService.save("alice", "plain-password", Set.of(UserRole.TCG)));
 
         assertEquals("Invalid username", exception.getMessage());
         verify(passwordEncoder, never()).encode(any());
@@ -111,7 +111,7 @@ class UserServiceTest {
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("plain-password", "hashed-password")).thenReturn(true);
 
-        Set<UserRole> roles = userService.authenticate("alice", "plain-password");
+        Set<UserRole> roles = authService.authenticate("alice", "plain-password");
 
         assertEquals(Set.of(UserRole.TCG), roles);
         verify(passwordEncoder).matches("plain-password", "hashed-password");
@@ -123,7 +123,7 @@ class UserServiceTest {
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("wrong-password", "hashed-password")).thenReturn(false);
 
-        Set<UserRole> roles = userService.authenticate("alice", "wrong-password");
+        Set<UserRole> roles = authService.authenticate("alice", "wrong-password");
 
         assertTrue(roles.isEmpty());
     }
@@ -132,7 +132,7 @@ class UserServiceTest {
     void returnsEmptySetWhenUserDoesNotExist() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
-        Set<UserRole> roles = userService.authenticate("unknown", "plain-password");
+        Set<UserRole> roles = authService.authenticate("unknown", "plain-password");
 
         assertTrue(roles.isEmpty());
         verify(passwordEncoder, never()).matches(any(), any());
@@ -146,7 +146,7 @@ class UserServiceTest {
         when(userRepository.findById("user-1")).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
 
-        UserDto result = userService.updateRoles("user-1", newRoles);
+        UserDto result = authService.updateRoles("user-1", newRoles);
 
         assertEquals(new UserDto("user-1", "alice", Set.of(UserRole.ADMIN, UserRole.TCG)), result);
         assertEquals(newRoles, user.getRoles());
@@ -160,7 +160,7 @@ class UserServiceTest {
         when(userRepository.findById("unknown-id")).thenReturn(Optional.empty());
 
         InvalidCredentialException exception = assertThrows(
-                InvalidCredentialException.class, () -> userService.updateRoles("unknown-id", Set.of(UserRole.TCG)));
+                InvalidCredentialException.class, () -> authService.updateRoles("unknown-id", Set.of(UserRole.TCG)));
 
         assertEquals("Invalid user id", exception.getMessage());
         verify(userRepository, never()).save(any());
@@ -168,7 +168,7 @@ class UserServiceTest {
 
     @Test
     void rejectsNullRolesWhenUpdating() {
-        assertThrows(InvalidCredentialException.class, () -> userService.updateRoles("user-1", null));
+        assertThrows(InvalidCredentialException.class, () -> authService.updateRoles("user-1", null));
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
@@ -180,7 +180,7 @@ class UserServiceTest {
         when(passwordEncoder.encode("new-password")).thenReturn("new-hash");
         when(userRepository.save(user)).thenReturn(user);
 
-        UserDto result = userService.updatePassword("user-1", "new-password");
+        UserDto result = authService.updatePassword("user-1", "new-password");
 
         assertEquals("new-hash", user.getPassword());
         assertEquals(new UserDto("user-1", "alice", Set.of(UserRole.TCG)), result);
@@ -194,7 +194,7 @@ class UserServiceTest {
         when(userRepository.findById("unknown-id")).thenReturn(Optional.empty());
 
         InvalidCredentialException exception = assertThrows(
-                InvalidCredentialException.class, () -> userService.updatePassword("unknown-id", "new-password"));
+                InvalidCredentialException.class, () -> authService.updatePassword("unknown-id", "new-password"));
 
         assertEquals("Invalid user id", exception.getMessage());
         verify(passwordEncoder, never()).encode(any());
@@ -205,7 +205,7 @@ class UserServiceTest {
     @NullSource
     @ValueSource(strings = {"", " "})
     void rejectsInvalidPasswordWhenUpdating(String password) {
-        assertThrows(InvalidCredentialException.class, () -> userService.updatePassword("user-1", password));
+        assertThrows(InvalidCredentialException.class, () -> authService.updatePassword("user-1", password));
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
@@ -213,7 +213,7 @@ class UserServiceTest {
     @NullSource
     @ValueSource(strings = {"", " "})
     void rejectsInvalidUsername(String username) {
-        assertThrows(InvalidCredentialException.class, () -> userService.authenticate(username, "plain-password"));
+        assertThrows(InvalidCredentialException.class, () -> authService.authenticate(username, "plain-password"));
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
@@ -221,13 +221,13 @@ class UserServiceTest {
     @NullSource
     @ValueSource(strings = {"", " "})
     void rejectsInvalidPassword(String password) {
-        assertThrows(InvalidCredentialException.class, () -> userService.authenticate("alice", password));
+        assertThrows(InvalidCredentialException.class, () -> authService.authenticate("alice", password));
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
     @Test
     void rejectsNullRolesWhenSaving() {
-        assertThrows(InvalidCredentialException.class, () -> userService.save("alice", "plain-password", null));
+        assertThrows(InvalidCredentialException.class, () -> authService.save("alice", "plain-password", null));
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 

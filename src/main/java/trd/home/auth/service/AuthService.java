@@ -14,24 +14,28 @@ import trd.home.auth.dao.User;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
+import trd.home.common.logging.LogMethodCall;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final UserSessionService userSessionService;
+    private final AuthSessionService userSessionService;
 
+    @LogMethodCall
     public Set<UserRole> getAvailableRoles() {
         return EnumSet.allOf(UserRole.class);
     }
 
+    @LogMethodCall
     @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream().map(UserDto::from).toList();
     }
 
+    @LogMethodCall
     @Transactional
     public UserDto save(String username, String password, Set<UserRole> roles) {
         validateCredentials(username, password);
@@ -45,6 +49,7 @@ public class UserService {
         return UserDto.from(userRepository.save(user));
     }
 
+    @LogMethodCall
     @Transactional(readOnly = true)
     public Set<UserRole> authenticate(String username, String password) {
         validateCredentials(username, password);
@@ -56,6 +61,7 @@ public class UserService {
                 .orElseGet(Set::of);
     }
 
+    @LogMethodCall
     @Transactional
     public UserDto updateRoles(String userId, Set<UserRole> roles) {
         validateUserId(userId);
@@ -68,6 +74,7 @@ public class UserService {
         return updatedUser;
     }
 
+    @LogMethodCall
     @Transactional
     public UserDto updatePassword(String userId, String password) {
         validateUserId(userId);

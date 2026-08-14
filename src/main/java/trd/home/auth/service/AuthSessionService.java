@@ -5,11 +5,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
-public class UserSessionService {
+public class AuthSessionService {
 
     private final SessionRegistry sessionRegistry;
 
-    public UserSessionService(SessionRegistry sessionRegistry) {
+    public AuthSessionService(SessionRegistry sessionRegistry) {
         this.sessionRegistry = sessionRegistry;
     }
 

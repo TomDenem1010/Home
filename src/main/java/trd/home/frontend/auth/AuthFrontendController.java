@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.auth.constant.UserRole;
-import trd.home.auth.service.UserService;
+import trd.home.auth.service.AuthService;
 
 @Controller
 @RequestMapping("/auth")
 public class AuthFrontendController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
-    public AuthFrontendController(UserService userService) {
-        this.userService = userService;
+    public AuthFrontendController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping
@@ -27,13 +27,13 @@ public class AuthFrontendController {
 
     @GetMapping("/users")
     public String listUsers(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("users", authService.getAllUsers());
         return renderPage(model, "/auth/users", "Users", "Registered users and their roles.", "auth/users");
     }
 
     @GetMapping("/create-user")
     public String createUser(Model model) {
-        model.addAttribute("availableRoles", userService.getAvailableRoles());
+        model.addAttribute("availableRoles", authService.getAvailableRoles());
         return renderPage(
                 model, "/auth/create-user", "Create user", "Create a new user and assign roles.", "auth/create-user");
     }
@@ -43,27 +43,27 @@ public class AuthFrontendController {
             @RequestParam String username,
             @RequestParam String password,
             @RequestParam(required = false) Set<UserRole> roles) {
-        userService.save(username, password, roles == null ? Set.of() : roles);
+        authService.save(username, password, roles == null ? Set.of() : roles);
         return "redirect:/auth/users";
     }
 
     @GetMapping("/update-roles")
     public String updateRoles(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("availableRoles", userService.getAvailableRoles());
+        model.addAttribute("users", authService.getAllUsers());
+        model.addAttribute("availableRoles", authService.getAvailableRoles());
         return renderPage(
                 model, "/auth/update-roles", "Update roles", "Update a user's roles by user ID.", "auth/update-roles");
     }
 
     @PostMapping("/update-roles")
     public String updateRoles(@RequestParam String userId, @RequestParam(required = false) Set<UserRole> roles) {
-        userService.updateRoles(userId, roles == null ? Set.of() : roles);
+        authService.updateRoles(userId, roles == null ? Set.of() : roles);
         return "redirect:/auth/users";
     }
 
     @GetMapping("/update-password")
     public String updatePassword(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("users", authService.getAllUsers());
         return renderPage(
                 model,
                 "/auth/update-password",
@@ -74,7 +74,7 @@ public class AuthFrontendController {
 
     @PostMapping("/update-password")
     public String updatePassword(@RequestParam String userId, @RequestParam String password) {
-        userService.updatePassword(userId, password);
+        authService.updatePassword(userId, password);
         return "redirect:/auth/users";
     }
 

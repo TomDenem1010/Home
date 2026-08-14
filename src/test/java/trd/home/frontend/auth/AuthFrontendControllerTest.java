@@ -11,12 +11,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.UserDto;
-import trd.home.auth.service.UserService;
+import trd.home.auth.service.AuthService;
 
 class AuthFrontendControllerTest {
 
-    private final UserService userService = mock(UserService.class);
-    private final AuthFrontendController controller = new AuthFrontendController(userService);
+    private final AuthService authService = mock(AuthService.class);
+    private final AuthFrontendController controller = new AuthFrontendController(authService);
 
     @Test
     void authRedirectsToUserList() {
@@ -27,7 +27,7 @@ class AuthFrontendControllerTest {
     void listsUsers() {
         var users = List.of(new UserDto("user-1", "alice", Set.of(UserRole.ADMIN)));
         var model = new ConcurrentModel();
-        when(userService.getAllUsers()).thenReturn(users);
+        when(authService.getAllUsers()).thenReturn(users);
 
         assertEquals("index", controller.listUsers(model));
         assertEquals(users, model.getAttribute("users"));
@@ -38,7 +38,7 @@ class AuthFrontendControllerTest {
     @Test
     void showsCreateUserPageWithAvailableRoles() {
         var model = new ConcurrentModel();
-        when(userService.getAvailableRoles()).thenReturn(Set.of(UserRole.ADMIN, UserRole.TCG));
+        when(authService.getAvailableRoles()).thenReturn(Set.of(UserRole.ADMIN, UserRole.TCG));
 
         assertEquals("index", controller.createUser(model));
         assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG), model.getAttribute("availableRoles"));
@@ -50,15 +50,15 @@ class AuthFrontendControllerTest {
     void createsUserAndRedirectsToList() {
         assertEquals("redirect:/auth/users", controller.createUser("alice", "plain-password", Set.of(UserRole.TCG)));
 
-        verify(userService).save("alice", "plain-password", Set.of(UserRole.TCG));
+        verify(authService).save("alice", "plain-password", Set.of(UserRole.TCG));
     }
 
     @Test
     void showsUpdateUserPageWithUsersAndRoles() {
         var users = List.of(new UserDto("user-1", "alice", Set.of(UserRole.TCG)));
         var model = new ConcurrentModel();
-        when(userService.getAllUsers()).thenReturn(users);
-        when(userService.getAvailableRoles()).thenReturn(Set.of(UserRole.ADMIN, UserRole.TCG));
+        when(authService.getAllUsers()).thenReturn(users);
+        when(authService.getAvailableRoles()).thenReturn(Set.of(UserRole.ADMIN, UserRole.TCG));
 
         assertEquals("index", controller.updateRoles(model));
         assertEquals(users, model.getAttribute("users"));
@@ -71,14 +71,14 @@ class AuthFrontendControllerTest {
     void updatesUserByIdAndRedirectsToList() {
         assertEquals("redirect:/auth/users", controller.updateRoles("user-1", Set.of(UserRole.ADMIN)));
 
-        verify(userService).updateRoles("user-1", Set.of(UserRole.ADMIN));
+        verify(authService).updateRoles("user-1", Set.of(UserRole.ADMIN));
     }
 
     @Test
     void showsUpdatePasswordPageWithUsers() {
         var users = List.of(new UserDto("user-1", "alice", Set.of(UserRole.TCG)));
         var model = new ConcurrentModel();
-        when(userService.getAllUsers()).thenReturn(users);
+        when(authService.getAllUsers()).thenReturn(users);
 
         assertEquals("index", controller.updatePassword(model));
         assertEquals(users, model.getAttribute("users"));
@@ -90,6 +90,6 @@ class AuthFrontendControllerTest {
     void updatesPasswordByUserIdAndRedirectsToList() {
         assertEquals("redirect:/auth/users", controller.updatePassword("user-1", "new-password"));
 
-        verify(userService).updatePassword("user-1", "new-password");
+        verify(authService).updatePassword("user-1", "new-password");
     }
 }

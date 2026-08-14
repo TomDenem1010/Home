@@ -12,10 +12,10 @@ import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.User;
 
-class UserSessionServiceTest {
+class AuthSessionServiceTest {
 
     private final SessionRegistry sessionRegistry = mock(SessionRegistry.class);
-    private final UserSessionService service = new UserSessionService(sessionRegistry);
+    private final AuthSessionService service = new AuthSessionService(sessionRegistry);
 
     @Test
     void expiresEveryActiveSessionForUsername() {

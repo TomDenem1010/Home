@@ -16,17 +16,17 @@ import trd.home.auth.repository.UserRepository;
 public class InitialAdminUserInitializer implements ApplicationRunner {
 
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final AuthService authService;
     private final String username;
     private final String password;
 
     public InitialAdminUserInitializer(
             UserRepository userRepository,
-            UserService userService,
+            AuthService authService,
             @Value("${home.auth.initial-admin.username}") String username,
             @Value("${home.auth.initial-admin.password}") String password) {
         this.userRepository = userRepository;
-        this.userService = userService;
+        this.authService = authService;
         this.username = username;
         this.password = password;
     }
@@ -41,7 +41,7 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
         validateUsername(username);
         validatePassword(password);
 
-        userService.save(username, password, Set.of(UserRole.ADMIN));
+        authService.save(username, password, Set.of(UserRole.ADMIN));
         log.info("Initial admin user created: {}", username);
     }
 

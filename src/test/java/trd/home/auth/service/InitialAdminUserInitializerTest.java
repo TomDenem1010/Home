@@ -16,7 +16,7 @@ import trd.home.auth.repository.UserRepository;
 class InitialAdminUserInitializerTest {
 
     private final UserRepository userRepository = mock(UserRepository.class);
-    private final UserService userService = mock(UserService.class);
+    private final AuthService authService = mock(AuthService.class);
     private final ApplicationArguments arguments = mock(ApplicationArguments.class);
 
     @Test
@@ -25,7 +25,7 @@ class InitialAdminUserInitializerTest {
 
         initializer.run(arguments);
 
-        verify(userService).save("admin", "strong-password", Set.of(UserRole.ADMIN));
+        verify(authService).save("admin", "strong-password", Set.of(UserRole.ADMIN));
     }
 
     @Test
@@ -35,7 +35,7 @@ class InitialAdminUserInitializerTest {
 
         initializer.run(arguments);
 
-        verify(userService, never()).save("admin", "strong-password", Set.of(UserRole.ADMIN));
+        verify(authService, never()).save("admin", "strong-password", Set.of(UserRole.ADMIN));
     }
 
     @Test
@@ -43,7 +43,7 @@ class InitialAdminUserInitializerTest {
         InitialAdminUserInitializer initializer = initializer(" ", "strong-password");
 
         assertThrows(InvalidCredentialException.class, () -> initializer.run(arguments));
-        verify(userService, never()).save(" ", "strong-password", Set.of(UserRole.ADMIN));
+        verify(authService, never()).save(" ", "strong-password", Set.of(UserRole.ADMIN));
     }
 
     @Test
@@ -51,10 +51,10 @@ class InitialAdminUserInitializerTest {
         InitialAdminUserInitializer initializer = initializer("admin", " ");
 
         assertThrows(InvalidCredentialException.class, () -> initializer.run(arguments));
-        verify(userService, never()).save("admin", " ", Set.of(UserRole.ADMIN));
+        verify(authService, never()).save("admin", " ", Set.of(UserRole.ADMIN));
     }
 
     private InitialAdminUserInitializer initializer(String username, String password) {
-        return new InitialAdminUserInitializer(userRepository, userService, username, password);
+        return new InitialAdminUserInitializer(userRepository, authService, username, password);
     }
 }
