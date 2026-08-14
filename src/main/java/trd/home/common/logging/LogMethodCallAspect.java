@@ -11,11 +11,11 @@ import trd.home.common.repository.ApplicationLogRepository;
 
 @Aspect
 @Component
-public class MethodCallLoggingAspect {
+public class LogMethodCallAspect {
 
     private final ApplicationLogRepository applicationLogRepository;
 
-    public MethodCallLoggingAspect(ApplicationLogRepository applicationLogRepository) {
+    public LogMethodCallAspect(ApplicationLogRepository applicationLogRepository) {
         this.applicationLogRepository = applicationLogRepository;
     }
 
@@ -28,14 +28,13 @@ public class MethodCallLoggingAspect {
         Object output;
         try {
             output = joinPoint.proceed();
+            long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
+            applicationLogRepository.save(ApplicationLog.successful(method, input, output, durationMs));
+            return output;
         } catch (Throwable throwable) {
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
             applicationLogRepository.save(ApplicationLog.failed(method, input, throwable, durationMs));
             throw throwable;
         }
-
-        long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
-        applicationLogRepository.save(ApplicationLog.successful(method, input, output, durationMs));
-        return output;
     }
 }

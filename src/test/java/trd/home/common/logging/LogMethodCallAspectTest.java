@@ -14,10 +14,10 @@ import org.mockito.ArgumentCaptor;
 import trd.home.common.dao.ApplicationLog;
 import trd.home.common.repository.ApplicationLogRepository;
 
-class MethodCallLoggingAspectTest {
+class LogMethodCallAspectTest {
 
     private final ApplicationLogRepository repository = mock(ApplicationLogRepository.class);
-    private final MethodCallLoggingAspect aspect = new MethodCallLoggingAspect(repository);
+    private final LogMethodCallAspect aspect = new LogMethodCallAspect(repository);
     private final ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
     private final Signature signature = mock(Signature.class);
 
@@ -25,7 +25,7 @@ class MethodCallLoggingAspectTest {
     void logsMethodInputAndOutput() throws Throwable {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toLongString()).thenReturn("String Example.find(String)");
-        when(joinPoint.getArgs()).thenReturn(new Object[] {"card"});
+        when(joinPoint.getArgs()).thenReturn(new Object[] { "card" });
         when(joinPoint.proceed()).thenReturn("result");
 
         assertEquals("result", aspect.logMethodCall(joinPoint));
