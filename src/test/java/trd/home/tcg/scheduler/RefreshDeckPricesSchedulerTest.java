@@ -3,6 +3,7 @@ package trd.home.tcg.scheduler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -50,7 +51,7 @@ class RefreshDeckPricesSchedulerTest {
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
         verify(notificationPublisher)
-                .publish(FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
+                .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
     }
 
     @Test
@@ -71,10 +72,36 @@ class RefreshDeckPricesSchedulerTest {
         assertNull(event.getProcessedAt());
         assertEquals("Unable to refresh prices", event.getErrorMessage());
         verify(notificationPublisher)
-                .publish(FrontendNotificationType.ERROR, "Failed to refresh deck prices: Unable to refresh prices");
+                .publish(
+                        null,
+                        FrontendNotificationType.ERROR,
+                        "Failed to refresh deck prices: Unable to refresh prices");
         InOrder order = inOrder(eventRepository, cardPriceSaver);
         order.verify(eventRepository).save(event);
         order.verify(cardPriceSaver).updateCardPrice(cards);
         order.verify(eventRepository).save(event);
+    }
+
+    @Test
+    void keepsCompletedWorkDoneWhenNotificationPublishingFails() {
+        ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES);
+        List<CardmarketCardDto> cards = List.of();
+        when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
+                        EventType.REFRESH_DECK_PRICES, EventStatus.TO_DO))
+                .thenReturn(Optional.of(event));
+        when(cardRepository.findAllInActiveDeckCurrentVersions()).thenReturn(cards);
+        doThrow(new IllegalStateException("Database unavailable"))
+                .when(notificationPublisher)
+                .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
+
+        assertThrows(IllegalStateException.class, scheduler::processNextEvent);
+
+        assertEquals(EventStatus.DONE, event.getStatus());
+        InOrder order = inOrder(eventRepository, cardPriceSaver, notificationPublisher);
+        order.verify(eventRepository).save(event);
+        order.verify(cardPriceSaver).updateCardPrice(cards);
+        order.verify(eventRepository).save(event);
+        order.verify(notificationPublisher)
+                .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
     }
 }

@@ -14,9 +14,35 @@
     };
 
     window.addFrontendEventListener("notification", showNotification);
+    initializeActionForms();
     restoreNotifications();
 
-    function showNotification(notification, storedNotification) {
+    function initializeActionForms() {
+        document.querySelectorAll(".frontend-action-form").forEach(form => {
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton?.setAttribute("disabled", "disabled");
+                try {
+                    const response = await fetch(form.action, {
+                        method: form.method,
+                        body: new FormData(form)
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Action failed with status ${response.status}`);
+                    }
+                } catch (error) {
+                    showNotification({type: "ERROR", message: "The operation could not be started."});
+                    console.error(error);
+                } finally {
+                    submitButton?.removeAttribute("disabled");
+                }
+            });
+        });
+    }
+
+    function showNotification(notification, context = {}) {
+        const storedNotification = context.storedNotification;
         const container = document.querySelector("#notification-container");
         const toast = document.createElement("div");
         const type = notification.type.toLowerCase();
@@ -75,7 +101,6 @@
         content.append(title, message);
         toast.append(icon, content, closeButton, progress);
         container.append(toast);
-
         const dismiss = () => {
             if (toast.classList.contains("notification--leaving")) {
                 return;
@@ -92,7 +117,7 @@
 
     function restoreNotifications() {
         readStoredNotifications().forEach(storedNotification => {
-            showNotification(storedNotification.notification, storedNotification);
+            showNotification(storedNotification.notification, {storedNotification});
         });
     }
 

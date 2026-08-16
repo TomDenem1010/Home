@@ -36,17 +36,20 @@ public class SaveDecksFromResourceScheduler {
                 .ifPresent(event -> {
                     event.markProcessing();
                     eventRepository.save(event);
+                    FrontendNotificationType notificationType;
+                    String notificationMessage;
                     try {
                         deckFileReader.read().forEach(deckSaver::save);
                         event.markDone();
-                        notificationPublisher.publish(
-                                FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
+                        notificationType = FrontendNotificationType.SUCCESS;
+                        notificationMessage = "Decks were saved successfully.";
                     } catch (RuntimeException exception) {
                         event.markFailed(exception);
-                        notificationPublisher.publish(
-                                FrontendNotificationType.ERROR, "Failed to save decks: " + exception.getMessage());
+                        notificationType = FrontendNotificationType.ERROR;
+                        notificationMessage = "Failed to save decks: " + exception.getMessage();
                     }
                     eventRepository.save(event);
+                    notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
                 });
     }
 }

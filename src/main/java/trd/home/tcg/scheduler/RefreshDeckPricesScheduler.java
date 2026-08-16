@@ -36,18 +36,20 @@ public class RefreshDeckPricesScheduler {
                 .ifPresent(event -> {
                     event.markProcessing();
                     eventRepository.save(event);
+                    FrontendNotificationType notificationType;
+                    String notificationMessage;
                     try {
                         cardPriceSaver.updateCardPrice(cardRepository.findAllInActiveDeckCurrentVersions());
                         event.markDone();
-                        notificationPublisher.publish(
-                                FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
+                        notificationType = FrontendNotificationType.SUCCESS;
+                        notificationMessage = "Deck prices were refreshed successfully.";
                     } catch (RuntimeException exception) {
                         event.markFailed(exception);
-                        notificationPublisher.publish(
-                                FrontendNotificationType.ERROR,
-                                "Failed to refresh deck prices: " + exception.getMessage());
+                        notificationType = FrontendNotificationType.ERROR;
+                        notificationMessage = "Failed to refresh deck prices: " + exception.getMessage();
                     }
                     eventRepository.save(event);
+                    notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
                 });
     }
 }

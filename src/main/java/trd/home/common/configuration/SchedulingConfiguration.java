@@ -10,7 +10,7 @@ public class SchedulingConfiguration {
     @Bean
     ThreadPoolTaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(3);
+        taskScheduler.setPoolSize(4);
         taskScheduler.setThreadNamePrefix("scheduler-");
         taskScheduler.setWaitForTasksToCompleteOnShutdown(true);
         return taskScheduler;

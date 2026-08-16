@@ -49,7 +49,7 @@ class SaveDecksFromResourceSchedulerTest {
         order.verify(eventRepository).save(event);
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
-        verify(notificationPublisher).publish(FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
+        verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
     }
 
     @Test
@@ -70,7 +70,7 @@ class SaveDecksFromResourceSchedulerTest {
         assertNull(event.getProcessedAt());
         assertEquals("Unable to save deck", event.getErrorMessage());
         verify(notificationPublisher)
-                .publish(FrontendNotificationType.ERROR, "Failed to save decks: Unable to save deck");
+                .publish(null, FrontendNotificationType.ERROR, "Failed to save decks: Unable to save deck");
         InOrder order = inOrder(eventRepository, deckSaver);
         order.verify(eventRepository).save(event);
         order.verify(deckSaver).save(deck);

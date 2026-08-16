@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import tools.jackson.databind.json.JsonMapper;
@@ -16,7 +17,7 @@ class FrontendNotificationPublisherTest {
 
     private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
     private final FrontendNotificationPublisher publisher = new FrontendNotificationPublisher(
-            eventRepository, JsonMapper.builder().build());
+            eventRepository, JsonMapper.builder().build(), () -> Optional.of("alice"));
 
     @Test
     void serializesNotificationIntoApplicationEvent() {
@@ -27,6 +28,6 @@ class FrontendNotificationPublisherTest {
         ApplicationEvent event = eventCaptor.getValue();
         assertEquals(EventType.FRONTEND_NOTIFICATION, event.getType());
         assertEquals(EventStatus.TO_DO, event.getStatus());
-        assertEquals("{\"type\":\"WARNING\",\"message\":\"Warning\"}", event.getMessage());
+        assertEquals("{\"username\":\"alice\",\"type\":\"WARNING\",\"message\":\"Warning\"}", event.getMessage());
     }
 }

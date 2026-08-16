@@ -14,6 +14,7 @@ import trd.home.auth.dao.User;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
+import trd.home.common.logging.LogMasked;
 import trd.home.common.logging.LogMethodCall;
 
 @Service
@@ -37,7 +38,7 @@ public class AuthService {
 
     @LogMethodCall
     @Transactional
-    public UserDto save(String username, String password, Set<UserRole> roles) {
+    public UserDto save(String username, @LogMasked String password, Set<UserRole> roles) {
         validateCredentials(username, password);
         validateRoles(roles);
         validateUsernameExistence(username);
@@ -51,7 +52,7 @@ public class AuthService {
 
     @LogMethodCall
     @Transactional(readOnly = true)
-    public Set<UserRole> authenticate(String username, String password) {
+    public Set<UserRole> authenticate(String username, @LogMasked String password) {
         validateCredentials(username, password);
 
         return userRepository
@@ -76,7 +77,7 @@ public class AuthService {
 
     @LogMethodCall
     @Transactional
-    public UserDto updatePassword(String userId, String password) {
+    public UserDto updatePassword(String userId, @LogMasked String password) {
         validateUserId(userId);
         validatePassword(password);
 

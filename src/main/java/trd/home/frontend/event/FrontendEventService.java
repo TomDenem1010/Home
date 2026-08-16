@@ -37,18 +37,17 @@ public class FrontendEventService {
         return emitter;
     }
 
-    public void sendToUser(String username, FrontendEvent event) {
+    public boolean hasConnection(String username) {
         Set<Connection> connections = connectionsByUsername.get(username);
-        if (connections == null) {
-            return;
-        }
-
-        connections.forEach(connection -> send(username, connection, event));
+        return connections != null && !connections.isEmpty();
     }
 
-    public void sendToAll(FrontendEvent event) {
-        connectionsByUsername.forEach(
-                (username, connections) -> connections.forEach(connection -> send(username, connection, event)));
+    public void sendToUser(String username, FrontendEvent event) {
+        Set<Connection> connections = connectionsByUsername.get(username);
+        if (connections == null || connections.isEmpty()) {
+            return;
+        }
+        connections.stream().anyMatch(connection -> send(username, connection, event));
     }
 
     @EventListener
@@ -62,12 +61,14 @@ public class FrontendEventService {
                 }));
     }
 
-    private void send(String username, Connection connection, FrontendEvent event) {
+    private boolean send(String username, Connection connection, FrontendEvent event) {
         try {
             connection.emitter().send(SseEmitter.event().name("notification").data(event));
+            return true;
         } catch (IOException | IllegalStateException exception) {
             remove(username, connection);
             connection.emitter().complete();
+            return false;
         }
     }
 

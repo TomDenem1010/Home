@@ -1,5 +1,7 @@
 package trd.home.common.event;
 
+import java.util.Objects;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -13,15 +15,23 @@ public class FrontendNotificationPublisher {
 
     private final ApplicationEventRepository eventRepository;
     private final ObjectMapper objectMapper;
+    private final AuditorAware<String> auditorAware;
 
-    public FrontendNotificationPublisher(ApplicationEventRepository eventRepository, ObjectMapper objectMapper) {
+    public FrontendNotificationPublisher(
+            ApplicationEventRepository eventRepository, ObjectMapper objectMapper, AuditorAware<String> auditorAware) {
         this.eventRepository = eventRepository;
         this.objectMapper = objectMapper;
+        this.auditorAware = auditorAware;
     }
 
     public void publish(FrontendNotificationType type, String message) {
+        publish(auditorAware.getCurrentAuditor().orElse("system"), type, message);
+    }
+
+    public void publish(String username, FrontendNotificationType type, String message) {
         try {
-            String serializedNotification = objectMapper.writeValueAsString(new FrontendEvent(type, message));
+            String serializedNotification = objectMapper.writeValueAsString(
+                    new FrontendEvent(Objects.requireNonNullElse(username, "system"), type, message));
             eventRepository.save(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, serializedNotification));
         } catch (JacksonException exception) {
             throw new IllegalStateException("Unable to serialize frontend notification", exception);

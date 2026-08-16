@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import trd.home.common.dao.ApplicationLog;
@@ -19,7 +19,7 @@ class LogMethodCallAspectTest {
     private final ApplicationLogRepository repository = mock(ApplicationLogRepository.class);
     private final LogMethodCallAspect aspect = new LogMethodCallAspect(repository);
     private final ProceedingJoinPoint joinPoint = mock(ProceedingJoinPoint.class);
-    private final Signature signature = mock(Signature.class);
+    private final MethodSignature signature = mock(MethodSignature.class);
 
     @Test
     void logsMethodInputAndOutput() throws Throwable {
@@ -54,9 +54,26 @@ class LogMethodCallAspectTest {
         assertEquals("java.lang.IllegalStateException: failed", log.getError());
     }
 
+    @Test
+    void masksAnnotatedArguments() throws Throwable {
+        when(joinPoint.getSignature()).thenReturn(signature);
+        when(signature.toLongString()).thenReturn("void Example.save(String, String)");
+        when(signature.getMethod()).thenReturn(Example.class.getDeclaredMethod("save", String.class, String.class));
+        when(joinPoint.getArgs()).thenReturn(new Object[] {"alice", "secret-password"});
+
+        aspect.logMethodCall(joinPoint);
+
+        assertEquals("[alice, ***]", savedLog().getInput());
+    }
+
     private ApplicationLog savedLog() {
         ArgumentCaptor<ApplicationLog> captor = ArgumentCaptor.forClass(ApplicationLog.class);
         verify(repository).save(captor.capture());
         return captor.getValue();
+    }
+
+    private static class Example {
+
+        void save(String username, @LogMasked String password) {}
     }
 }
