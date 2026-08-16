@@ -1,4 +1,6 @@
 (() => {
+    const storageKey = "home.frontend-notifications";
+    const notificationLifetime = 5000;
     const source = new EventSource("/api/frontend-events");
 
     source.onmessage = event => dispatch("message", event);
@@ -12,8 +14,9 @@
     };
 
     window.addFrontendEventListener("notification", showNotification);
+    restoreNotifications();
 
-    function showNotification(notification) {
+    function showNotification(notification, storedNotification) {
         const container = document.querySelector("#notification-container");
         const toast = document.createElement("div");
         const type = notification.type.toLowerCase();
@@ -22,11 +25,26 @@
             warning: {icon: "!", title: "Warning"},
             error: {icon: "×", title: "An error occurred"}
         }[type];
-        const lifetime = 5000;
+        const id = storedNotification?.id ?? createNotificationId();
+        const lifetime = storedNotification?.lifetime ?? notificationLifetime;
+        const expiresAt = storedNotification?.expiresAt ?? Date.now() + lifetime;
+        const remainingLifetime = expiresAt - Date.now();
+
+        if (!presentation || remainingLifetime <= 0) {
+            removeStoredNotification(id);
+            return;
+        }
+        if (!storedNotification) {
+            storeNotification({id, notification, expiresAt, lifetime});
+        }
 
         toast.className = `notification notification--${type}`;
         toast.setAttribute("role", type === "error" ? "alert" : "status");
-        toast.style.setProperty("--notification-lifetime", `${lifetime}ms`);
+        toast.style.setProperty("--notification-lifetime", `${remainingLifetime}ms`);
+        toast.style.setProperty(
+            "--notification-progress-width",
+            `${Math.min(100, remainingLifetime / lifetime * 100)}%`
+        );
 
         const icon = document.createElement("span");
         icon.className = "notification__icon";
@@ -62,13 +80,49 @@
             if (toast.classList.contains("notification--leaving")) {
                 return;
             }
+            removeStoredNotification(id);
             toast.classList.add("notification--leaving");
             toast.addEventListener("transitionend", () => toast.remove(), {once: true});
             window.setTimeout(() => toast.remove(), 300);
         };
 
         closeButton.addEventListener("click", dismiss);
-        window.setTimeout(dismiss, lifetime);
+        window.setTimeout(dismiss, remainingLifetime);
+    }
+
+    function restoreNotifications() {
+        readStoredNotifications().forEach(storedNotification => {
+            showNotification(storedNotification.notification, storedNotification);
+        });
+    }
+
+    function storeNotification(storedNotification) {
+        writeStoredNotifications([...readStoredNotifications(), storedNotification]);
+    }
+
+    function removeStoredNotification(id) {
+        writeStoredNotifications(readStoredNotifications().filter(notification => notification.id !== id));
+    }
+
+    function readStoredNotifications() {
+        try {
+            const notifications = JSON.parse(sessionStorage.getItem(storageKey) ?? "[]");
+            return Array.isArray(notifications) ? notifications : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function writeStoredNotifications(notifications) {
+        try {
+            sessionStorage.setItem(storageKey, JSON.stringify(notifications));
+        } catch {
+            // Notifications still work for the current page when storage is unavailable.
+        }
+    }
+
+    function createNotificationId() {
+        return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`;
     }
 
     function dispatch(type, event) {
