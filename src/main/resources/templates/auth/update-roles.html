@@ -5,10 +5,11 @@
     <form th:action="@{/auth/update-roles}" method="post">
         <label>
             User
-            <select name="userId" required>
+            <select id="role-user-select" name="userId" required>
                 <option value="" selected disabled>Select a user</option>
                 <option th:each="user : ${users}"
                         th:value="${user.id}"
+                        th:attr="data-roles=${#strings.setJoin(user.roles, ',')}"
                         th:text="${user.username + ' (' + user.id + ')'}">
                     username (user-id)
                 </option>
@@ -18,7 +19,7 @@
             <legend>New roles</legend>
             <div class="role-options">
                 <label class="role-option" th:each="role : ${availableRoles}">
-                    <input type="checkbox" name="roles" th:value="${role}">
+                    <input class="role-checkbox" type="checkbox" name="roles" th:value="${role}">
                     <span th:text="${role}">ROLE</span>
                 </label>
             </div>
