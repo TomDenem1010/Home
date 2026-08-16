@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -15,6 +16,8 @@ import org.mockito.InOrder;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
+import trd.home.common.event.FrontendNotificationPublisher;
+import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.service.CardmarketDeckSaver;
@@ -25,8 +28,9 @@ class SaveDecksFromResourceSchedulerTest {
     private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
     private final CardmarketDeckSaver deckSaver = mock(CardmarketDeckSaver.class);
     private final DeckFileReader deckFileReader = mock(DeckFileReader.class);
+    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
     private final SaveDecksFromResourceScheduler scheduler =
-            new SaveDecksFromResourceScheduler(eventRepository, deckSaver, deckFileReader);
+            new SaveDecksFromResourceScheduler(eventRepository, deckSaver, deckFileReader, notificationPublisher);
 
     @Test
     void processesOldestPendingEvent() {
@@ -45,6 +49,8 @@ class SaveDecksFromResourceSchedulerTest {
         order.verify(eventRepository).save(event);
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
+        verify(notificationPublisher)
+                .publish(FrontendNotificationType.SUCCESS, "A paklik mentése sikeresen befejeződött.");
     }
 
     @Test
@@ -64,6 +70,8 @@ class SaveDecksFromResourceSchedulerTest {
         assertEquals(EventStatus.ERROR, event.getStatus());
         assertNull(event.getProcessedAt());
         assertEquals("Unable to save deck", event.getErrorMessage());
+        verify(notificationPublisher)
+                .publish(FrontendNotificationType.ERROR, "A paklik mentése sikertelen: Unable to save deck");
         InOrder order = inOrder(eventRepository, deckSaver);
         order.verify(eventRepository).save(event);
         order.verify(deckSaver).save(deck);

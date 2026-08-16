@@ -37,12 +37,20 @@ public class ApplicationEvent extends AuditedEntity {
     @Column(name = "ERROR_MESSAGE", length = MAX_ERROR_MESSAGE_LENGTH)
     private String errorMessage;
 
+    @Column(name = "MESSAGE", length = MAX_ERROR_MESSAGE_LENGTH)
+    private String message;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false, length = 20)
     private EventStatus status;
 
     public ApplicationEvent(EventType type) {
+        this(type, null);
+    }
+
+    public ApplicationEvent(EventType type, String message) {
         this.type = type;
+        this.message = message;
         this.status = EventStatus.TO_DO;
     }
 

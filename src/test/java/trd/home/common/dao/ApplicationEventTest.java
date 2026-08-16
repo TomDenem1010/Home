@@ -11,6 +11,14 @@ import trd.home.common.constant.EventType;
 class ApplicationEventTest {
 
     @Test
+    void storesMessage() {
+        ApplicationEvent event = new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, "serialized message");
+
+        assertEquals("serialized message", event.getMessage());
+        assertEquals(EventStatus.TO_DO, event.getStatus());
+    }
+
+    @Test
     void followsSuccessfulLifecycle() {
         ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES);
 
