@@ -40,6 +40,7 @@ class CardmarketDeckRepositoryTest {
         var projection = mock(CardmarketDeckRepository.CardmarketDeckCardPriceProjection.class);
         Instant createdAt = Instant.parse("2026-01-01T00:00:00Z");
         when(projection.getCardName()).thenReturn("Card");
+        when(projection.getCardLink()).thenReturn("https://example.test/card");
         when(projection.getQuantity()).thenReturn(2);
         when(projection.getLatestFromInEuro()).thenReturn(new BigDecimal("3.00"));
         when(projection.getLatestTrendInEuro()).thenReturn(new BigDecimal("4.00"));
@@ -50,6 +51,7 @@ class CardmarketDeckRepositoryTest {
 
         assertEquals("deck-id", result.deckId());
         assertEquals(1, result.cards().size());
+        assertEquals("https://example.test/card", result.cards().getFirst().cardLink());
         assertEquals(new BigDecimal("6.00"), result.sumLatestFromInEuro());
         assertEquals(new BigDecimal("8.00"), result.sumLatestTrendInEuro());
     }

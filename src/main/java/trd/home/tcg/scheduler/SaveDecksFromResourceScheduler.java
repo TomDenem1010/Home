@@ -40,12 +40,11 @@ public class SaveDecksFromResourceScheduler {
                         deckFileReader.read().forEach(deckSaver::save);
                         event.markDone();
                         notificationPublisher.publish(
-                                FrontendNotificationType.SUCCESS, "A paklik mentése sikeresen befejeződött.");
+                                FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
                     } catch (RuntimeException exception) {
                         event.markFailed(exception);
                         notificationPublisher.publish(
-                                FrontendNotificationType.ERROR,
-                                "A paklik mentése sikertelen: " + exception.getMessage());
+                                FrontendNotificationType.ERROR, "Failed to save decks: " + exception.getMessage());
                     }
                     eventRepository.save(event);
                 });

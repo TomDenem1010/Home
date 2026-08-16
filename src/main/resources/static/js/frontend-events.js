@@ -18,11 +18,11 @@
         const toast = document.createElement("div");
         const type = notification.type.toLowerCase();
         const presentation = {
-            success: {icon: "✓", title: "Sikeres művelet"},
-            warning: {icon: "!", title: "Figyelmeztetés"},
-            error: {icon: "×", title: "Hiba történt"}
+            success: {icon: "✓", title: "Operation completed"},
+            warning: {icon: "!", title: "Warning"},
+            error: {icon: "×", title: "An error occurred"}
         }[type];
-        const lifetime = 5000 + Math.floor(Math.random() * 3001);
+        const lifetime = 5000;
 
         toast.className = `notification notification--${type}`;
         toast.setAttribute("role", type === "error" ? "alert" : "status");
@@ -47,7 +47,7 @@
         const closeButton = document.createElement("button");
         closeButton.className = "notification__close";
         closeButton.type = "button";
-        closeButton.setAttribute("aria-label", "Értesítés bezárása");
+        closeButton.setAttribute("aria-label", "Dismiss notification");
         closeButton.textContent = "×";
 
         const progress = document.createElement("span");

@@ -5,6 +5,7 @@ import java.time.Instant;
 
 public record CardmarketDeckCardPriceSummary(
         String cardName,
+        String cardLink,
         int quantity,
         BigDecimal latestFromInEuro,
         BigDecimal latestTrendInEuro,

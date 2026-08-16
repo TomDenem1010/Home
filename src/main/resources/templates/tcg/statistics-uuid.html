@@ -28,7 +28,13 @@
             </thead>
             <tbody>
             <tr th:each="card : ${deckPriceHistorySummary.cards}">
-                <td class="card-name" th:attr="data-sort-value=${card.cardName}" th:text="${card.cardName}">Card name</td>
+                <td class="card-name" th:attr="data-sort-value=${card.cardName}">
+                    <a class="card-link"
+                       th:href="${card.cardLink}"
+                       th:text="${card.cardName}"
+                       target="_blank"
+                       rel="noopener noreferrer">Card name</a>
+                </td>
                 <td class="quantity" th:attr="data-sort-value=${card.quantity}" th:text="${card.quantity}">0</td>
                 <td th:attr="data-sort-value=${card.latestFromInEuro == null ? '' : card.latestFromInEuro}">
                     <strong th:text="${card.latestFromInEuro == null ? '-' : #numbers.formatDecimal(card.latestFromInEuro, 1, 2) + ' €'}">-</strong>

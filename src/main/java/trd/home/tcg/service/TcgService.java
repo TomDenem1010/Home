@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
+import trd.home.common.event.FrontendNotificationPublisher;
+import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
@@ -17,15 +19,18 @@ public class TcgService {
 
     private final ApplicationEventRepository eventRepository;
     private final CardmarketDeckRepository cardmarketDeckRepository;
+    private final FrontendNotificationPublisher notificationPublisher;
 
     @LogMethodCall
     public void saveDecksFromResource() {
         eventRepository.save(new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE));
+        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck saving has started.");
     }
 
     @LogMethodCall
     public void refreshDeckPrices() {
         eventRepository.save(new ApplicationEvent(EventType.REFRESH_DECK_PRICES));
+        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
     }
 
     @LogMethodCall

@@ -20,13 +20,13 @@ class FrontendNotificationPublisherTest {
 
     @Test
     void serializesNotificationIntoApplicationEvent() {
-        publisher.publish(FrontendNotificationType.WARNING, "Figyelmeztetés");
+        publisher.publish(FrontendNotificationType.WARNING, "Warning");
 
         ArgumentCaptor<ApplicationEvent> eventCaptor = ArgumentCaptor.forClass(ApplicationEvent.class);
         verify(eventRepository).save(eventCaptor.capture());
         ApplicationEvent event = eventCaptor.getValue();
         assertEquals(EventType.FRONTEND_NOTIFICATION, event.getType());
         assertEquals(EventStatus.TO_DO, event.getStatus());
-        assertEquals("{\"type\":\"WARNING\",\"message\":\"Figyelmeztetés\"}", event.getMessage());
+        assertEquals("{\"type\":\"WARNING\",\"message\":\"Warning\"}", event.getMessage());
     }
 }

@@ -15,7 +15,7 @@ class SchedulingConfigurationTest {
         try {
             taskScheduler.initialize();
 
-            assertEquals(2, taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
+            assertEquals(3, taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
             assertTrue(taskScheduler.getThreadNamePrefix().startsWith("scheduler-"));
         } finally {
             taskScheduler.shutdown();

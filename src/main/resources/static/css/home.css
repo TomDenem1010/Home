@@ -469,6 +469,18 @@ table {
     font-weight: 650;
 }
 
+.card-link {
+    color: #2d6cdf;
+    text-decoration: none;
+    text-underline-offset: 0.2em;
+}
+
+.card-link:hover,
+.card-link:focus-visible {
+    color: #1f55b5;
+    text-decoration: underline;
+}
+
 .history-table .quantity {
     width: 4rem;
     text-align: center;

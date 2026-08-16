@@ -83,6 +83,7 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                     SUBSTR(card.link, 1, INSTR(card.link || '?', '?') - 1),
                     '[^/]+$'
                 ) AS "cardName",
+                card.link AS "cardLink",
                 deck_card.quantity AS "quantity",
                 latest_price.from_in_euro AS "latestFromInEuro",
                 latest_price.trend_in_euro AS "latestTrendInEuro",
@@ -106,6 +107,7 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
         List<CardmarketDeckCardPriceSummary> cards = calculateDeckCardPriceSummaryProjections(deckId).stream()
                 .map(projection -> new CardmarketDeckCardPriceSummary(
                         projection.getCardName(),
+                        projection.getCardLink(),
                         projection.getQuantity(),
                         projection.getLatestFromInEuro(),
                         projection.getLatestTrendInEuro(),
@@ -149,6 +151,8 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
         String getDeckId();
 
         String getCardName();
+
+        String getCardLink();
 
         int getQuantity();
 

@@ -40,12 +40,12 @@ public class RefreshDeckPricesScheduler {
                         cardPriceSaver.updateCardPrice(cardRepository.findAllInActiveDeckCurrentVersions());
                         event.markDone();
                         notificationPublisher.publish(
-                                FrontendNotificationType.SUCCESS, "A pakliárak frissítése sikeresen befejeződött.");
+                                FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
                     } catch (RuntimeException exception) {
                         event.markFailed(exception);
                         notificationPublisher.publish(
                                 FrontendNotificationType.ERROR,
-                                "A pakliárak frissítése sikertelen: " + exception.getMessage());
+                                "Failed to refresh deck prices: " + exception.getMessage());
                     }
                     eventRepository.save(event);
                 });

@@ -50,7 +50,7 @@ class RefreshDeckPricesSchedulerTest {
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
         verify(notificationPublisher)
-                .publish(FrontendNotificationType.SUCCESS, "A pakliárak frissítése sikeresen befejeződött.");
+                .publish(FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
     }
 
     @Test
@@ -71,7 +71,7 @@ class RefreshDeckPricesSchedulerTest {
         assertNull(event.getProcessedAt());
         assertEquals("Unable to refresh prices", event.getErrorMessage());
         verify(notificationPublisher)
-                .publish(FrontendNotificationType.ERROR, "A pakliárak frissítése sikertelen: Unable to refresh prices");
+                .publish(FrontendNotificationType.ERROR, "Failed to refresh deck prices: Unable to refresh prices");
         InOrder order = inOrder(eventRepository, cardPriceSaver);
         order.verify(eventRepository).save(event);
         order.verify(cardPriceSaver).updateCardPrice(cards);
