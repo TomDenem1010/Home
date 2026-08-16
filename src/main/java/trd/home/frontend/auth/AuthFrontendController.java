@@ -1,6 +1,10 @@
 package trd.home.frontend.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.auth.constant.UserRole;
+import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
 
 @Controller
@@ -56,8 +61,17 @@ public class AuthFrontendController {
     }
 
     @PostMapping("/update-roles")
-    public String updateRoles(@RequestParam String userId, @RequestParam(required = false) Set<UserRole> roles) {
-        authService.updateRoles(userId, roles == null ? Set.of() : roles);
+    public String updateRoles(
+            @RequestParam String userId,
+            @RequestParam(required = false) Set<UserRole> roles,
+            Authentication authentication,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        UserDto updatedUser = authService.updateRoles(userId, roles == null ? Set.of() : roles);
+        if (updatedUser.username().equals(authentication.getName())) {
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
+            return "redirect:/login";
+        }
         return "redirect:/auth/users";
     }
 
