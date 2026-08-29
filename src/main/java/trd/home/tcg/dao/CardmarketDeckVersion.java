@@ -14,6 +14,7 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
+import trd.home.tcg.exception.WrongCardQuantityException;
 
 @Entity
 @Table(name = "cardmarket_deck_version")
@@ -36,7 +37,7 @@ public class CardmarketDeckVersion extends AuditedEntity {
 
     public void addCard(CardmarketCard card, int quantity) {
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Card quantity must be positive.");
+            throw new WrongCardQuantityException("Card quantity must be positive.");
         }
 
         CardmarketDeckCard deckCard = new CardmarketDeckCard();

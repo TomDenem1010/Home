@@ -8,6 +8,7 @@ import tools.jackson.databind.ObjectMapper;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
+import trd.home.common.exception.UnableToSerializeNotificationException;
 import trd.home.common.repository.ApplicationEventRepository;
 
 @Service
@@ -34,7 +35,7 @@ public class FrontendNotificationPublisher {
                     new FrontendEvent(Objects.requireNonNullElse(username, "system"), type, message));
             eventRepository.save(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, serializedNotification));
         } catch (JacksonException exception) {
-            throw new IllegalStateException("Unable to serialize frontend notification", exception);
+            throw new UnableToSerializeNotificationException("Unable to serialize frontend notification", exception);
         }
     }
 }

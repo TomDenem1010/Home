@@ -97,7 +97,7 @@ class AuthFrontendControllerTest {
         HttpServletResponse response = mock(HttpServletResponse.class);
         HttpSession session = mock(HttpSession.class);
         when(authentication.getName()).thenReturn("alice");
-        when(request.getSession(false)).thenReturn(session, null);
+        when(request.getSession(false)).thenReturn(session, (HttpSession) null);
         when(authService.updateRoles("user-1", Set.of(UserRole.ADMIN, UserRole.TCG)))
                 .thenReturn(new UserDto("user-1", "alice", Set.of(UserRole.ADMIN, UserRole.TCG)));
 

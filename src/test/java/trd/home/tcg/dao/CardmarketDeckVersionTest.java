@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import trd.home.tcg.constant.DeckStatus;
+import trd.home.tcg.exception.WrongCardQuantityException;
 
 class CardmarketDeckVersionTest {
 
@@ -75,8 +76,8 @@ class CardmarketDeckVersionTest {
         CardmarketCard card = card("card-1");
 
         assertAll(
-                () -> assertThrows(IllegalArgumentException.class, () -> version.addCard(card, 0)),
-                () -> assertThrows(IllegalArgumentException.class, () -> version.addCard(card, -1)),
+                () -> assertThrows(WrongCardQuantityException.class, () -> version.addCard(card, 0)),
+                () -> assertThrows(WrongCardQuantityException.class, () -> version.addCard(card, -1)),
                 () -> assertEquals(0, version.getCards().size()));
     }
 

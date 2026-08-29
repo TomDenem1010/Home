@@ -74,6 +74,7 @@ class LogMethodCallAspectTest {
 
     private static class Example {
 
+        @SuppressWarnings("unused")
         void save(String username, @LogMasked String password) {}
     }
 }
