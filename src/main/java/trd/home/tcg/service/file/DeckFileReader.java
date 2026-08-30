@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
@@ -13,6 +14,7 @@ import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckVersion;
 import trd.home.tcg.exception.UnableToReadResourcesException;
 
+@Slf4j
 @AllArgsConstructor
 public class DeckFileReader extends ResourceFileReader {
 
@@ -50,6 +52,7 @@ public class DeckFileReader extends ResourceFileReader {
                     .filter(line -> !line.isBlank())
                     .forEach(line -> addCard(version, line));
         } catch (IOException exception) {
+            log.error("Failed to read cards from deck file '{}'", resource.getFilename(), exception);
             throw new UnableToReadResourcesException("Unable to read deck file: " + resource.getFilename(), exception);
         }
     }

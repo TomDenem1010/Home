@@ -2,6 +2,7 @@ package trd.home.common.logging;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import trd.home.common.dao.ApplicationLog;
 import trd.home.common.repository.ApplicationLogRepository;
 
+@Slf4j
 @Aspect
 @Component
 public class LogMethodCallAspect {
@@ -35,6 +37,7 @@ public class LogMethodCallAspect {
             applicationLogRepository.save(ApplicationLog.successful(method, input, output, durationMs));
             return output;
         } catch (Throwable throwable) {
+            log.error("Logged method call failed: {}", method, throwable);
             long durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt);
             applicationLogRepository.save(ApplicationLog.failed(method, input, throwable, durationMs));
             throw throwable;

@@ -3,12 +3,14 @@ package trd.home.frontend.event;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import trd.home.common.dto.FrontendEvent;
 
+@Slf4j
 @Service
 public class FrontendEventService {
 
@@ -31,6 +33,7 @@ public class FrontendEventService {
         try {
             emitter.send(SseEmitter.event().comment("connected"));
         } catch (IOException exception) {
+            log.error("Failed to establish frontend event stream for user '{}'", username, exception);
             remove(username, connection);
             emitter.completeWithError(exception);
         }
@@ -66,6 +69,7 @@ public class FrontendEventService {
             connection.emitter().send(SseEmitter.event().name("notification").data(event));
             return true;
         } catch (IOException | IllegalStateException exception) {
+            log.error("Failed to send frontend event to user '{}'", username, exception);
             remove(username, connection);
             connection.emitter().complete();
             return false;

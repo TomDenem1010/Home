@@ -2,10 +2,12 @@ package trd.home.tcg.service.playwright;
 
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import trd.home.tcg.exception.ThrottlerException;
 
+@Slf4j
 @Component
 public class CardmarketRequestThrottler {
 
@@ -29,6 +31,7 @@ public class CardmarketRequestThrottler {
         try {
             Thread.sleep(nextDelayMillis());
         } catch (InterruptedException exception) {
+            log.error("Interrupted while waiting before the next Cardmarket request", exception);
             Thread.currentThread().interrupt();
             throw new ThrottlerException("Interrupted while waiting before the next Cardmarket request", exception);
         }

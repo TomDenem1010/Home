@@ -2,11 +2,13 @@ package trd.home.tcg.dto;
 
 import java.net.URI;
 import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
 
+@Slf4j
 public record CardmarketCardDto(
         String id,
         String link,
@@ -56,7 +58,8 @@ public record CardmarketCardDto(
             if (keyValue.length == 2 && "language".equals(keyValue[0])) {
                 try {
                     return CardLanguage.findByCardmarketUrlPart(Integer.parseInt(keyValue[1]));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException exception) {
+                    log.error("Failed to parse Cardmarket language identifier '{}'", keyValue[1], exception);
                     return null;
                 }
             }

@@ -1,5 +1,6 @@
 package trd.home.tcg.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import trd.home.common.constant.EventStatus;
@@ -10,6 +11,7 @@ import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.service.playwright.CardmarketCardPriceSaver;
 
+@Slf4j
 @Component
 public class RefreshDeckPricesScheduler {
 
@@ -44,6 +46,7 @@ public class RefreshDeckPricesScheduler {
                         notificationType = FrontendNotificationType.SUCCESS;
                         notificationMessage = "Deck prices were refreshed successfully.";
                     } catch (RuntimeException exception) {
+                        log.error("Failed to refresh Cardmarket prices for active decks", exception);
                         event.markFailed(exception);
                         notificationType = FrontendNotificationType.ERROR;
                         notificationMessage = "Failed to refresh deck prices: " + exception.getMessage();

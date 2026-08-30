@@ -1,5 +1,6 @@
 package trd.home.tcg.scheduler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import trd.home.common.constant.EventStatus;
@@ -10,6 +11,7 @@ import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.service.CardmarketDeckSaver;
 import trd.home.tcg.service.file.DeckFileReader;
 
+@Slf4j
 @Component
 public class SaveDecksFromResourceScheduler {
 
@@ -44,6 +46,7 @@ public class SaveDecksFromResourceScheduler {
                         notificationType = FrontendNotificationType.SUCCESS;
                         notificationMessage = "Decks were saved successfully.";
                     } catch (RuntimeException exception) {
+                        log.error("Failed to save decks from configured resource files", exception);
                         event.markFailed(exception);
                         notificationType = FrontendNotificationType.ERROR;
                         notificationMessage = "Failed to save decks: " + exception.getMessage();

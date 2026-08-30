@@ -5,6 +5,7 @@ import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Response;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
 
+@Slf4j
 @Service
 @NoArgsConstructor
 public class CardmarketCaller {
@@ -32,9 +34,11 @@ public class CardmarketCaller {
             }
             return document;
         } catch (HtmlParseException | CardmarketRateLimitException exception) {
+            log.error("Cardmarket request failed for URL '{}'", url, exception);
             throw exception;
-        } catch (Exception e) {
-            throw new FailedToLaunchBrowser("Failed to launch browser", e);
+        } catch (Exception exception) {
+            log.error("Unexpected error while calling Cardmarket URL '{}'", url, exception);
+            throw new FailedToLaunchBrowser("Failed to launch browser", exception);
         }
     }
 
@@ -46,8 +50,9 @@ public class CardmarketCaller {
     private Document parseHtml(String html) {
         try {
             return Jsoup.parse(html);
-        } catch (Exception e) {
-            throw new HtmlParseException("Failed to parse HTML", e);
+        } catch (Exception exception) {
+            log.error("Failed to parse HTML returned by Cardmarket", exception);
+            throw new HtmlParseException("Failed to parse HTML", exception);
         }
     }
 }

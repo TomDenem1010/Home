@@ -3,12 +3,14 @@ package trd.home.tcg.validator;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.exception.UnableToReadResourcesException;
 import trd.home.tcg.exception.WrongCardLineException;
 
+@Slf4j
 public class ResourceDeckCardValidator implements ResourceValidator {
 
     @Override
@@ -22,6 +24,10 @@ public class ResourceDeckCardValidator implements ResourceValidator {
                 }
             });
         } catch (IOException exception) {
+            log.error(
+                    "Failed to read deck file '{}' while validating its card entries",
+                    resource.getFilename(),
+                    exception);
             throw new UnableToReadResourcesException("Unable to read deck file: " + resource.getFilename(), exception);
         }
     }

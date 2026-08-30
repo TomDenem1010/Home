@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.repository.ApplicationEventRepository;
 
+@Slf4j
 @Component
 public class StuckApplicationEventScheduler {
 
@@ -61,8 +63,9 @@ public class StuckApplicationEventScheduler {
                 return objectMapper
                         .readValue(event.getMessage(), FrontendEvent.class)
                         .username();
-            } catch (RuntimeException ignored) {
-                // Fall back to the audit owner for malformed frontend events.
+            } catch (RuntimeException exception) {
+                log.error(
+                        "Failed to determine the recipient of malformed frontend event '{}'", event.getId(), exception);
             }
         }
         return Objects.requireNonNullElse(event.getCreatedBy(), "system");

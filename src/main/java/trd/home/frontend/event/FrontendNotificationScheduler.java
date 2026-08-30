@@ -1,5 +1,6 @@
 package trd.home.frontend.event;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
@@ -9,6 +10,7 @@ import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.repository.ApplicationEventRepository;
 
+@Slf4j
 @Component
 public class FrontendNotificationScheduler {
 
@@ -33,6 +35,7 @@ public class FrontendNotificationScheduler {
             try {
                 frontendEvent = objectMapper.readValue(event.getMessage(), FrontendEvent.class);
             } catch (RuntimeException exception) {
+                log.error("Failed to deserialize frontend notification event '{}'", event.getId(), exception);
                 event.markFailed(exception);
                 eventRepository.save(event);
                 continue;
