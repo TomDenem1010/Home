@@ -54,5 +54,6 @@ public class RefreshDeckPricesScheduler {
                     eventRepository.save(event);
                     notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
                 });
+        log.info("Finished processing refresh deck prices event");
     }
 }

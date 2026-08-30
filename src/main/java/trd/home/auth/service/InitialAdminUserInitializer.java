@@ -2,6 +2,7 @@ package trd.home.auth.service;
 
 import java.util.Objects;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,6 +12,7 @@ import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 import trd.home.common.logging.LogMethodCall;
 
+@Slf4j
 @Component
 public class InitialAdminUserInitializer implements ApplicationRunner {
 
@@ -37,10 +39,12 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
             return;
         }
 
+        log.info("Creating initial admin user.");
         validateUsername(username);
         validatePassword(password);
 
         authService.save(username, password, Set.of(UserRole.ADMIN));
+        log.info("Initial admin user created successfully.");
     }
 
     private void validatePassword(String password) {

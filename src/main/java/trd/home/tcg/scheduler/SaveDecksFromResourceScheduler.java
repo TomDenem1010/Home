@@ -54,5 +54,6 @@ public class SaveDecksFromResourceScheduler {
                     eventRepository.save(event);
                     notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
                 });
+        log.info("Finished processing save decks from resource event");
     }
 }

@@ -55,6 +55,7 @@ public class StuckApplicationEventScheduler {
                 .collect(Collectors.groupingBy(this::recipientUsername))
                 .forEach((username, events) -> notificationPublisher.publish(
                         username, FrontendNotificationType.ERROR, stuckEventMessage(events)));
+        log.info("Published notifications for {} stuck events.", stuckEvents.size());
     }
 
     private String recipientUsername(ApplicationEvent event) {
