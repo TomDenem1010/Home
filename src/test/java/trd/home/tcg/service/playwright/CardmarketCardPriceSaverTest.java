@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +83,20 @@ class CardmarketCardPriceSaverTest {
         }
 
         verify(persister, never()).saveAll(anyList());
+    }
+
+    @Test
+    void doesNotThrottleBeforeTheFirstCard() {
+        CardmarketCardDto card = card("card-1");
+        when(gatherer.getCardmarketCardPrice(card.link(), browser)).thenReturn(new CardmarketCardPrice());
+
+        try (@SuppressWarnings("unused")
+                MockedConstruction<PlaywrightBrowserContext> ignored = browserContext()) {
+            saver.updateCardPrice(List.of(card));
+        }
+
+        verify(throttler, never()).waitBeforeNextRequest();
+        verify(gatherer, times(1)).getCardmarketCardPrice(card.link(), browser);
     }
 
     private MockedConstruction<PlaywrightBrowserContext> browserContext() {

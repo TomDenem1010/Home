@@ -163,7 +163,7 @@
 				<artifactId>pitest-maven</artifactId>
 				<version>1.25.9</version>
 				<configuration>
-					<mutationThreshold>80</mutationThreshold>
+					<mutationThreshold>95</mutationThreshold>
 
 					<targetClasses>
 						<param>trd.home.tcg.*</param>

@@ -3,12 +3,14 @@ package trd.home.tcg.scheduler;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -36,10 +38,17 @@ class SaveDecksFromResourceSchedulerTest {
     void processesOldestPendingEvent() {
         ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
         CardmarketDeck deck = new CardmarketDeck();
+        List<EventStatus> savedStatuses = new ArrayList<>();
         when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
                         EventType.SAVE_DECKS_FROM_RESOURCE, EventStatus.TO_DO))
                 .thenReturn(Optional.of(event));
         when(deckFileReader.read()).thenReturn(List.of(deck));
+        doAnswer(invocation -> {
+                    savedStatuses.add(event.getStatus());
+                    return event;
+                })
+                .when(eventRepository)
+                .save(event);
 
         scheduler.processNextEvent();
 
@@ -49,6 +58,7 @@ class SaveDecksFromResourceSchedulerTest {
         order.verify(eventRepository).save(event);
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
+        assertEquals(List.of(EventStatus.PROCESSING, EventStatus.DONE), savedStatuses);
         verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
     }
 

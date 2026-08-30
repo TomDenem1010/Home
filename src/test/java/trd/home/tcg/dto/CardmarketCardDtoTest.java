@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
@@ -27,6 +28,7 @@ class CardmarketCardDtoTest {
         assertAll(
                 () -> assertEquals("card-id", dto.id()),
                 () -> assertEquals(link, dto.link()),
+                () -> assertEquals(CardFoilType.FOIL, dto.foilType()),
                 () -> assertEquals(expectedCardGameType, dto.cardGameType()),
                 () -> assertEquals(expectedExpansion, dto.expansion()),
                 () -> assertEquals(expectedName, dto.name()),
@@ -43,6 +45,7 @@ class CardmarketCardDtoTest {
         CardmarketCard card = new CardmarketCard();
         card.setId("card-id");
         card.setLink(link);
+        card.setFoilType(CardFoilType.FOIL);
         return card;
     }
 

@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -37,10 +39,17 @@ class RefreshDeckPricesSchedulerTest {
     void processesOldestPendingEvent() {
         ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES);
         List<CardmarketCardDto> cards = List.of();
+        List<EventStatus> savedStatuses = new ArrayList<>();
         when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
                         EventType.REFRESH_DECK_PRICES, EventStatus.TO_DO))
                 .thenReturn(Optional.of(event));
         when(cardRepository.findAllInActiveDeckCurrentVersions()).thenReturn(cards);
+        doAnswer(invocation -> {
+                    savedStatuses.add(event.getStatus());
+                    return event;
+                })
+                .when(eventRepository)
+                .save(event);
 
         scheduler.processNextEvent();
 
@@ -50,6 +59,7 @@ class RefreshDeckPricesSchedulerTest {
         order.verify(eventRepository).save(event);
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
+        assertEquals(List.of(EventStatus.PROCESSING, EventStatus.DONE), savedStatuses);
         verify(notificationPublisher)
                 .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
     }

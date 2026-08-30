@@ -25,8 +25,8 @@ class CardmarketCardPriceGathererTest {
     void extractsEuroPricesFromCardmarketPage() {
         when(caller.callWithPlaywright("https://example.test/card", browser)).thenReturn(Jsoup.parse("""
                         <dl>
-                          <dt>From</dt><dd>1.234,56 €</dd>
-                          <dt>Price Trend</dt><dd>987,65 €</dd>
+                          <dt>From</dt><dd>1.234,56</dd>
+                          <dt>Price Trend</dt><dd>987,65</dd>
                         </dl>
                         """));
 
@@ -46,5 +46,17 @@ class CardmarketCardPriceGathererTest {
 
         assertEquals(BigDecimal.ZERO, price.getFromInEuro());
         assertEquals(BigDecimal.ZERO, price.getTrendInEuro());
+    }
+
+    @Test
+    void usesZeroWhenPriceLabelHasNoValue() {
+        when(caller.callWithPlaywright("https://example.test/card", browser))
+                .thenReturn(Jsoup.parse("<dl><dt>Price Trend</dt><dd>2,50</dd><dt>From</dt></dl>"));
+
+        CardmarketCardPrice price =
+                new CardmarketCardPriceGatherer(caller).getCardmarketCardPrice("https://example.test/card", browser);
+
+        assertEquals(BigDecimal.ZERO, price.getFromInEuro());
+        assertEquals(new BigDecimal("2.50"), price.getTrendInEuro());
     }
 }
