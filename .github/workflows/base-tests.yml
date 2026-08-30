@@ -15,7 +15,7 @@ permissions:
     contents: read
 
 jobs:
-    base-tests:
+    spotless:
         runs-on: ubuntu-latest
 
         steps:
@@ -26,9 +26,21 @@ jobs:
 
             -   name: Set up JDK 25
                 uses: ./.github/actions/setup-jdk-25
-                
+
             -   name: Check Java formatting
                 run: mvn -B spotless:check
+
+    mutation-tests:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v5
+                with:
+                    ref: ${{ inputs.branch || 'main' }}
+
+            -   name: Set up JDK 25
+                uses: ./.github/actions/setup-jdk-25
 
             -   name: Run mutation tests
                 run: mvn -B test-compile org.pitest:pitest-maven:mutationCoverage
