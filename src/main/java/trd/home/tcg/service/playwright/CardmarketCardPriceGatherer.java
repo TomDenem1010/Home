@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dao.CardmarketCardPrice;
 
 @Service
@@ -15,6 +16,7 @@ public class CardmarketCardPriceGatherer {
 
     private final CardmarketCaller cardmarketCaller;
 
+    @LogMethodCall
     public CardmarketCardPrice getCardmarketCardPrice(String link, Browser browser) {
         Document document = cardmarketCaller.callWithPlaywright(link, browser);
 

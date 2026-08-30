@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
@@ -18,6 +19,7 @@ import trd.home.tcg.exception.HtmlParseException;
 @NoArgsConstructor
 public class CardmarketCaller {
 
+    @LogMethodCall
     public Document callWithPlaywright(String url, Browser browser) {
         try {
             BrowserContext context = browser.contexts().get(0);

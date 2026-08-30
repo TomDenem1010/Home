@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
+import trd.home.common.logging.LogMethodCall;
 
 @Service
 public class DatabaseUserDetailsService implements UserDetailsService {
@@ -18,6 +19,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @LogMethodCall
     public UserDetails loadUserByUsername(String username) {
         var user = userRepository
                 .findByUsername(username)

@@ -4,6 +4,7 @@ import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.Playwright;
 import java.util.Objects;
 import lombok.Getter;
+import trd.home.common.logging.LogMethodCall;
 
 @Getter
 public class PlaywrightBrowserContext implements AutoCloseable {
@@ -17,6 +18,7 @@ public class PlaywrightBrowserContext implements AutoCloseable {
     }
 
     @Override
+    @LogMethodCall
     public void close() {
         if (Objects.nonNull(browser)) {
             browser.close();

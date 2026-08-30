@@ -17,6 +17,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.constant.DeckStatus;
 
 @Entity
@@ -43,12 +44,14 @@ public class CardmarketDeck extends AuditedEntity {
     @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CardmarketDeckVersion> versions = new ArrayList<>();
 
+    @LogMethodCall
     public void addVersion(CardmarketDeckVersion version) {
         versions.add(version);
         version.setDeck(this);
         currentVersion = version;
     }
 
+    @LogMethodCall
     public void delete(Instant deletedAt) {
         status = DeckStatus.DELETED;
         this.deletedAt = deletedAt;

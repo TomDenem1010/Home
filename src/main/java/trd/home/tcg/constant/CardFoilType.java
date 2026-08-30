@@ -1,6 +1,7 @@
 package trd.home.tcg.constant;
 
 import java.util.Objects;
+import trd.home.common.logging.LogMethodCall;
 
 public enum CardFoilType {
     ETCHED_FOIL,
@@ -13,10 +14,12 @@ public enum CardFoilType {
     SURGE_FOIL,
     TEXTURED_FOIL;
 
+    @LogMethodCall
     public static boolean isFoil(CardFoilType type) {
         return Objects.nonNull(type) && type != NO;
     }
 
+    @LogMethodCall
     public static CardFoilType fromString(String value) {
         for (CardFoilType type : CardFoilType.values()) {
             if (type.name().equalsIgnoreCase(value)) {

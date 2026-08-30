@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
+import trd.home.common.logging.LogMethodCall;
 
 @Component
 public class InitialAdminUserInitializer implements ApplicationRunner {
@@ -30,6 +31,7 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
     }
 
     @Override
+    @LogMethodCall
     public void run(ApplicationArguments args) {
         if (userRepository.existsByRole(UserRole.ADMIN)) {
             return;

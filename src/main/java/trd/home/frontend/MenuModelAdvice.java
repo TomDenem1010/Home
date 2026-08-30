@@ -4,11 +4,13 @@ import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import trd.home.common.logging.LogMethodCall;
 
 @ControllerAdvice
 public class MenuModelAdvice {
 
     @ModelAttribute("menuItems")
+    @LogMethodCall
     public List<MenuItem> menuItems(Authentication authentication) {
         boolean admin = hasRole(authentication, "ADMIN");
         boolean tcg = hasRole(authentication, "TCG");

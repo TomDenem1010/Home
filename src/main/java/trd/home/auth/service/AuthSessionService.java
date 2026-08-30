@@ -3,6 +3,7 @@ package trd.home.auth.service;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import trd.home.common.logging.LogMethodCall;
 
 @Service
 public class AuthSessionService {
@@ -13,6 +14,7 @@ public class AuthSessionService {
         this.sessionRegistry = sessionRegistry;
     }
 
+    @LogMethodCall
     public void expireSessions(String username) {
         sessionRegistry.getAllPrincipals().stream()
                 .filter(UserDetails.class::isInstance)

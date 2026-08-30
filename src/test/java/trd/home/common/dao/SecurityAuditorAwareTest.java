@@ -1,6 +1,7 @@
 package trd.home.common.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -9,6 +10,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import trd.home.common.logging.LogMethodCall;
 
 class SecurityAuditorAwareTest {
 
@@ -40,5 +42,13 @@ class SecurityAuditorAwareTest {
                         "key", "anonymousUser", List.of(new SimpleGrantedAuthority("ROLE_ANONYMOUS"))));
 
         assertEquals("system", auditorAware.getCurrentAuditor().orElseThrow());
+    }
+
+    @Test
+    void doesNotAuditAuditorResolutionToDatabase() throws NoSuchMethodException {
+        LogMethodCall annotation =
+                SecurityAuditorAware.class.getMethod("getCurrentAuditor").getAnnotation(LogMethodCall.class);
+
+        assertFalse(annotation.audit());
     }
 }

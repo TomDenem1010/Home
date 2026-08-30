@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dto.CardmarketCardDto;
 
 @Service
@@ -15,6 +16,7 @@ public class CardmarketCardPriceSaver {
     private final CardmarketRequestThrottler requestThrottler;
     private final CardmarketCardPricePersister pricePersister;
 
+    @LogMethodCall
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
         List<GatheredCardmarketPrice> gatheredPrices = new ArrayList<>();
         try (PlaywrightBrowserContext playwrightBrowserContext = new PlaywrightBrowserContext()) {

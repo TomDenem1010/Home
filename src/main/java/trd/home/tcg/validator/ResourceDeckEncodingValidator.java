@@ -7,6 +7,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.exception.UnableToReadResourcesException;
 import trd.home.tcg.exception.WrongDeckEncodingException;
@@ -15,6 +16,7 @@ import trd.home.tcg.exception.WrongDeckEncodingException;
 public class ResourceDeckEncodingValidator implements ResourceValidator {
 
     @Override
+    @LogMethodCall
     public void validateResource(Resource resource) {
         try {
             createUtf8Decoder().decode(ByteBuffer.wrap(resource.getInputStream().readAllBytes()));

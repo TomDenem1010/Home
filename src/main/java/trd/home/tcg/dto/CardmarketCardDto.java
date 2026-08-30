@@ -3,6 +3,7 @@ package trd.home.tcg.dto;
 import java.net.URI;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
@@ -18,6 +19,7 @@ public record CardmarketCardDto(
         String name,
         CardLanguage cardLanguage) {
 
+    @LogMethodCall
     public static CardmarketCardDto from(CardmarketCard card) {
         String link = card.getLink();
         if (Objects.isNull(link) || link.isBlank()) {

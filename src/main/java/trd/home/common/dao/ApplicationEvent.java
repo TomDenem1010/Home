@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
+import trd.home.common.logging.LogMethodCall;
 
 @Entity
 @Table(name = "APPLICATION_EVENT")
@@ -54,16 +55,19 @@ public class ApplicationEvent extends AuditedEntity {
         this.status = EventStatus.TO_DO;
     }
 
+    @LogMethodCall
     public void markProcessing() {
         status = EventStatus.PROCESSING;
     }
 
+    @LogMethodCall
     public void markDone() {
         status = EventStatus.DONE;
         processedAt = Instant.now();
         errorMessage = null;
     }
 
+    @LogMethodCall
     public void markFailed(Throwable throwable) {
         status = EventStatus.ERROR;
         String message = throwable.getMessage();

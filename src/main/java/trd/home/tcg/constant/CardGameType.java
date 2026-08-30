@@ -3,6 +3,7 @@ package trd.home.tcg.constant;
 import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import trd.home.common.logging.LogMethodCall;
 
 @Getter
 @AllArgsConstructor
@@ -12,6 +13,7 @@ public enum CardGameType {
 
     private final String cardmarketUrlPart;
 
+    @LogMethodCall
     public static CardGameType findByCardmarketUrlPart(String cardmarketUrlPart) {
         return Stream.of(CardGameType.values())
                 .filter(type -> type.cardmarketUrlPart.equals(cardmarketUrlPart))

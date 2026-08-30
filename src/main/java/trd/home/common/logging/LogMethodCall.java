@@ -7,4 +7,13 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LogMethodCall {}
+public @interface LogMethodCall {
+
+    boolean in() default true;
+
+    boolean out() default true;
+
+    boolean duration() default true;
+
+    boolean audit() default true;
+}

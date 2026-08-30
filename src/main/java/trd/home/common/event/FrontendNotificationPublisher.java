@@ -10,6 +10,7 @@ import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.exception.UnableToSerializeNotificationException;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationEventRepository;
 
 @Slf4j
@@ -27,10 +28,12 @@ public class FrontendNotificationPublisher {
         this.auditorAware = auditorAware;
     }
 
+    @LogMethodCall
     public void publish(FrontendNotificationType type, String message) {
         publish(auditorAware.getCurrentAuditor().orElse("system"), type, message);
     }
 
+    @LogMethodCall
     public void publish(String username, FrontendNotificationType type, String message) {
         try {
             String serializedNotification = objectMapper.writeValueAsString(

@@ -7,6 +7,7 @@ import org.springframework.security.authentication.event.LogoutSuccessEvent;
 import org.springframework.stereotype.Component;
 import trd.home.auth.constant.LoginType;
 import trd.home.common.dao.ApplicationLog;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationLogRepository;
 
 @Component
@@ -21,11 +22,13 @@ public class AuthenticationEventLogger {
     }
 
     @EventListener
+    @LogMethodCall
     public void logLoginSuccess(AuthenticationSuccessEvent event) {
         save(LoginType.LOGIN_SUCCESS, event.getAuthentication().getName());
     }
 
     @EventListener
+    @LogMethodCall
     public void logLoginFailure(AbstractAuthenticationFailureEvent event) {
         applicationLogRepository.save(ApplicationLog.failed(
                 LoginType.LOGIN_FAILURE.getPath(),
@@ -35,6 +38,7 @@ public class AuthenticationEventLogger {
     }
 
     @EventListener
+    @LogMethodCall
     public void logLogoutSuccess(LogoutSuccessEvent event) {
         save(LoginType.LOGOUT_SUCCESS, event.getAuthentication().getName());
     }

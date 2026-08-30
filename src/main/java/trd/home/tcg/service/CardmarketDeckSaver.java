@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.math.BigInteger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckVersion;
@@ -18,6 +19,7 @@ public class CardmarketDeckSaver {
     private final CardmarketCardRepository cardRepository;
 
     @Transactional
+    @LogMethodCall
     public void save(CardmarketDeck deck) {
         if (deckRepository.existsByName(deck.getName())) {
             deckRepository.findByName(deck.getName()).ifPresent(existingDeck -> {

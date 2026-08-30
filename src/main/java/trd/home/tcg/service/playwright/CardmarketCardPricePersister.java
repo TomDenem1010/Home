@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dao.CardmarketCardPrice;
 import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
@@ -16,6 +17,7 @@ public class CardmarketCardPricePersister {
     private final CardmarketCardPriceRepository priceRepository;
 
     @Transactional
+    @LogMethodCall
     public void saveAll(List<GatheredCardmarketPrice> gatheredPrices) {
         List<CardmarketCardPrice> prices = gatheredPrices.stream()
                 .map(gatheredPrice -> {

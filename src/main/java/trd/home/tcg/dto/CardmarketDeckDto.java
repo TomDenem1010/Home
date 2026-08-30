@@ -2,10 +2,12 @@ package trd.home.tcg.dto;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dao.CardmarketDeck;
 
 public record CardmarketDeckDto(String id, String name, Set<CardmarketDeckCardDto> cards) {
 
+    @LogMethodCall
     public static CardmarketDeckDto from(CardmarketDeck deck) {
         Set<CardmarketDeckCardDto> cards = deck.getCurrentVersion().getCards().stream()
                 .map(deckCard -> new CardmarketDeckCardDto(

@@ -10,6 +10,7 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import trd.home.common.logging.LogMethodCall;
 
 @Entity
 @Table(name = "APPLICATION_LOG")
@@ -47,10 +48,12 @@ public class ApplicationLog extends AuditedEntity {
         this.durationMs = durationMs;
     }
 
+    @LogMethodCall
     public static ApplicationLog successful(String method, String input, Object output, long durationMs) {
         return new ApplicationLog(method, input, Objects.isNull(output) ? null : output.toString(), null, durationMs);
     }
 
+    @LogMethodCall
     public static ApplicationLog failed(String method, String input, Throwable throwable, long durationMs) {
         return new ApplicationLog(method, input, null, throwable.toString(), durationMs);
     }

@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.exception.UnableToReadResourcesException;
@@ -14,6 +15,7 @@ import trd.home.tcg.exception.WrongCardLineException;
 public class ResourceDeckCardValidator implements ResourceValidator {
 
     @Override
+    @LogMethodCall
     public void validateResource(Resource resource) {
         try (var reader = resource.getInputStream()) {
             AtomicInteger lineNumber = new AtomicInteger();
