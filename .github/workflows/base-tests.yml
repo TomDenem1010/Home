@@ -1,4 +1,4 @@
-name: Mutation Tests
+name: Base Tests
 
 on:
     push:
@@ -15,7 +15,7 @@ permissions:
     contents: read
 
 jobs:
-    mutation-tests:
+    base-tests:
         runs-on: ubuntu-latest
 
         steps:
@@ -26,6 +26,9 @@ jobs:
 
             -   name: Set up JDK 25
                 uses: ./.github/actions/setup-jdk-25
+                
+            -   name: Check Java formatting
+                run: mvn -B spotless:check
 
             -   name: Run mutation tests
                 run: mvn -B test-compile org.pitest:pitest-maven:mutationCoverage
