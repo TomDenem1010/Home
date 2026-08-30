@@ -1,5 +1,6 @@
 package trd.home.tcg.service.playwright;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -57,7 +58,7 @@ class CardmarketCallerTest {
         when(context.pages()).thenReturn(List.of(page));
         when(page.content()).thenReturn("<html />");
 
-        caller.callWithPlaywright("https://example.test/card", browser);
+        assertDoesNotThrow(() -> caller.callWithPlaywright("https://example.test/card", browser));
 
         verify(page).navigate("https://example.test/card");
         verify(page).waitForLoadState();

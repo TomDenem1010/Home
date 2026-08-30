@@ -1,5 +1,6 @@
 package trd.home.tcg.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.inOrder;
@@ -26,7 +27,7 @@ class TcgServiceTest {
 
     @Test
     void createsSaveDecksFromResourceEvent() {
-        service.saveDecksFromResource();
+        assertDoesNotThrow(service::saveDecksFromResource);
 
         InOrder order = inOrder(eventRepository, notificationPublisher);
         order.verify(eventRepository).save(argThat(event -> event.getType() == EventType.SAVE_DECKS_FROM_RESOURCE));
@@ -35,7 +36,7 @@ class TcgServiceTest {
 
     @Test
     void createsRefreshDeckPricesEvent() {
-        service.refreshDeckPrices();
+        assertDoesNotThrow(service::refreshDeckPrices);
 
         InOrder order = inOrder(eventRepository, notificationPublisher);
         order.verify(eventRepository).save(argThat(event -> event.getType() == EventType.REFRESH_DECK_PRICES));

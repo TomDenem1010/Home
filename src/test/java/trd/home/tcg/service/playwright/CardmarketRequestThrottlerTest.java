@@ -1,5 +1,6 @@
 package trd.home.tcg.service.playwright;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,6 +58,13 @@ class CardmarketRequestThrottlerTest {
         assertTrue(IntStream.range(0, 100)
                 .mapToLong(ignored -> throttler.nextDelayMillis())
                 .allMatch(delay -> delay == 0 || delay == 1));
+    }
+
+    @Test
+    void completesWaitWhenRequestIsNotInterrupted() {
+        CardmarketRequestThrottler throttler = new CardmarketRequestThrottler(Duration.ZERO, Duration.ZERO);
+
+        assertDoesNotThrow(throttler::waitBeforeNextRequest);
     }
 
     @Test

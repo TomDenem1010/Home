@@ -1,5 +1,6 @@
 package trd.home.tcg.service.playwright;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -92,7 +93,7 @@ class CardmarketCardPriceSaverTest {
 
         try (@SuppressWarnings("unused")
                 MockedConstruction<PlaywrightBrowserContext> ignored = browserContext()) {
-            saver.updateCardPrice(List.of(card));
+            assertDoesNotThrow(() -> saver.updateCardPrice(List.of(card)));
         }
 
         verify(throttler, never()).waitBeforeNextRequest();

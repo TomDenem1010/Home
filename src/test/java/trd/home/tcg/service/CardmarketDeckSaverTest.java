@@ -1,5 +1,6 @@
 package trd.home.tcg.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +41,7 @@ class CardmarketDeckSaverTest {
         deck.setName("Kilo Apogee Mind");
         when(deckRepository.existsByName(deck.getName())).thenReturn(true);
 
-        saver.save(deck);
+        assertDoesNotThrow(() -> saver.save(deck));
 
         verify(deckRepository).existsByName("Kilo Apogee Mind");
         verify(deckRepository, never()).save(any());

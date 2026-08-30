@@ -1,5 +1,6 @@
 package trd.home.auth.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,7 +24,7 @@ class InitialAdminUserInitializerTest {
     void createsInitialAdminWhenNoAdminExists() {
         InitialAdminUserInitializer initializer = initializer("admin", "strong-password");
 
-        initializer.run(arguments);
+        assertDoesNotThrow(() -> initializer.run(arguments));
 
         verify(authService).save("admin", "strong-password", Set.of(UserRole.ADMIN));
     }
@@ -33,7 +34,7 @@ class InitialAdminUserInitializerTest {
         when(userRepository.existsByRole(UserRole.ADMIN)).thenReturn(true);
         InitialAdminUserInitializer initializer = initializer("admin", "strong-password");
 
-        initializer.run(arguments);
+        assertDoesNotThrow(() -> initializer.run(arguments));
 
         verify(authService, never()).save("admin", "strong-password", Set.of(UserRole.ADMIN));
     }
