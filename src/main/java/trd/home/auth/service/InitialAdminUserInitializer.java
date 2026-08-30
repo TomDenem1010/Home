@@ -2,7 +2,6 @@ package trd.home.auth.service;
 
 import java.util.Objects;
 import java.util.Set;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -11,7 +10,6 @@ import trd.home.auth.constant.UserRole;
 import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 
-@Slf4j
 @Component
 public class InitialAdminUserInitializer implements ApplicationRunner {
 
@@ -34,7 +32,6 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (userRepository.existsByRole(UserRole.ADMIN)) {
-            log.info("Initial admin user already exists");
             return;
         }
 
@@ -42,7 +39,6 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
         validatePassword(password);
 
         authService.save(username, password, Set.of(UserRole.ADMIN));
-        log.info("Initial admin user created: {}", username);
     }
 
     private void validatePassword(String password) {
