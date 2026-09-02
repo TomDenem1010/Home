@@ -15,7 +15,7 @@ permissions:
     contents: read
 
 jobs:
-    spotless:
+    spotless-check:
         runs-on: ubuntu-latest
 
         steps:
@@ -30,7 +30,79 @@ jobs:
             -   name: Check Java formatting
                 run: mvn -B spotless:check
 
-    mutation-tests:
+    dependency-check:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout repository
+                uses: actions/checkout@v5
+                with:
+                    ref: ${{ inputs.branch || 'main' }}
+
+            -   name: Set up JDK 25
+                uses: ./.github/actions/setup-jdk-25
+
+            -   name: Run OWASP dependency check
+                run: mvn -B dependency-check:check
+
+            -   name: Print OWASP dependency-check summary
+                if: always()
+                shell: pwsh
+                run: |
+                    $reportPath = 'target/dependency-check-report.json'
+
+                    if (-not (Test-Path -LiteralPath $reportPath)) {
+                        throw "OWASP dependency-check JSON report was not generated."
+                    }
+
+                    $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+                    $vulnerabilities = @(
+                        $report.dependencies |
+                            Where-Object vulnerabilities |
+                            ForEach-Object {
+                                $dependency = $_.fileName
+                                $_.vulnerabilities | ForEach-Object {
+                                    [PSCustomObject]@{
+                                        Dependency = $dependency
+                                        Name = $_.name
+                                        Severity = $_.severity
+                                        CVSS = if ($_.cvssv3.baseScore) { $_.cvssv3.baseScore } elseif ($_.cvssv2.score) { $_.cvssv2.score } else { 'N/A' }
+                                    }
+                                }
+                            }
+                    )
+
+                    $vulnerableDependencies = @($vulnerabilities.Dependency | Sort-Object -Unique).Count
+                    Write-Host "Vulnerable dependencies: $vulnerableDependencies"
+                    Write-Host "Total vulnerabilities: $($vulnerabilities.Count)"
+                    $vulnerabilities |
+                        Sort-Object -Property @{ Expression = 'CVSS'; Descending = $true }, Dependency, Name |
+                        Format-Table -AutoSize |
+                        Out-String |
+                        Write-Host
+
+                    @"
+                    ## OWASP dependency-check report
+
+                    | Metric | Value |
+                    | --- | ---: |
+                    | Vulnerable dependencies | $vulnerableDependencies |
+                    | Total vulnerabilities | $($vulnerabilities.Count) |
+
+                    "@ | Add-Content $env:GITHUB_STEP_SUMMARY
+
+                    if ($vulnerabilities.Count) {
+                        '| Dependency | Vulnerability | Severity | CVSS |' | Add-Content $env:GITHUB_STEP_SUMMARY
+                        '| --- | --- | --- | ---: |' | Add-Content $env:GITHUB_STEP_SUMMARY
+                        $vulnerabilities |
+                            Sort-Object -Property @{ Expression = 'CVSS'; Descending = $true }, Dependency, Name |
+                            ForEach-Object {
+                                "| $($_.Dependency) | $($_.Name) | $($_.Severity) | $($_.CVSS) |" |
+                                    Add-Content $env:GITHUB_STEP_SUMMARY
+                            }
+                    }
+
+    mutation-check:
         runs-on: ubuntu-latest
 
         steps:
