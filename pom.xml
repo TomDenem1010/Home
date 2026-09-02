@@ -98,13 +98,13 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>13.3.0</version>
+			<version>13.4.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-oracle</artifactId>
-			<version>13.3.0</version>
+			<version>13.4.0</version>
 		</dependency>
 
 		<dependency>
@@ -129,7 +129,7 @@
 		<dependency>
 			<groupId>org.jsoup</groupId>
 			<artifactId>jsoup</artifactId>
-			<version>1.23.1</version>
+			<version>1.23.2</version>
 		</dependency>
 	</dependencies>
 
@@ -149,7 +149,7 @@
 			<plugin>
 				<groupId>com.diffplug.spotless</groupId>
 				<artifactId>spotless-maven-plugin</artifactId>
-				<version>3.10.0</version>
+				<version>3.10.1</version>
 				<configuration>
 					<lineEndings>UNIX</lineEndings>
 					<java>
@@ -180,7 +180,7 @@
 			<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
-				<version>1.25.9</version>
+				<version>1.30.0</version>
 				<configuration>
 					<mutationThreshold>95</mutationThreshold>
 
