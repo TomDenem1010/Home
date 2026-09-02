@@ -53,11 +53,11 @@ jobs:
 
                     if (-not (Test-Path -LiteralPath $reportPath)) {
                         Write-Warning "OWASP dependency-check JSON report was not generated. See the previous step for the original error."
-                        @"
-                        ## OWASP dependency-check report
-
-                        The JSON report was not generated. See the **Run OWASP dependency check** step for the original error.
-                        "@ | Add-Content $env:GITHUB_STEP_SUMMARY
+                        @(
+                            '## OWASP dependency-check report'
+                            ''
+                            'The JSON report was not generated. See the **Run OWASP dependency check** step for the original error.'
+                        ) | Add-Content $env:GITHUB_STEP_SUMMARY
                         exit 0
                     }
 
