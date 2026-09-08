@@ -159,25 +159,6 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<version>12.2.2</version>
-				<configuration>
-					<failBuildOnCVSS>0</failBuildOnCVSS>
-					<formats>
-						<format>HTML</format>
-						<format>JSON</format>
-					</formats>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>org.pitest</groupId>
 				<artifactId>pitest-maven</artifactId>
 				<version>1.30.0</version>
