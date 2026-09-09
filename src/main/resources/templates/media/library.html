@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <script defer th:src="@{/js/media.js}"></script>
+    <div class="media-layout">
+        <div class="media-browser">
+            <section class="media-panel" aria-labelledby="media-selector-title">
+            <h2 id="media-selector-title" th:text="${mode == 'by-actor' ? 'Actors' : 'Folders'}">Actors</h2>
+            <div class="media-scroll" tabindex="0" role="region" aria-labelledby="media-selector-title">
+            <ul class="media-list" th:if="${mode == 'by-actor'}">
+                <li th:each="actor : ${actors}">
+                    <a th:href="@{/media/by-actor(actorId=${actor.id})}" th:text="${actor.name}"
+                       th:attr="aria-current=${actor.id == selectedId} ? 'true' : null">Actor</a>
+                </li>
+            </ul>
+            <p th:if="${mode == 'by-actor' and #lists.isEmpty(actors)}">No active actors.</p>
+            <ul class="media-list" th:if="${mode == 'by-folder'}">
+                <li th:each="folder : ${folders}">
+                    <a th:href="@{/media/by-folder(folderId=${folder.id})}"
+                       th:title="${folder.path}" th:attr="aria-current=${folder.id == selectedId} ? 'true' : null">
+                        <span th:text="${folder.type}">Folder</span>
+                        <small th:text="${folder.path}"></small>
+                    </a>
+                </li>
+            </ul>
+            <p th:if="${mode == 'by-folder' and #lists.isEmpty(folders)}">No active folders.</p>
+            </div>
+            </section>
+            <section class="media-panel" aria-labelledby="media-videos-title">
+            <h2 id="media-videos-title">Videos</h2>
+            <div class="media-scroll" tabindex="0" role="region" aria-labelledby="media-videos-title">
+            <p th:if="${#lists.isEmpty(videos)}">No videos to display. Select an actor or folder.</p>
+            <ul class="media-list">
+                <li th:each="video : ${videos}">
+                    <button type="button" class="media-video" th:attr="data-stream=@{/media/videos/{id}/stream(id=${video.id})},data-name=${video.name}">
+                    <span th:text="${video.name}">Video</span>
+                    <small><span th:each="actor, loop : ${video.actors}" th:text="${actor.name + (loop.last ? '' : ' & ')}"></span></small>
+                    <small th:text="${video.folder.path}"></small>
+                    </button>
+                </li>
+            </ul>
+            </div>
+            </section>
+        </div>
+        <div class="media-player">
+            <h2 id="media-playing">Video player</h2>
+            <video id="media-player" controls preload="metadata">Your browser does not support video playback.</video>
+            <p id="media-playback-status" role="status">Choose a video from the list.</p>
+        </div>
+    </div>
+</section>
+</body>
+</html>

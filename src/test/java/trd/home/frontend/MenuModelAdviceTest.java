@@ -76,7 +76,7 @@ class MenuModelAdviceTest {
     void createsExpectedMenuStructure() {
         var menus = advice.menuItems(authentication("ROLE_ADMIN"));
 
-        assertEquals(2, menus.size());
+        assertEquals(3, menus.size());
         assertEquals(
                 List.of("/auth/users", "/auth/create-user", "/auth/update-roles", "/auth/update-password"),
                 menu(menus, "Auth").submenuItems().stream()

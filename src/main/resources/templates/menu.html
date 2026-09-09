@@ -5,7 +5,8 @@
     <li th:each="menuItem : ${menuItems}" th:if="${menuItem.authorized}">
         <details class="menu-group" name="main-menu"
                  th:open="${(menuItem.label == 'TCG' and #strings.startsWith(activePath, '/tcg'))
-                           or (menuItem.label == 'Auth' and #strings.startsWith(activePath, '/auth'))}">
+                           or (menuItem.label == 'Auth' and #strings.startsWith(activePath, '/auth'))
+                           or (menuItem.label == 'MEDIA' and #strings.startsWith(activePath, '/media'))}">
             <summary class="main-menu-item">
                 <span th:text="${menuItem.label}">Menüpont</span>
                 <span class="menu-chevron" aria-hidden="true"></span>

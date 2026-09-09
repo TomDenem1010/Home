@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <form th:action="@{/media/import}" method="post" class="media-import">
+        <label for="media-path">Server folder path</label>
+        <input id="media-path" name="path" type="text" required placeholder="C:\Media">
+        <button type="submit">Import videos</button>
+        <p>Each import replaces the active library. Videos outside this path become inactive.</p>
+    </form>
+    <p th:if="${importMessage}" th:text="${importMessage}" role="status"></p>
+    <p th:if="${importError}" th:text="${importError}" role="alert"></p>
+</section>
+</body>
+</html>

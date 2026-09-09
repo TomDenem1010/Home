@@ -153,6 +153,14 @@ body {
 }
 
 .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    flex-shrink: 0;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 10;
     width: 240px;
     padding: 2rem 1rem;
     color: white;
@@ -575,6 +583,8 @@ th:not(:first-child) {
 
     .sidebar {
         width: 100%;
+        height: auto;
+        max-height: 50dvh;
     }
 
     main {

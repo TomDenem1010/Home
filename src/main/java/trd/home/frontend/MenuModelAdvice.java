@@ -14,6 +14,7 @@ public class MenuModelAdvice {
     public List<MenuItem> menuItems(Authentication authentication) {
         boolean admin = hasRole(authentication, "ADMIN");
         boolean tcg = hasRole(authentication, "TCG");
+        boolean media = hasRole(authentication, "MEDIA");
 
         return List.of(
                 new MenuItem(
@@ -39,7 +40,18 @@ public class MenuModelAdvice {
                                         "/tcg/refresh-deck-prices",
                                         SubmenuItem.Type.ACTION,
                                         tcg),
-                                new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg))));
+                                new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg))),
+                new MenuItem(
+                        "MEDIA",
+                        media,
+                        List.of(
+                                new SubmenuItem(
+                                        "Server folder path",
+                                        "/media/server-folder-path",
+                                        SubmenuItem.Type.PAGE,
+                                        media),
+                                new SubmenuItem("ByActor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
+                                new SubmenuItem("ByFolder", "/media/by-folder", SubmenuItem.Type.PAGE, media))));
     }
 
     private static boolean hasRole(Authentication authentication, String role) {

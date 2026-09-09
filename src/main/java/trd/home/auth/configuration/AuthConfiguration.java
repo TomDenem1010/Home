@@ -28,6 +28,8 @@ public class AuthConfiguration {
                         .permitAll()
                         .requestMatchers("/auth/**")
                         .hasAnyRole("ADMIN")
+                        .requestMatchers("/media", "/media/**")
+                        .hasRole("MEDIA")
                         .requestMatchers("/tcg/**")
                         .hasAnyRole("TCG")
                         .anyRequest()
