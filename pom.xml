@@ -166,7 +166,7 @@
 					<mutationThreshold>95</mutationThreshold>
 
 					<targetClasses>
-						<param>trd.home.tcg.*</param>
+						<param>trd.home.*</param>
 					</targetClasses>
 
 					<outputFormats>
