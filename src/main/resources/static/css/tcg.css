@@ -22,16 +22,4 @@
 .tcg-page th[aria-sort="descending"] .sort-button::after { content: "↓"; color: white; }
 .tcg-page .sort-button:hover, .tcg-page .sort-button:focus-visible { color: #d9e7ff; }
 
-.notification { --notification-accent: #2d6cdf; --notification-surface: #f4f7ff; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: .85rem; overflow: hidden; padding: 1rem 1rem 1.1rem; border: 1px solid #cbd9f4; border-left: 4px solid var(--notification-accent); border-radius: .85rem; background: rgb(255 255 255 / 96%); box-shadow: 0 .8rem 2.5rem rgb(23 32 51 / 16%); animation: notification-enter 260ms ease; pointer-events: auto; transition: opacity 200ms ease, transform 200ms ease; }
-.notification--success { --notification-accent: #168447; --notification-surface: #eaf8f0; }
-.notification--warning { --notification-accent: #c47b08; --notification-surface: #fff6df; }
-.notification--error { --notification-accent: #c43229; --notification-surface: #fff0ef; }
-.notification__icon { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; color: var(--notification-accent); font-weight: 800; background: var(--notification-surface); }
-.notification__content { display: grid; gap: .25rem; min-width: 0; }
-.notification__message { color: #5d6675; font-size: .86rem; overflow-wrap: anywhere; }
-.notification__close { width: 1.75rem; height: 1.75rem; padding: 0; border: 0; border-radius: 50%; color: #7a8495; font-size: 1.25rem; background: transparent; cursor: pointer; }
-.notification__progress { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--notification-accent); transform-origin: left; animation: notification-progress var(--notification-lifetime) linear forwards; }
-.notification--leaving { opacity: 0; transform: translateX(1.5rem) scale(.98); }
-@keyframes notification-enter { from { opacity: 0; transform: translateX(1.5rem) scale(.98); } }
-@keyframes notification-progress { to { transform: scaleX(0); } }
 @media (max-width: 640px) { .tcg-page .price-summary-row { grid-template-columns: 1fr; } }

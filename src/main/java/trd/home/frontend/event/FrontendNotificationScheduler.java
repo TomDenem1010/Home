@@ -44,16 +44,18 @@ public class FrontendNotificationScheduler {
                 continue;
             }
 
-            deliver(event, frontendEvent);
-            return;
+            if (deliver(event, frontendEvent)) {
+                return;
+            }
         }
     }
 
-    private void deliver(ApplicationEvent event, FrontendEvent frontendEvent) {
-        event.markProcessing();
-        eventRepository.save(event);
-        frontendEventService.sendToUser(frontendEvent.username(), frontendEvent);
+    private boolean deliver(ApplicationEvent event, FrontendEvent frontendEvent) {
+        if (!frontendEventService.sendToUser(frontendEvent.username(), frontendEvent)) {
+            return false;
+        }
         event.markDone();
         eventRepository.save(event);
+        return true;
     }
 }

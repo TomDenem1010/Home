@@ -34,12 +34,12 @@ class FrontendNotificationSchedulerTest {
         ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
         pendingEvent(event);
         when(frontendEventService.hasConnection("alice")).thenReturn(true);
+        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(true);
 
         scheduler.processNextEvent();
 
         ArgumentCaptor<FrontendEvent> frontendEventCaptor = ArgumentCaptor.forClass(FrontendEvent.class);
         InOrder order = inOrder(eventRepository, frontendEventService);
-        order.verify(eventRepository).save(event);
         order.verify(frontendEventService).sendToUser(eq("alice"), frontendEventCaptor.capture());
         order.verify(eventRepository).save(event);
         FrontendEvent frontendEvent = frontendEventCaptor.getValue();
@@ -48,6 +48,19 @@ class FrontendNotificationSchedulerTest {
         assertEquals("Done", frontendEvent.message());
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
+    }
+
+    @Test
+    void keepsNotificationPendingWhenRecipientDisconnectsBeforeSending() {
+        ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
+        pendingEvent(event);
+        when(frontendEventService.hasConnection("alice")).thenReturn(true);
+        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(false);
+
+        scheduler.processNextEvent();
+
+        assertEquals(EventStatus.TO_DO, event.getStatus());
+        verify(eventRepository, never()).save(event);
     }
 
     @Test

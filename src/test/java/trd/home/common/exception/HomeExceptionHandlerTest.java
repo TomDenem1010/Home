@@ -25,6 +25,11 @@ class HomeExceptionHandlerTest {
         assertEquals("An unexpected error occurred", response.getBody().get("message"));
     }
 
+    @Test
+    void ignoresDisconnectedAsyncClient() {
+        handler.handleDisconnectedClient();
+    }
+
     private static class TestHomeException extends HomeException {
 
         private TestHomeException(String message) {

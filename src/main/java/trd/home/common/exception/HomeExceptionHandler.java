@@ -6,12 +6,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import trd.home.common.logging.LogMethodCall;
 
 @RestControllerAdvice
 public class HomeExceptionHandler {
 
     private static final String UNEXPECTED_ERROR_MESSAGE = "An unexpected error occurred";
+
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleDisconnectedClient() {
+        // The SSE response is already unusable, so no error body can or should be written.
+    }
 
     @ExceptionHandler(HomeException.class)
     @LogMethodCall

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -48,13 +49,19 @@ public class FrontendEventService {
         return connections != null && !connections.isEmpty();
     }
 
+    @Scheduled(fixedDelayString = "${frontend.sse.heartbeat.delay:15s}")
+    public void sendHeartbeats() {
+        connectionsByUsername.forEach(
+                (username, connections) -> connections.forEach(connection -> sendHeartbeat(username, connection)));
+    }
+
     @LogMethodCall
-    public void sendToUser(String username, FrontendEvent event) {
+    public boolean sendToUser(String username, FrontendEvent event) {
         Set<Connection> connections = connectionsByUsername.get(username);
         if (connections == null || connections.isEmpty()) {
-            return;
+            return false;
         }
-        connections.stream().anyMatch(connection -> send(username, connection, event));
+        return connections.stream().anyMatch(connection -> send(username, connection, event));
     }
 
     @EventListener
@@ -74,10 +81,18 @@ public class FrontendEventService {
             connection.emitter().send(SseEmitter.event().name("notification").data(event));
             return true;
         } catch (IOException | IllegalStateException exception) {
-            log.error("Failed to send frontend event to user '{}'", username, exception);
+            log.debug("Removing disconnected frontend event stream for user '{}'", username, exception);
             remove(username, connection);
-            connection.emitter().complete();
             return false;
+        }
+    }
+
+    private void sendHeartbeat(String username, Connection connection) {
+        try {
+            connection.emitter().send(SseEmitter.event().comment("heartbeat"));
+        } catch (IOException | IllegalStateException exception) {
+            log.debug("Removing disconnected frontend event stream for user '{}'", username);
+            remove(username, connection);
         }
     }
 

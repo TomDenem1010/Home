@@ -6,6 +6,7 @@
     <title th:text="${pageTitle} + ' | Home'">Home</title>
     <link rel="stylesheet" th:href="@{/css/home.css}" href="/css/home.css">
     <link rel="stylesheet" th:if="${featureStylesheet != null}" th:href="@{${featureStylesheet}}">
+    <script defer th:src="@{/js/frontend-events.js}" src="/js/frontend-events.js"></script>
     <script defer th:if="${featureScript != null}" th:src="@{${featureScript}}"></script>
 </head>
 <body>
