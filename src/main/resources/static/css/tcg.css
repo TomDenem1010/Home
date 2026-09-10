@@ -1,0 +1,37 @@
+.tcg-page .table-container { overflow-x: auto; }
+.tcg-page table { width: 100%; max-width: 900px; border-collapse: collapse; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 8%); }
+.tcg-page.deck-history { max-width: 1200px; margin-top: 2rem; }
+.tcg-page .price-summary-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.tcg-page .price-card { padding: 1.1rem 1.25rem; border: 1px solid #dce3ed; border-top: 4px solid #2d6cdf; border-radius: .75rem; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 7%); }
+.tcg-page .price-card span { display: block; margin-bottom: .35rem; color: #667085; font-size: .82rem; }
+.tcg-page .price-card strong { font-size: 1.35rem; }
+.tcg-page .back-link, .tcg-page .card-link { color: #2d6cdf; font-weight: 650; text-decoration: none; }
+.tcg-page .back-link:hover, .tcg-page .card-link:hover, .tcg-page .card-link:focus-visible { text-decoration: underline; }
+.tcg-page .history-table-container { border-radius: .75rem; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 8%); }
+.tcg-page .history-table { max-width: none; box-shadow: none; }
+.tcg-page .history-table .card-name { min-width: 14rem; font-weight: 650; }
+.tcg-page .history-table .quantity { width: 4rem; text-align: center; }
+.tcg-page .price-date { display: block; margin-top: .5rem; color: #7a8495; font-size: .72rem; white-space: nowrap; }
+.tcg-page th, .tcg-page td { padding: .85rem 1rem; border-bottom: 1px solid #e2e7ef; text-align: left; }
+.tcg-page th { color: white; background: #25324a; }
+.tcg-page td:not(:first-child), .tcg-page th:not(:first-child) { text-align: right; }
+.tcg-page .sort-button { display: inline-flex; align-items: center; justify-content: inherit; gap: .45rem; width: 100%; padding: 0; border: 0; color: inherit; font: inherit; font-weight: 700; text-align: inherit; background: transparent; cursor: pointer; }
+.tcg-page th:not(:first-child) .sort-button { justify-content: flex-end; }
+.tcg-page .sort-button::after { content: "↕"; color: #aebbd0; font-size: .85rem; }
+.tcg-page th[aria-sort="ascending"] .sort-button::after { content: "↑"; color: white; }
+.tcg-page th[aria-sort="descending"] .sort-button::after { content: "↓"; color: white; }
+.tcg-page .sort-button:hover, .tcg-page .sort-button:focus-visible { color: #d9e7ff; }
+
+.notification { --notification-accent: #2d6cdf; --notification-surface: #f4f7ff; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: .85rem; overflow: hidden; padding: 1rem 1rem 1.1rem; border: 1px solid #cbd9f4; border-left: 4px solid var(--notification-accent); border-radius: .85rem; background: rgb(255 255 255 / 96%); box-shadow: 0 .8rem 2.5rem rgb(23 32 51 / 16%); animation: notification-enter 260ms ease; pointer-events: auto; transition: opacity 200ms ease, transform 200ms ease; }
+.notification--success { --notification-accent: #168447; --notification-surface: #eaf8f0; }
+.notification--warning { --notification-accent: #c47b08; --notification-surface: #fff6df; }
+.notification--error { --notification-accent: #c43229; --notification-surface: #fff0ef; }
+.notification__icon { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; color: var(--notification-accent); font-weight: 800; background: var(--notification-surface); }
+.notification__content { display: grid; gap: .25rem; min-width: 0; }
+.notification__message { color: #5d6675; font-size: .86rem; overflow-wrap: anywhere; }
+.notification__close { width: 1.75rem; height: 1.75rem; padding: 0; border: 0; border-radius: 50%; color: #7a8495; font-size: 1.25rem; background: transparent; cursor: pointer; }
+.notification__progress { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--notification-accent); transform-origin: left; animation: notification-progress var(--notification-lifetime) linear forwards; }
+.notification--leaving { opacity: 0; transform: translateX(1.5rem) scale(.98); }
+@keyframes notification-enter { from { opacity: 0; transform: translateX(1.5rem) scale(.98); } }
+@keyframes notification-progress { to { transform: scaleX(0); } }
+@media (max-width: 640px) { .tcg-page .price-summary-row { grid-template-columns: 1fr; } }

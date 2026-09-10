@@ -37,6 +37,8 @@ class AuthFrontendControllerTest {
         assertEquals(users, model.getAttribute("users"));
         assertEquals("/auth/users", model.getAttribute("activePath"));
         assertEquals("auth/users", model.getAttribute("contentTemplate"));
+        assertEquals("/css/admin.css", model.getAttribute("featureStylesheet"));
+        assertEquals("/js/admin.js", model.getAttribute("featureScript"));
     }
 
     @Test

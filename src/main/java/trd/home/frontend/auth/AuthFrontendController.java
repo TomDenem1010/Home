@@ -107,6 +107,8 @@ public class AuthFrontendController {
         model.addAttribute("pageTitle", title);
         model.addAttribute("pageContent", content);
         model.addAttribute("contentTemplate", contentTemplate);
+        model.addAttribute("featureStylesheet", "/css/admin.css");
+        model.addAttribute("featureScript", "/js/admin.js");
         return "index";
     }
 }

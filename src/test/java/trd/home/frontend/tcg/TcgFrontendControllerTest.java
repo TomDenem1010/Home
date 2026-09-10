@@ -24,6 +24,8 @@ class TcgFrontendControllerTest {
 
         assertEquals("index", controller.tcg(model));
         assertEquals("/tcg", model.getAttribute("activePath"));
+        assertEquals("/css/tcg.css", model.getAttribute("featureStylesheet"));
+        assertEquals("/js/tcg.js", model.getAttribute("featureScript"));
     }
 
     @Test

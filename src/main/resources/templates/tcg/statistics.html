@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
-<section th:fragment="content"
+<section class="tcg-page" th:fragment="content"
          aria-labelledby="deck-price-summary-title">
     <h2 id="deck-price-summary-title">Deck prices</h2>
     <div class="table-container" th:if="${!deckPriceSummaries.empty}">

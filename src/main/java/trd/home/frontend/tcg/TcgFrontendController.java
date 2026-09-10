@@ -59,6 +59,8 @@ public class TcgFrontendController {
         model.addAttribute("activePath", activePath);
         model.addAttribute("pageTitle", title);
         model.addAttribute("pageContent", content);
+        model.addAttribute("featureStylesheet", "/css/tcg.css");
+        model.addAttribute("featureScript", "/js/tcg.js");
         return "index";
     }
 }

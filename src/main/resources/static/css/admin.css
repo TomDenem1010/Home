@@ -1,0 +1,13 @@
+.admin-page.table-container { overflow-x: auto; }
+.admin-page table { width: 100%; max-width: 900px; border-collapse: collapse; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 8%); }
+.admin-page th, .admin-page td { padding: .85rem 1rem; border-bottom: 1px solid #e2e7ef; text-align: left; }
+.admin-page th { color: white; background: #25324a; }
+.admin-page.form-card { max-width: 36rem; margin-top: 2rem; padding: 1.5rem; border: 1px solid #dce3ed; border-radius: .75rem; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 7%); }
+.admin-page.form-card form, .admin-page.form-card label { display: grid; gap: .45rem; }
+.admin-page.form-card form { gap: 1rem; }
+.admin-page.form-card input, .admin-page.form-card select { min-width: 0; padding: .7rem .8rem; border: 1px solid #b8c2d1; border-radius: .45rem; font: inherit; }
+.admin-page.form-card select { background: white; }
+.admin-page.form-card fieldset { border: 1px solid #dce3ed; border-radius: .45rem; }
+.admin-page .role-options { display: flex; flex-wrap: wrap; gap: 1rem; }
+.admin-page .role-option { display: flex; grid-template-columns: auto 1fr; align-items: center; }
+.admin-page .primary-button { padding: .75rem 1rem; border: 0; border-radius: .45rem; color: white; font: inherit; font-weight: 700; background: #2d6cdf; cursor: pointer; }
