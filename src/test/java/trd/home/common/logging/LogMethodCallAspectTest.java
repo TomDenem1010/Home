@@ -15,6 +15,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import trd.home.common.dao.ApplicationLog;
 import trd.home.common.repository.ApplicationLogRepository;
 
@@ -151,6 +153,23 @@ class LogMethodCallAspectTest {
         assertSame(output, aspect.logMethodCall(joinPoint, annotation(method)));
         assertTrue(message(1).contains("[[1, 2], [a, b]]"));
         assertTrue(savedLog().getOutput().startsWith("[Ljava.lang.Object;@"));
+    }
+
+    @Test
+    void calculatesElapsedMillisecondsFromNanosecondDifference() throws Exception {
+        Method method = Example.class.getDeclaredMethod("find", List.class);
+        Class<?> contextType = java.util.Arrays.stream(LogMethodCallAspect.class.getDeclaredClasses())
+                .filter(type -> type.getSimpleName().equals("MethodCallContext"))
+                .findFirst()
+                .orElseThrow();
+        var constructor = contextType.getDeclaredConstructors()[0];
+        constructor.setAccessible(true);
+        Object context = constructor.newInstance(
+                "method", null, System.nanoTime() - TimeUnit.SECONDS.toNanos(2), annotation(method));
+
+        Long elapsed = ReflectionTestUtils.invokeMethod(aspect, "elapsedMilliseconds", context);
+
+        assertTrue(elapsed >= 1_500 && elapsed < 3_000, "Unexpected elapsed time: " + elapsed);
     }
 
     private void prepare(Method method, Object[] arguments, Object output) throws Throwable {

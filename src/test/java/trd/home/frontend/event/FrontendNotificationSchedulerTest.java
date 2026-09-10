@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.json.JsonMapper;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
@@ -104,6 +105,19 @@ class FrontendNotificationSchedulerTest {
         verify(eventRepository).save(delivered);
         verify(frontendEventService).sendToUser(eq("alice"), any());
         verify(frontendEventService).sendToUser(eq("bob"), any());
+    }
+
+    @Test
+    void deliverReturnsTrueAfterPersistingSuccessfulNotification() {
+        ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
+        FrontendEvent frontendEvent = new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done");
+        when(frontendEventService.sendToUser("alice", frontendEvent)).thenReturn(true);
+
+        Boolean delivered = ReflectionTestUtils.invokeMethod(scheduler, "deliver", event, frontendEvent);
+
+        assertEquals(Boolean.TRUE, delivered);
+        assertEquals(EventStatus.DONE, event.getStatus());
+        verify(eventRepository).save(event);
     }
 
     private ApplicationEvent frontendEvent(String username, String type, String message) {

@@ -247,6 +247,24 @@ class AuthServiceTest {
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void rejectsInvalidUsernameBeforeSaving(String username) {
+        assertThrows(
+                InvalidCredentialException.class,
+                () -> authService.save(username, "plain-password", Set.of(UserRole.TCG)));
+        verifyNoInteractions(passwordEncoder, userRepository, userSessionService);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void rejectsInvalidPasswordBeforeSaving(String password) {
+        assertThrows(InvalidCredentialException.class, () -> authService.save("alice", password, Set.of(UserRole.TCG)));
+        verifyNoInteractions(passwordEncoder, userRepository, userSessionService);
+    }
+
     private static User user(String username, String password, Set<UserRole> roles) {
         User user = new User();
         user.setUsername(username);

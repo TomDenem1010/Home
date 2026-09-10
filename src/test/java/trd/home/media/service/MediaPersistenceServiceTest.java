@@ -81,6 +81,7 @@ class MediaPersistenceServiceTest {
         actor.setName("Alice");
         actor.setStatus(MediaStatus.INACTIVE);
         Video video = new Video();
+        video.setStatus(MediaStatus.INACTIVE);
         when(folders.findByPath(anyString())).thenReturn(Optional.of(folder));
         when(actors.findByName("Alice")).thenReturn(Optional.of(actor));
         when(videos.findByFolderIdAndNameAndActorKey(eq("folder-1"), eq("Film"), anyString()))

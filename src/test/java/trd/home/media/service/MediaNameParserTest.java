@@ -4,9 +4,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 import org.junit.jupiter.api.Test;
+import trd.home.media.dto.ParsedVideoName;
 
 class MediaNameParserTest {
     private final MediaNameParser parser = new MediaNameParser();
+
+    @Test
+    void parsesValidExtensionlessHiddenVideoNameWhoseFirstCharacterIsADot() {
+        ParsedVideoName result = parser.parse(".Actor - Film");
+
+        assertEquals("Film", result.name());
+        assertEquals(Set.of(".Actor"), result.actors());
+    }
 
     @Test
     void parsesActorsAndPreservesSpacesAndTitleSeparators() {
