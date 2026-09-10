@@ -56,7 +56,7 @@ class MediaQueryServiceTest {
         assertThrows(MediaVideoNotFoundException.class, () -> service.videoPath("missing"));
         Folder folder = folder("folder-1", "media", "media");
         Video video = video("video-1", "Film", folder);
-        video.setFileName("..\\outside.mp4");
+        video.setFileName(java.nio.file.Path.of("..", "outside.mp4").toString());
         when(videos.findByIdAndStatus("video-1", MediaStatus.ACTIVE)).thenReturn(Optional.of(video));
 
         assertThrows(MediaVideoNotFoundException.class, () -> service.videoPath("video-1"));
