@@ -38,4 +38,31 @@ class MediaNameParserTest {
                 MediaPersistenceService.actorKey(Set.of("AB", "C")),
                 MediaPersistenceService.actorKey(Set.of("A", "BC")));
     }
+
+    @Test
+    void acceptsFilenameWithoutExtensionAndStripsWhitespace() {
+        var result = parser.parse("  Alice  & Bob -   Film  ");
+
+        assertEquals("Film", result.name());
+        assertEquals(Set.of("Alice", "Bob"), result.actors());
+    }
+
+    @Test
+    void rejectsOverlongTitleAndActor() {
+        String overlong = "x".repeat(256);
+
+        assertThrows(
+                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse("Alice - " + overlong));
+        assertThrows(
+                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse(overlong + " - Film"));
+    }
+
+    @Test
+    void acceptsBoundaryLengthTitleActorAndOneCharacterActor() {
+        String boundary = "x".repeat(255);
+
+        assertEquals("Title", parser.parse("A - Title").name());
+        assertEquals(boundary, parser.parse("Alice - " + boundary).name());
+        assertEquals(Set.of(boundary), parser.parse(boundary + " - Film").actors());
+    }
 }

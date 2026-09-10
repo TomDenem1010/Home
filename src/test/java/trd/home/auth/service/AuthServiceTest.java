@@ -172,6 +172,22 @@ class AuthServiceTest {
         verifyNoInteractions(passwordEncoder, userRepository);
     }
 
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void rejectsInvalidUserIdBeforeRoleUpdate(String userId) {
+        assertThrows(InvalidCredentialException.class, () -> authService.updateRoles(userId, Set.of(UserRole.TCG)));
+        verifyNoInteractions(passwordEncoder, userRepository, userSessionService);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", " "})
+    void rejectsInvalidUserIdBeforePasswordUpdate(String userId) {
+        assertThrows(InvalidCredentialException.class, () -> authService.updatePassword(userId, "new-password"));
+        verifyNoInteractions(passwordEncoder, userRepository, userSessionService);
+    }
+
     @Test
     void hashesAndUpdatesPasswordByUserId() {
         User user = user("alice", "old-hash", Set.of(UserRole.TCG));

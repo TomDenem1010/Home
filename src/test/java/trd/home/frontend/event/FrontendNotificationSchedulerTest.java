@@ -86,6 +86,26 @@ class FrontendNotificationSchedulerTest {
         assertNotNull(event.getErrorMessage());
     }
 
+    @Test
+    void continuesAfterFailedDeliveryAndStopsAfterSuccessfulDelivery() {
+        ApplicationEvent disconnected = frontendEvent("alice", "SUCCESS", "First");
+        ApplicationEvent delivered = frontendEvent("bob", "SUCCESS", "Second");
+        when(eventRepository.findTop100ByTypeAndStatusOrderByCreatedAtAsc(
+                        EventType.FRONTEND_NOTIFICATION, EventStatus.TO_DO))
+                .thenReturn(List.of(disconnected, delivered));
+        when(frontendEventService.hasConnection(any())).thenReturn(true);
+        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(false);
+        when(frontendEventService.sendToUser(eq("bob"), any())).thenReturn(true);
+
+        scheduler.processNextEvent();
+
+        assertEquals(EventStatus.TO_DO, disconnected.getStatus());
+        assertEquals(EventStatus.DONE, delivered.getStatus());
+        verify(eventRepository).save(delivered);
+        verify(frontendEventService).sendToUser(eq("alice"), any());
+        verify(frontendEventService).sendToUser(eq("bob"), any());
+    }
+
     private ApplicationEvent frontendEvent(String username, String type, String message) {
         return new ApplicationEvent(
                 EventType.FRONTEND_NOTIFICATION,

@@ -1,6 +1,7 @@
 package trd.home.common.logging;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import ch.qos.logback.core.read.ListAppender;
 import java.lang.reflect.Method;
 import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,6 +127,30 @@ class LogMethodCallAspectTest {
                 appender.list.get(1).getThrowableProxy().getClassName());
         assertEquals("failed", appender.list.get(1).getThrowableProxy().getMessage());
         assertEquals("java.lang.IllegalStateException: failed", savedLog().getError());
+    }
+
+    @Test
+    void preservesArgumentsWhenSignatureIsNotAMethodSignature() throws Throwable {
+        Method method = Example.class.getDeclaredMethod("withoutAudit");
+        Signature plainSignature = mock(Signature.class);
+        when(plainSignature.toLongString()).thenReturn("plain signature");
+        when(joinPoint.getSignature()).thenReturn(plainSignature);
+        when(joinPoint.getArgs()).thenReturn(new Object[] {"value"});
+        when(joinPoint.proceed()).thenReturn("result");
+
+        assertEquals("result", aspect.logMethodCall(joinPoint, annotation(method)));
+        assertEquals("Calling plain signature with input [value]", message(0));
+    }
+
+    @Test
+    void formatsPrimitiveAndNestedArrayOutputs() throws Throwable {
+        Method method = Example.class.getDeclaredMethod("find", List.class);
+        Object[] output = {new int[] {1, 2}, new String[] {"a", "b"}};
+        prepare(method, new Object[] {List.of()}, output);
+
+        assertSame(output, aspect.logMethodCall(joinPoint, annotation(method)));
+        assertTrue(message(1).contains("[[1, 2], [a, b]]"));
+        assertTrue(savedLog().getOutput().startsWith("[Ljava.lang.Object;@"));
     }
 
     private void prepare(Method method, Object[] arguments, Object output) throws Throwable {

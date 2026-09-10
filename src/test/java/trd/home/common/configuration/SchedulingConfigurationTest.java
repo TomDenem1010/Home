@@ -17,6 +17,10 @@ class SchedulingConfigurationTest {
 
             assertEquals(4, taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
             assertTrue(taskScheduler.getThreadNamePrefix().startsWith("scheduler-"));
+            assertEquals(
+                    true,
+                    org.springframework.test.util.ReflectionTestUtils.getField(
+                            taskScheduler, "waitForTasksToCompleteOnShutdown"));
         } finally {
             taskScheduler.shutdown();
         }
