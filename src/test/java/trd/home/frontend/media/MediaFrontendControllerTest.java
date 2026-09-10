@@ -2,11 +2,11 @@ package trd.home.frontend.media;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.FileSystemResource;
@@ -23,6 +23,15 @@ class MediaFrontendControllerTest {
 
     @TempDir
     Path directory;
+
+    @Test
+    void requestsMediaImportAndRedirectsImmediately() throws Exception {
+        mvc.perform(post("/media/import").param("path", "C:\\Media"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/media/server-folder-path"));
+
+        verify(service).importPath("C:\\Media");
+    }
 
     @Test
     void streamsRequestedByteRange() throws Exception {
@@ -42,15 +51,5 @@ class MediaFrontendControllerTest {
         mvc.perform(get("/media/videos/missing/stream"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Video is unavailable."));
-    }
-
-    @Test
-    void actorApiStillReturnsJson() throws Exception {
-        when(service.activeActors()).thenReturn(List.of());
-
-        mvc.perform(get("/media/api/actors"))
-                .andExpect(status().isOk())
-                .andExpect(content().json("[]"));
-        verify(service).activeActors();
     }
 }

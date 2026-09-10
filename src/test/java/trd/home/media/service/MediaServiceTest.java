@@ -7,14 +7,32 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.InOrder;
+import trd.home.common.constant.EventType;
+import trd.home.common.event.FrontendNotificationPublisher;
+import trd.home.common.event.FrontendNotificationType;
+import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.media.exception.MediaVideoNotFoundException;
 
 class MediaServiceTest {
     private final MediaQueryService query = mock(MediaQueryService.class);
-    private final MediaService service = new MediaService(query, mock(MediaImportService.class));
+    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
+    private final MediaService service = new MediaService(query, eventRepository, notificationPublisher);
 
     @TempDir
     Path directory;
+
+    @Test
+    void createsMediaImportEvent() {
+        service.importPath("C:\\Media");
+
+        InOrder order = inOrder(eventRepository, notificationPublisher);
+        order.verify(eventRepository)
+                .save(argThat(
+                        event -> event.getType() == EventType.IMPORT_MEDIA && "C:\\Media".equals(event.getMessage())));
+        order.verify(notificationPublisher).publish(FrontendNotificationType.WARNING, "Media import has started.");
+    }
 
     @Test
     void resolvesExistingVideoResource() throws Exception {

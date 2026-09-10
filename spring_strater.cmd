@@ -1,0 +1,1 @@
+mvn clean package -DskipTests spring-boot:run

@@ -1,16 +1,12 @@
 package trd.home.frontend.media;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import trd.home.common.logging.LogMethodCall;
-import trd.home.media.dto.*;
 import trd.home.media.service.*;
 
 @Controller
@@ -58,51 +54,9 @@ public class MediaFrontendController {
 
     @PostMapping("/import")
     @LogMethodCall
-    public String importPath(@RequestParam String path, RedirectAttributes redirect) {
-        redirect.addFlashAttribute("importMessage", "Imported videos: " + mediaService.importPath(path));
+    public String importPath(@RequestParam String path) {
+        mediaService.importPath(path);
         return "redirect:/media/server-folder-path";
-    }
-
-    @GetMapping("/api/actors")
-    @ResponseBody
-    @LogMethodCall
-    public List<ActorDto> actors() {
-        return mediaService.activeActors();
-    }
-
-    @GetMapping("/api/folders")
-    @ResponseBody
-    @LogMethodCall
-    public List<FolderDto> folders() {
-        return mediaService.activeFolders();
-    }
-
-    @GetMapping("/api/videos")
-    @ResponseBody
-    @LogMethodCall
-    public List<VideoDto> videos() {
-        return mediaService.activeVideos();
-    }
-
-    @GetMapping("/api/actors/{id}/videos")
-    @ResponseBody
-    @LogMethodCall
-    public List<VideoDto> actorVideos(@PathVariable String id) {
-        return mediaService.videosByActor(id);
-    }
-
-    @GetMapping("/api/folders/{id}/videos")
-    @ResponseBody
-    @LogMethodCall
-    public List<VideoDto> folderVideos(@PathVariable String id) {
-        return mediaService.videosByFolder(id);
-    }
-
-    @PostMapping("/api/import")
-    @ResponseBody
-    @LogMethodCall
-    public Map<String, Integer> importApi(@RequestParam String path) throws IOException {
-        return Map.of("imported", mediaService.importPath(path));
     }
 
     @GetMapping("/videos/{id}/stream")
