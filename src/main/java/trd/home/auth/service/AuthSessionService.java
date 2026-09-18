@@ -1,18 +1,16 @@
 package trd.home.auth.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import trd.home.common.logging.LogMethodCall;
 
 @Service
+@RequiredArgsConstructor
 public class AuthSessionService {
 
     private final SessionRegistry sessionRegistry;
-
-    public AuthSessionService(SessionRegistry sessionRegistry) {
-        this.sessionRegistry = sessionRegistry;
-    }
 
     @LogMethodCall
     public void expireSessions(String username) {

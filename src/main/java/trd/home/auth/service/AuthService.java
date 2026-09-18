@@ -3,9 +3,8 @@ package trd.home.auth.service;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,12 +17,13 @@ import trd.home.common.logging.LogMasked;
 import trd.home.common.logging.LogMethodCall;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final AuthSessionService userSessionService;
+    private final AuthInputValidator validator;
 
     @LogMethodCall
     public Set<UserRole> getAvailableRoles() {
@@ -39,9 +39,9 @@ public class AuthService {
     @LogMethodCall
     @Transactional
     public UserDto save(String username, @LogMasked String password, Set<UserRole> roles) {
-        validateCredentials(username, password);
-        validateRoles(roles);
-        validateUsernameExistence(username);
+        validator.credentials(username, password);
+        validator.roles(roles);
+        validateUsernameIsAvailable(username);
 
         User user = new User();
         user.setUsername(username);
@@ -53,7 +53,7 @@ public class AuthService {
     @LogMethodCall
     @Transactional(readOnly = true)
     public Set<UserRole> authenticate(String username, @LogMasked String password) {
-        validateCredentials(username, password);
+        validator.credentials(username, password);
 
         return userRepository
                 .findByUsername(username)
@@ -65,8 +65,8 @@ public class AuthService {
     @LogMethodCall
     @Transactional
     public UserDto updateRoles(String userId, Set<UserRole> roles) {
-        validateUserId(userId);
-        validateRoles(roles);
+        validator.userId(userId);
+        validator.roles(roles);
 
         User user = findUserById(userId);
         user.setRoles(new HashSet<>(roles));
@@ -78,8 +78,8 @@ public class AuthService {
     @LogMethodCall
     @Transactional
     public UserDto updatePassword(String userId, @LogMasked String password) {
-        validateUserId(userId);
-        validatePassword(password);
+        validator.userId(userId);
+        validator.password(password);
 
         User user = findUserById(userId);
         user.setPassword(passwordEncoder.encode(password));
@@ -88,36 +88,7 @@ public class AuthService {
         return updatedUser;
     }
 
-    private void validateCredentials(String username, String password) {
-        validateUsername(username);
-        validatePassword(password);
-    }
-
-    private void validatePassword(String password) {
-        if (Objects.isNull(password) || password.isBlank()) {
-            throw new InvalidCredentialException("Password must not be blank");
-        }
-    }
-
-    private void validateUsername(String username) {
-        if (Objects.isNull(username) || username.isBlank()) {
-            throw new InvalidCredentialException("Username must not be blank");
-        }
-    }
-
-    private void validateUserId(String userId) {
-        if (Objects.isNull(userId) || userId.isBlank()) {
-            throw new InvalidCredentialException("User id must not be blank");
-        }
-    }
-
-    private void validateRoles(Set<UserRole> roles) {
-        if (Objects.isNull(roles)) {
-            throw new InvalidCredentialException("Roles must not be null");
-        }
-    }
-
-    private void validateUsernameExistence(String username) {
+    private void validateUsernameIsAvailable(String username) {
         if (userRepository.existsByUsername(username)) {
             throw new InvalidCredentialException("Invalid username");
         }

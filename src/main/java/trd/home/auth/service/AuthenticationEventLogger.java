@@ -1,5 +1,6 @@
 package trd.home.auth.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
@@ -11,15 +12,12 @@ import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationLogRepository;
 
 @Component
+@RequiredArgsConstructor
 public class AuthenticationEventLogger {
 
     private static final long NO_DURATION = 0L;
 
     private final ApplicationLogRepository applicationLogRepository;
-
-    public AuthenticationEventLogger(ApplicationLogRepository applicationLogRepository) {
-        this.applicationLogRepository = applicationLogRepository;
-    }
 
     @EventListener
     @LogMethodCall

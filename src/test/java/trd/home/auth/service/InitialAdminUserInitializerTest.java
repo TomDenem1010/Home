@@ -56,6 +56,7 @@ class InitialAdminUserInitializerTest {
     }
 
     private InitialAdminUserInitializer initializer(String username, String password) {
-        return new InitialAdminUserInitializer(userRepository, authService, username, password);
+        return new InitialAdminUserInitializer(
+                userRepository, authService, new AuthInputValidator(), username, password);
     }
 }

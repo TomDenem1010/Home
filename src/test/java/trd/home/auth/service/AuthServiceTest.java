@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import trd.home.auth.constant.UserRole;
@@ -41,6 +42,9 @@ class AuthServiceTest {
 
     @Mock
     private AuthSessionService userSessionService;
+
+    @Spy
+    private AuthInputValidator validator = new AuthInputValidator();
 
     @InjectMocks
     private AuthService authService;
