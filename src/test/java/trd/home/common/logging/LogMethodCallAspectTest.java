@@ -152,7 +152,7 @@ class LogMethodCallAspectTest {
 
         assertSame(output, aspect.logMethodCall(joinPoint, annotation(method)));
         assertTrue(message(1).contains("[[1, 2], [a, b]]"));
-        assertTrue(savedLog().getOutput().startsWith("[Ljava.lang.Object;@"));
+        assertEquals("[[1, 2], [a, b]]", savedLog().getOutput());
     }
 
     @Test

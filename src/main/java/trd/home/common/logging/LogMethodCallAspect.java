@@ -51,16 +51,18 @@ public class LogMethodCallAspect {
     }
 
     private void handleSuccessfulCall(MethodCallContext context, Object output) {
-        logSuccessfulCall(context, output);
-        auditSuccessfulCall(context, output);
+        long durationMs = elapsedMilliseconds(context);
+        String formattedOutput = formatObject(output);
+        logSuccessfulCall(context, formattedOutput, durationMs);
+        auditSuccessfulCall(context, formattedOutput, durationMs);
     }
 
     private void handleFailedCall(MethodCallContext context, Throwable throwable) {
         log.error("Logged method call failed: {}", context.methodName(), throwable);
-        auditFailedCall(context, throwable);
+        auditFailedCall(context, throwable, elapsedMilliseconds(context));
     }
 
-    private void logSuccessfulCall(MethodCallContext context, Object output) {
+    private void logSuccessfulCall(MethodCallContext context, String output, long durationMs) {
         if (!log.isDebugEnabled()) {
             return;
         }
@@ -68,29 +70,25 @@ public class LogMethodCallAspect {
         boolean logOutput = context.configuration().out();
         boolean logDuration = context.configuration().duration();
         if (logOutput && logDuration) {
-            log.debug(
-                    "Completed {} with output {} in {} ms",
-                    context.methodName(),
-                    formatObject(output),
-                    elapsedMilliseconds(context));
+            log.debug("Completed {} with output {} in {} ms", context.methodName(), output, durationMs);
         } else if (logOutput) {
-            log.debug("Completed {} with output {}", context.methodName(), formatObject(output));
+            log.debug("Completed {} with output {}", context.methodName(), output);
         } else if (logDuration) {
-            log.debug("Completed {} in {} ms", context.methodName(), elapsedMilliseconds(context));
+            log.debug("Completed {} in {} ms", context.methodName(), durationMs);
         }
     }
 
-    private void auditSuccessfulCall(MethodCallContext context, Object output) {
+    private void auditSuccessfulCall(MethodCallContext context, String output, long durationMs) {
         if (context.configuration().audit()) {
-            applicationLogRepository.save(ApplicationLog.successful(
-                    context.methodName(), context.input(), output, elapsedMilliseconds(context)));
+            applicationLogRepository.save(
+                    ApplicationLog.successful(context.methodName(), context.input(), output, durationMs));
         }
     }
 
-    private void auditFailedCall(MethodCallContext context, Throwable throwable) {
+    private void auditFailedCall(MethodCallContext context, Throwable throwable, long durationMs) {
         if (context.configuration().audit()) {
-            applicationLogRepository.save(ApplicationLog.failed(
-                    context.methodName(), context.input(), throwable, elapsedMilliseconds(context)));
+            applicationLogRepository.save(
+                    ApplicationLog.failed(context.methodName(), context.input(), throwable, durationMs));
         }
     }
 
@@ -121,7 +119,7 @@ public class LogMethodCallAspect {
 
     private String formatObject(Object object) {
         if (object == null) {
-            return "null";
+            return null;
         }
         if (!object.getClass().isArray()) {
             return object.toString();

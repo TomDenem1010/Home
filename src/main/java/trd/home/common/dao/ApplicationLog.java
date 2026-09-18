@@ -7,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import trd.home.common.logging.LogMethodCall;
@@ -49,8 +48,8 @@ public class ApplicationLog extends AuditedEntity {
     }
 
     @LogMethodCall
-    public static ApplicationLog successful(String method, String input, Object output, long durationMs) {
-        return new ApplicationLog(method, input, Objects.isNull(output) ? null : output.toString(), null, durationMs);
+    public static ApplicationLog successful(String method, String input, String output, long durationMs) {
+        return new ApplicationLog(method, input, output, null, durationMs);
     }
 
     @LogMethodCall
