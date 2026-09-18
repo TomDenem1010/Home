@@ -2,7 +2,7 @@ package trd.home.tcg.validator;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import trd.home.common.logging.LogMethodCall;
@@ -18,13 +18,15 @@ public class ResourceDeckCardValidator implements ResourceValidator {
     @LogMethodCall
     public void validateResource(Resource resource) {
         try (var reader = resource.getInputStream()) {
-            AtomicInteger lineNumber = new AtomicInteger();
-            new String(reader.readAllBytes(), StandardCharsets.UTF_8).lines().forEach(line -> {
-                int currentLineNumber = lineNumber.incrementAndGet();
+            List<String> lines = new String(reader.readAllBytes(), StandardCharsets.UTF_8)
+                    .lines()
+                    .toList();
+            for (int index = 0; index < lines.size(); index++) {
+                String line = lines.get(index);
                 if (!line.isBlank()) {
-                    checkCardLine(line, currentLineNumber);
+                    checkCardLine(line, index + 1);
                 }
-            });
+            }
         } catch (IOException exception) {
             log.error(
                     "Failed to read deck file '{}' while validating its card entries",

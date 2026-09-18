@@ -25,7 +25,7 @@ class SaveDecksFromResourceServiceTest {
     private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
     private final SaveDecksFromResourceService service = new SaveDecksFromResourceService(
-            eventRepository, deckSaver, deckFileReader, deckRepository, notificationPublisher);
+            new TcgEventProcessor(eventRepository, notificationPublisher), deckSaver, deckFileReader, deckRepository);
 
     @Test
     void readsAndSavesEveryResourceDeck() {

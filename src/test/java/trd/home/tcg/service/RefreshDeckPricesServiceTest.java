@@ -29,7 +29,10 @@ class RefreshDeckPricesServiceTest {
     private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
     private final RefreshDeckPricesService service = new RefreshDeckPricesService(
-            eventRepository, cardPriceSaver, cardRepository, deckRepository, notificationPublisher);
+            new TcgEventProcessor(eventRepository, notificationPublisher),
+            cardPriceSaver,
+            cardRepository,
+            deckRepository);
 
     @Test
     void refreshesRequestedDecksSequentially() {

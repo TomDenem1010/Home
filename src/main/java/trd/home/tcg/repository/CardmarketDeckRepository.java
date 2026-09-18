@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -118,21 +119,18 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
                         projection.getLatestPriceCreatedAt()))
                 .toList();
 
-        BigDecimal sumLatestFromInEuro = BigDecimal.ZERO;
-        BigDecimal sumLatestTrendInEuro = BigDecimal.ZERO;
-        for (CardmarketDeckCardPriceSummary card : cards) {
-            BigDecimal quantity = BigDecimal.valueOf(card.quantity());
-            BigDecimal latestFromInEuro = card.latestFromInEuro();
-            BigDecimal latestTrendInEuro = card.latestTrendInEuro();
-            if (latestFromInEuro != null) {
-                sumLatestFromInEuro = sumLatestFromInEuro.add(latestFromInEuro.multiply(quantity));
-            }
-            if (latestTrendInEuro != null) {
-                sumLatestTrendInEuro = sumLatestTrendInEuro.add(latestTrendInEuro.multiply(quantity));
-            }
-        }
+        BigDecimal totalFrom = totalPrice(cards, CardmarketDeckCardPriceSummary::latestFromInEuro);
+        BigDecimal totalTrend = totalPrice(cards, CardmarketDeckCardPriceSummary::latestTrendInEuro);
+        return new CardmarketDeckPriceHistorySummary(deckId, cards, totalFrom, totalTrend);
+    }
 
-        return new CardmarketDeckPriceHistorySummary(deckId, cards, sumLatestFromInEuro, sumLatestTrendInEuro);
+    private static BigDecimal totalPrice(
+            List<CardmarketDeckCardPriceSummary> cards,
+            Function<CardmarketDeckCardPriceSummary, BigDecimal> priceExtractor) {
+        return cards.stream()
+                .filter(card -> priceExtractor.apply(card) != null)
+                .map(card -> priceExtractor.apply(card).multiply(BigDecimal.valueOf(card.quantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     default Optional<CardmarketDeckDto> findByUuid(String uuid) {

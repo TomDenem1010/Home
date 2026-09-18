@@ -23,26 +23,22 @@ public class TcgService {
 
     @LogMethodCall
     public void saveDecksFromResource() {
-        eventRepository.save(new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE));
-        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck saving has started.");
+        createEvent(EventType.SAVE_DECKS_FROM_RESOURCE, null, "Deck saving has started.");
     }
 
     @LogMethodCall
     public void saveDeckFromResource(String deckId) {
-        eventRepository.save(new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, deckId));
-        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck saving has started.");
+        createEvent(EventType.SAVE_DECKS_FROM_RESOURCE, deckId, "Deck saving has started.");
     }
 
     @LogMethodCall
     public void refreshDeckPrices() {
-        eventRepository.save(new ApplicationEvent(EventType.REFRESH_DECK_PRICES));
-        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
+        createEvent(EventType.REFRESH_DECK_PRICES, null, "Deck price refresh has started.");
     }
 
     @LogMethodCall
     public void refreshDeckPrices(String deckId) {
-        eventRepository.save(new ApplicationEvent(EventType.REFRESH_DECK_PRICES, deckId));
-        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
+        createEvent(EventType.REFRESH_DECK_PRICES, deckId, "Deck price refresh has started.");
     }
 
     @LogMethodCall
@@ -53,5 +49,10 @@ public class TcgService {
     @LogMethodCall
     public CardmarketDeckPriceHistorySummary getDeckPriceHistorySummary(String deckId) {
         return cardmarketDeckRepository.calculateDeckPriceHistorySummary(deckId);
+    }
+
+    private void createEvent(EventType eventType, String deckId, String notificationMessage) {
+        eventRepository.save(new ApplicationEvent(eventType, deckId));
+        notificationPublisher.publish(FrontendNotificationType.WARNING, notificationMessage);
     }
 }

@@ -4,46 +4,28 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.event.FrontendNotificationPublisher;
-import trd.home.common.event.FrontendNotificationType;
-import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.exception.DeckImportException;
 import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.file.DeckFileReader;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SaveDecksFromResourceService {
 
-    private final ApplicationEventRepository eventRepository;
+    private static final String SUCCESS_MESSAGE = "Decks were saved successfully.";
+    private static final String FAILURE_MESSAGE_PREFIX = "Failed to save decks: ";
+
+    private final TcgEventProcessor eventProcessor;
     private final CardmarketDeckSaver deckSaver;
     private final DeckFileReader deckFileReader;
     private final CardmarketDeckRepository deckRepository;
-    private final FrontendNotificationPublisher notificationPublisher;
 
     public void process(ApplicationEvent event) {
-        event.markProcessing();
-        eventRepository.save(event);
-        FrontendNotificationType notificationType;
-        String notificationMessage;
-        try {
-            saveDecks(selectedDecks(event.getMessage()));
-            event.markDone();
-            notificationType = FrontendNotificationType.SUCCESS;
-            notificationMessage = "Decks were saved successfully.";
-        } catch (RuntimeException exception) {
-            log.error("Failed to save decks from configured resource files", exception);
-            event.markFailed(exception);
-            notificationType = FrontendNotificationType.ERROR;
-            notificationMessage = "Failed to save decks: " + exception.getMessage();
-        }
-        eventRepository.save(event);
-        notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
+        eventProcessor.process(
+                event, () -> saveDecks(selectedDecks(event.getMessage())), SUCCESS_MESSAGE, FAILURE_MESSAGE_PREFIX);
     }
 
     private List<CardmarketDeck> selectedDecks(String deckId) {
