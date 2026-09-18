@@ -1,93 +1,84 @@
 (() => {
     const storageKey = "home.frontend-notifications";
-    const notificationLifetime = 5000;
+    const maximumEventCount = 10;
 
-    window.showFrontendNotification = showNotification;
-    restoreNotifications();
+    window.showFrontendNotification = addEvent;
+    renderEvents(readStoredEvents());
 
     const source = new EventSource("/api/frontend-events");
-    source.addEventListener("notification", event => showNotification(JSON.parse(event.data)));
+    source.addEventListener("notification", event => addEvent(JSON.parse(event.data)));
     source.onerror = () => {
         // EventSource reconnects automatically after temporary connection failures.
     };
 
-    function showNotification(notification, storedNotification = null) {
+    function addEvent(notification) {
+        const records = [createRecord(notification), ...readStoredEvents()].slice(0, maximumEventCount);
+        writeStoredEvents(records);
+        renderEvents(records);
+    }
+
+    function createRecord(notification) {
+        return {
+            id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+            receivedAt: new Date().toISOString(),
+            notification
+        };
+    }
+
+    function renderEvents(records) {
+        const list = document.querySelector("#event-history-list");
+        const emptyState = document.querySelector("#event-history-empty");
+        if (!list) return;
+
+        list.replaceChildren(...records.map(createEventElement));
+        if (emptyState) emptyState.hidden = records.length > 0;
+    }
+
+    function createEventElement(record) {
+        const notification = record.notification;
         const presentation = {
             success: {icon: "✓", title: "Operation completed"},
             warning: {icon: "!", title: "Warning"},
             error: {icon: "×", title: "An error occurred"}
         }[notification.type.toLowerCase()];
-        if (!presentation) return;
-
-        const record = storedNotification ?? {
-            id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
-            notification,
-            expiresAt: Date.now() + notificationLifetime
-        };
-        const remainingLifetime = record.expiresAt - Date.now();
-        if (remainingLifetime <= 0) {
-            removeStoredNotification(record.id);
-            return;
-        }
-        if (!storedNotification) writeStoredNotifications([...readStoredNotifications(), record]);
-
-        const toast = document.createElement("div");
-        toast.className = `notification notification--${notification.type.toLowerCase()}`;
-        toast.setAttribute("role", notification.type === "ERROR" ? "alert" : "status");
-        toast.style.setProperty("--notification-lifetime", `${remainingLifetime}ms`);
+        const item = document.createElement("li");
+        item.className = `event-history__item event-history__item--${notification.type.toLowerCase()}`;
         const icon = document.createElement("span");
-        icon.className = "notification__icon";
+        icon.className = "event-history__icon";
         icon.setAttribute("aria-hidden", "true");
-        icon.textContent = presentation.icon;
+        icon.textContent = presentation?.icon ?? "•";
         const content = document.createElement("div");
-        content.className = "notification__content";
+        content.className = "event-history__content";
         const title = document.createElement("strong");
-        title.className = "notification__title";
-        title.textContent = presentation.title;
+        title.className = "event-history__title";
+        title.textContent = presentation?.title ?? "Event";
         const message = document.createElement("span");
-        message.className = "notification__message";
+        message.className = "event-history__message";
         message.textContent = notification.message;
-        const closeButton = document.createElement("button");
-        closeButton.className = "notification__close";
-        closeButton.type = "button";
-        closeButton.setAttribute("aria-label", "Dismiss notification");
-        closeButton.textContent = "×";
-        const progress = document.createElement("span");
-        progress.className = "notification__progress";
-        progress.setAttribute("aria-hidden", "true");
-        content.append(title, message);
-        toast.append(icon, content, closeButton, progress);
-        document.querySelector("#notification-container")?.append(toast);
-
-        const dismiss = () => {
-            if (toast.classList.contains("notification--leaving")) return;
-            removeStoredNotification(record.id);
-            toast.classList.add("notification--leaving");
-            window.setTimeout(() => toast.remove(), 300);
-        };
-        closeButton.addEventListener("click", dismiss);
-        window.setTimeout(dismiss, remainingLifetime);
+        const time = document.createElement("time");
+        time.className = "event-history__time";
+        const receivedAt = record.receivedAt ?? new Date().toISOString();
+        time.dateTime = receivedAt;
+        time.textContent = new Intl.DateTimeFormat(undefined, {hour: "2-digit", minute: "2-digit"})
+            .format(new Date(receivedAt));
+        content.append(title, message, time);
+        item.append(icon, content);
+        return item;
     }
 
-    function restoreNotifications() {
-        readStoredNotifications().forEach(record => showNotification(record.notification, record));
-    }
-    function readStoredNotifications() {
+    function readStoredEvents() {
         try {
             const records = JSON.parse(sessionStorage.getItem(storageKey) ?? "[]");
-            return Array.isArray(records) ? records : [];
+            return Array.isArray(records) ? records.slice(0, maximumEventCount) : [];
         } catch {
             return [];
         }
     }
-    function writeStoredNotifications(records) {
+    function writeStoredEvents(records) {
         try {
             sessionStorage.setItem(storageKey, JSON.stringify(records));
         } catch {
-            // Notifications still work while storage is unavailable.
+            // The event list still works while storage is unavailable.
         }
-    }
-    function removeStoredNotification(id) {
-        writeStoredNotifications(readStoredNotifications().filter(record => record.id !== id));
     }
 })();

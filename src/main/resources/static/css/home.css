@@ -12,30 +12,6 @@ body {
     margin: 0;
 }
 
-.notification-container {
-    position: fixed;
-    z-index: 1000;
-    top: 1rem;
-    right: 1rem;
-    display: grid;
-    width: min(25rem, calc(100vw - 2rem));
-    gap: .8rem;
-    pointer-events: none;
-}
-
-.notification { --notification-accent: #2d6cdf; --notification-surface: #f4f7ff; position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: .85rem; overflow: hidden; padding: 1rem 1rem 1.1rem; border: 1px solid #cbd9f4; border-left: 4px solid var(--notification-accent); border-radius: .85rem; background: rgb(255 255 255 / 96%); box-shadow: 0 .8rem 2.5rem rgb(23 32 51 / 16%); animation: notification-enter 260ms ease; pointer-events: auto; transition: opacity 200ms ease, transform 200ms ease; }
-.notification--success { --notification-accent: #168447; --notification-surface: #eaf8f0; }
-.notification--warning { --notification-accent: #c47b08; --notification-surface: #fff6df; }
-.notification--error { --notification-accent: #c43229; --notification-surface: #fff0ef; }
-.notification__icon { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; color: var(--notification-accent); font-weight: 800; background: var(--notification-surface); }
-.notification__content { display: grid; gap: .25rem; min-width: 0; }
-.notification__message { color: #5d6675; font-size: .86rem; overflow-wrap: anywhere; }
-.notification__close { width: 1.75rem; height: 1.75rem; padding: 0; border: 0; border-radius: 50%; color: #7a8495; font-size: 1.25rem; background: transparent; cursor: pointer; }
-.notification__progress { position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--notification-accent); transform-origin: left; animation: notification-progress var(--notification-lifetime) linear forwards; }
-.notification--leaving { opacity: 0; transform: translateX(1.5rem) scale(.98); }
-@keyframes notification-enter { from { opacity: 0; transform: translateX(1.5rem) scale(.98); } }
-@keyframes notification-progress { to { transform: scaleX(0); } }
-
 .sidebar {
     position: sticky;
     top: 0;
@@ -44,9 +20,10 @@ body {
     z-index: 10;
     width: 240px;
     height: 100dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow: hidden;
     padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
     color: white;
     background: #172033;
 }
@@ -60,7 +37,21 @@ body {
     text-decoration: none;
 }
 
-.logout-form { margin-top: 2rem; }
+.event-history { display: flex; flex: 1; flex-direction: column; min-height: 0; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #34445f; }
+.event-history h2 { margin: 0 0 .75rem; padding-inline: .25rem; color: #aebbd0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
+.event-history__list { display: grid; flex: 1; gap: .5rem; min-height: 0; margin: 0; padding: 0 .25rem 0 0; overflow-y: auto; overscroll-behavior: contain; list-style: none; scrollbar-gutter: stable; }
+.event-history__list:empty { flex: 0; }
+.event-history__item { --event-accent: #6f9cff; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .55rem; padding: .65rem; border-left: 3px solid var(--event-accent); border-radius: .4rem; background: #202b40; }
+.event-history__item--success { --event-accent: #53c985; }
+.event-history__item--warning { --event-accent: #e7a83e; }
+.event-history__item--error { --event-accent: #ef7169; }
+.event-history__icon { display: grid; place-items: center; width: 1.35rem; height: 1.35rem; border-radius: 50%; color: var(--event-accent); font-size: .75rem; font-weight: 800; background: #172033; }
+.event-history__content { display: grid; gap: .18rem; min-width: 0; }
+.event-history__title { color: #f4f7fb; font-size: .76rem; }
+.event-history__message { color: #c5cfdf; font-size: .74rem; line-height: 1.35; overflow-wrap: anywhere; }
+.event-history__time { color: #8290a8; font-size: .66rem; }
+.event-history__empty { margin: 0; padding-inline: .25rem; color: #8290a8; font-size: .75rem; }
+.logout-form { margin-top: auto; padding-top: 2rem; }
 .logout-form button {
     width: 100%;
     padding: .75rem;

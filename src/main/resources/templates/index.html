@@ -10,12 +10,16 @@
     <script defer th:if="${featureScript != null}" th:src="@{${featureScript}}"></script>
 </head>
 <body>
-<div id="notification-container" class="notification-container" aria-live="polite"></div>
 <aside class="sidebar">
     <a class="brand" th:href="@{/}">Home</a>
     <nav aria-label="Főmenü">
         <th:block th:replace="~{menu :: menu(${menuItems}, ${activePath})}"/>
     </nav>
+    <section class="event-history" aria-labelledby="event-history-title">
+        <h2 id="event-history-title">Latest events</h2>
+        <ol id="event-history-list" class="event-history__list" aria-live="polite"></ol>
+        <p id="event-history-empty" class="event-history__empty">No events yet.</p>
+    </section>
     <form class="logout-form" th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>
