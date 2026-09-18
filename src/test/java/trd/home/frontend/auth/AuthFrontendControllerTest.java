@@ -16,11 +16,13 @@ import org.springframework.ui.ConcurrentModel;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
+import trd.home.frontend.FrontendPageRenderer;
 
 class AuthFrontendControllerTest {
 
     private final AuthService authService = mock(AuthService.class);
-    private final AuthFrontendController controller = new AuthFrontendController(authService);
+    private final AuthFrontendController controller =
+            new AuthFrontendController(authService, new FrontendPageRenderer());
 
     @Test
     void authRedirectsToUserList() {

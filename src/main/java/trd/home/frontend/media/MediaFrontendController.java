@@ -1,22 +1,31 @@
 package trd.home.frontend.media;
 
 import java.io.IOException;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.common.logging.LogMethodCall;
-import trd.home.media.service.*;
+import trd.home.frontend.FrontendPageRenderer;
+import trd.home.media.service.MediaService;
 
 @Controller
 @RequestMapping("/media")
+@RequiredArgsConstructor
 public class MediaFrontendController {
     private final MediaService mediaService;
-
-    public MediaFrontendController(MediaService mediaService) {
-        this.mediaService = mediaService;
-    }
+    private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
     @LogMethodCall
@@ -27,18 +36,19 @@ public class MediaFrontendController {
     @GetMapping("/server-folder-path")
     @LogMethodCall
     public String serverFolderPath(Model model) {
-        model.addAttribute("activePath", "/media/server-folder-path");
-        model.addAttribute("pageTitle", "MEDIA / Server folder path");
-        model.addAttribute("pageContent", "Enter a server folder path to import videos.");
-        model.addAttribute("contentTemplate", "media/server-folder-path");
-        return "index";
+        return pageRenderer.render(
+                model,
+                "/media/server-folder-path",
+                "MEDIA / Server folder path",
+                "Enter a server folder path to import videos.",
+                "media/server-folder-path");
     }
 
     @GetMapping("/by-actor")
     @LogMethodCall
     public String byActor(@RequestParam(required = false) String actorId, Model model) {
         model.addAttribute("actors", mediaService.activeActors());
-        model.addAttribute("videos", actorId == null ? java.util.List.of() : mediaService.videosByActor(actorId));
+        model.addAttribute("videos", actorId == null ? List.of() : mediaService.videosByActor(actorId));
         model.addAttribute("selectedId", actorId);
         return page(model, "by-actor", "ByActor");
     }
@@ -47,7 +57,7 @@ public class MediaFrontendController {
     @LogMethodCall
     public String byFolder(@RequestParam(required = false) String folderId, Model model) {
         model.addAttribute("folders", mediaService.activeFolders());
-        model.addAttribute("videos", folderId == null ? java.util.List.of() : mediaService.videosByFolder(folderId));
+        model.addAttribute("videos", folderId == null ? List.of() : mediaService.videosByFolder(folderId));
         model.addAttribute("selectedId", folderId);
         return page(model, "by-folder", "ByFolder");
     }
@@ -75,10 +85,11 @@ public class MediaFrontendController {
 
     private String page(Model model, String mode, String title) {
         model.addAttribute("mode", mode);
-        model.addAttribute("activePath", "/media/" + mode);
-        model.addAttribute("pageTitle", title);
-        model.addAttribute("pageContent", "Select an actor or folder, then choose a video to play.");
-        model.addAttribute("contentTemplate", "media/library");
-        return "index";
+        return pageRenderer.render(
+                model,
+                "/media/" + mode,
+                title,
+                "Select an actor or folder, then choose a video to play.",
+                "media/library");
     }
 }

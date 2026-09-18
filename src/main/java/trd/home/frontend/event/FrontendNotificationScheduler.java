@@ -1,5 +1,6 @@
 package trd.home.frontend.event;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -12,20 +13,12 @@ import trd.home.common.repository.ApplicationEventRepository;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class FrontendNotificationScheduler {
 
     private final ApplicationEventRepository eventRepository;
     private final FrontendEventService frontendEventService;
     private final ObjectMapper objectMapper;
-
-    public FrontendNotificationScheduler(
-            ApplicationEventRepository eventRepository,
-            FrontendEventService frontendEventService,
-            ObjectMapper objectMapper) {
-        this.eventRepository = eventRepository;
-        this.frontendEventService = frontendEventService;
-        this.objectMapper = objectMapper;
-    }
 
     @Scheduled(fixedDelayString = "${frontend.scheduler.notification.delay:1s}")
     public void processNextEvent() {

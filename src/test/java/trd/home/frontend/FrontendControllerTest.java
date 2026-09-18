@@ -7,7 +7,7 @@ import org.springframework.ui.ConcurrentModel;
 
 class FrontendControllerTest {
 
-    private final FrontendController controller = new FrontendController();
+    private final FrontendController controller = new FrontendController(new FrontendPageRenderer());
 
     @Test
     void homeReturnsIndexView() {

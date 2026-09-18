@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import trd.home.frontend.FrontendPageRenderer;
 import trd.home.media.constant.MediaStatus;
 import trd.home.media.dto.ActorDto;
 import trd.home.media.dto.FolderDto;
@@ -22,7 +23,7 @@ import trd.home.media.service.MediaService;
 class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
     private final org.springframework.test.web.servlet.MockMvc mvc = MockMvcBuilders.standaloneSetup(
-                    new MediaFrontendController(service))
+                    new MediaFrontendController(service, new FrontendPageRenderer()))
             .setControllerAdvice(new trd.home.common.exception.HomeExceptionHandler())
             .build();
 

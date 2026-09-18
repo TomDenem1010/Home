@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
+import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.ChromeLauncher;
@@ -18,7 +19,8 @@ class TcgFrontendControllerTest {
 
     private final TcgService tcgService = mock(TcgService.class);
     private final ChromeLauncher chromeLauncher = mock(ChromeLauncher.class);
-    private final TcgFrontendController controller = new TcgFrontendController(tcgService, chromeLauncher);
+    private final TcgFrontendController controller =
+            new TcgFrontendController(tcgService, chromeLauncher, new FrontendPageRenderer());
 
     @Test
     void tcgReturnsIndexAndMarksTcgAsActive() {

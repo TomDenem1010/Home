@@ -1,5 +1,6 @@
 package trd.home.frontend.tcg;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,20 +8,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import trd.home.common.logging.LogMethodCall;
+import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.service.ChromeLauncher;
 import trd.home.tcg.service.TcgService;
 
 @Controller
 @RequestMapping("/tcg")
+@RequiredArgsConstructor
 public class TcgFrontendController {
 
     private final TcgService tcgService;
     private final ChromeLauncher chromeLauncher;
-
-    public TcgFrontendController(TcgService tcgService, ChromeLauncher chromeLauncher) {
-        this.tcgService = tcgService;
-        this.chromeLauncher = chromeLauncher;
-    }
+    private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
     @LogMethodCall
@@ -80,11 +79,6 @@ public class TcgFrontendController {
     }
 
     private String renderPage(Model model, String activePath, String title, String content) {
-        model.addAttribute("activePath", activePath);
-        model.addAttribute("pageTitle", title);
-        model.addAttribute("pageContent", content);
-        model.addAttribute("featureStylesheet", "/css/tcg.css");
-        model.addAttribute("featureScript", "/js/tcg.js");
-        return "index";
+        return pageRenderer.render(model, activePath, title, content, null, "tcg");
     }
 }

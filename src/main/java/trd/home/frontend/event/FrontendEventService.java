@@ -77,22 +77,22 @@ public class FrontendEventService {
     }
 
     private boolean send(String username, Connection connection, FrontendEvent event) {
+        return send(
+                username, connection, SseEmitter.event().name("notification").data(event));
+    }
+
+    private void sendHeartbeat(String username, Connection connection) {
+        send(username, connection, SseEmitter.event().comment("heartbeat"));
+    }
+
+    private boolean send(String username, Connection connection, SseEmitter.SseEventBuilder event) {
         try {
-            connection.emitter().send(SseEmitter.event().name("notification").data(event));
+            connection.emitter().send(event);
             return true;
         } catch (IOException | IllegalStateException exception) {
             log.debug("Removing disconnected frontend event stream for user '{}'", username, exception);
             remove(username, connection);
             return false;
-        }
-    }
-
-    private void sendHeartbeat(String username, Connection connection) {
-        try {
-            connection.emitter().send(SseEmitter.event().comment("heartbeat"));
-        } catch (IOException | IllegalStateException exception) {
-            log.debug("Removing disconnected frontend event stream for user '{}'", username);
-            remove(username, connection);
         }
     }
 

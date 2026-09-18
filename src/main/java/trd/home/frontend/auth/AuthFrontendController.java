@@ -3,6 +3,7 @@ package trd.home.frontend.auth;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -16,16 +17,15 @@ import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
 import trd.home.common.logging.LogMasked;
 import trd.home.common.logging.LogMethodCall;
+import trd.home.frontend.FrontendPageRenderer;
 
 @Controller
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthFrontendController {
 
     private final AuthService authService;
-
-    public AuthFrontendController(AuthService authService) {
-        this.authService = authService;
-    }
+    private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
     @LogMethodCall
@@ -103,12 +103,6 @@ public class AuthFrontendController {
     }
 
     private String renderPage(Model model, String activePath, String title, String content, String contentTemplate) {
-        model.addAttribute("activePath", activePath);
-        model.addAttribute("pageTitle", title);
-        model.addAttribute("pageContent", content);
-        model.addAttribute("contentTemplate", contentTemplate);
-        model.addAttribute("featureStylesheet", "/css/admin.css");
-        model.addAttribute("featureScript", "/js/admin.js");
-        return "index";
+        return pageRenderer.render(model, activePath, title, content, contentTemplate, "admin");
     }
 }
