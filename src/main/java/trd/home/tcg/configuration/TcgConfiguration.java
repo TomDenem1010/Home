@@ -1,8 +1,6 @@
 package trd.home.tcg.configuration;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import trd.home.tcg.service.file.DeckFileReader;
@@ -12,12 +10,6 @@ import trd.home.tcg.validator.ResourceDeckNameValidator;
 
 @Configuration(proxyBeanMethods = false)
 public class TcgConfiguration {
-
-    @Bean(destroyMethod = "shutdown")
-    ExecutorService deckPriceUpdateExecutor() {
-        return Executors.newSingleThreadExecutor(
-                Thread.ofPlatform().name("deck-price-updater-", 0).factory());
-    }
 
     @Bean
     ResourceDeckEncodingValidator resourceDeckEncodingValidator() {
