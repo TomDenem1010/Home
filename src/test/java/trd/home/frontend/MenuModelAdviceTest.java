@@ -83,7 +83,7 @@ class MenuModelAdviceTest {
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of("/tcg/save-decks-from-resource", "/tcg/refresh-deck-prices", "/tcg/statistics"),
+                List.of("/tcg/save-decks-from-resource", "/tcg/start-chrome", "/tcg/statistics"),
                 menu(menus, "TCG").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());

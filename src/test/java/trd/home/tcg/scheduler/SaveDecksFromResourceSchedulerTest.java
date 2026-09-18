@@ -22,6 +22,7 @@ import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dao.CardmarketDeck;
+import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.CardmarketDeckSaver;
 import trd.home.tcg.service.file.DeckFileReader;
 
@@ -30,9 +31,10 @@ class SaveDecksFromResourceSchedulerTest {
     private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
     private final CardmarketDeckSaver deckSaver = mock(CardmarketDeckSaver.class);
     private final DeckFileReader deckFileReader = mock(DeckFileReader.class);
+    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final SaveDecksFromResourceScheduler scheduler =
-            new SaveDecksFromResourceScheduler(eventRepository, deckSaver, deckFileReader, notificationPublisher);
+    private final SaveDecksFromResourceScheduler scheduler = new SaveDecksFromResourceScheduler(
+            eventRepository, deckSaver, deckFileReader, deckRepository, notificationPublisher);
 
     @Test
     void processesOldestPendingEvent() {

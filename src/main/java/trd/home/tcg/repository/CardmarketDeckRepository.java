@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dto.CardmarketDeckCardPriceSummary;
 import trd.home.tcg.dto.CardmarketDeckDto;
@@ -19,6 +20,9 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
     boolean existsByName(String name);
 
     Optional<CardmarketDeck> findByName(String name);
+
+    @Query("SELECT deck.id FROM CardmarketDeck deck WHERE deck.status = :status")
+    List<String> findIdsByStatus(@Param("status") DeckStatus status);
 
     @EntityGraph(attributePaths = {"currentVersion", "currentVersion.cards", "currentVersion.cards.card"})
     Optional<CardmarketDeck> findEntityById(String id);

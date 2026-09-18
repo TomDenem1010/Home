@@ -35,11 +35,7 @@ public class MenuModelAdvice {
                                         "/tcg/save-decks-from-resource",
                                         SubmenuItem.Type.ACTION,
                                         tcg),
-                                new SubmenuItem(
-                                        "Refresh Deck Prices",
-                                        "/tcg/refresh-deck-prices",
-                                        SubmenuItem.Type.ACTION,
-                                        tcg),
+                                new SubmenuItem("Start Chrome", "/tcg/start-chrome", SubmenuItem.Type.ACTION, tcg),
                                 new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
                         "MEDIA",

@@ -28,8 +28,20 @@ public class TcgService {
     }
 
     @LogMethodCall
+    public void saveDeckFromResource(String deckId) {
+        eventRepository.save(new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, deckId));
+        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck saving has started.");
+    }
+
+    @LogMethodCall
     public void refreshDeckPrices() {
         eventRepository.save(new ApplicationEvent(EventType.REFRESH_DECK_PRICES));
+        notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
+    }
+
+    @LogMethodCall
+    public void refreshDeckPrices(String deckId) {
+        eventRepository.save(new ApplicationEvent(EventType.REFRESH_DECK_PRICES, deckId));
         notificationPublisher.publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
     }
 

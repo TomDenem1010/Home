@@ -36,10 +36,33 @@ class TcgServiceTest {
 
     @Test
     void createsRefreshDeckPricesEvent() {
-        assertDoesNotThrow(service::refreshDeckPrices);
+        assertDoesNotThrow(() -> service.refreshDeckPrices());
 
         InOrder order = inOrder(eventRepository, notificationPublisher);
         order.verify(eventRepository).save(argThat(event -> event.getType() == EventType.REFRESH_DECK_PRICES));
+        order.verify(notificationPublisher)
+                .publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
+    }
+
+    @Test
+    void createsSaveDeckEventForSelectedDeck() {
+        service.saveDeckFromResource("deck-id");
+
+        InOrder order = inOrder(eventRepository, notificationPublisher);
+        order.verify(eventRepository)
+                .save(argThat(event -> event.getType() == EventType.SAVE_DECKS_FROM_RESOURCE
+                        && event.getMessage().equals("deck-id")));
+        order.verify(notificationPublisher).publish(FrontendNotificationType.WARNING, "Deck saving has started.");
+    }
+
+    @Test
+    void createsRefreshPriceEventForSelectedDeck() {
+        service.refreshDeckPrices("deck-id");
+
+        InOrder order = inOrder(eventRepository, notificationPublisher);
+        order.verify(eventRepository)
+                .save(argThat(event -> event.getType() == EventType.REFRESH_DECK_PRICES
+                        && event.getMessage().equals("deck-id")));
         order.verify(notificationPublisher)
                 .publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
     }

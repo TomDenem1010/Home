@@ -24,8 +24,24 @@ public interface CardmarketCardRepository extends JpaRepository<CardmarketCard, 
             """)
     List<CardmarketCard> findAllInCurrentDeckVersionsByStatus(@Param("status") DeckStatus status);
 
+    @Query("""
+            SELECT DISTINCT card
+            FROM CardmarketDeck deck
+            JOIN deck.currentVersion deckVersion
+            JOIN deckVersion.cards deckCard
+            JOIN deckCard.card card
+            WHERE deck.id = :deckId
+            """)
+    List<CardmarketCard> findAllInCurrentDeckVersionByDeckId(@Param("deckId") String deckId);
+
     default List<CardmarketCardDto> findAllInActiveDeckCurrentVersions() {
         return findAllInCurrentDeckVersionsByStatus(DeckStatus.ACTIVE).stream()
+                .map(CardmarketCardDto::from)
+                .toList();
+    }
+
+    default List<CardmarketCardDto> findAllInDeckCurrentVersion(String deckId) {
+        return findAllInCurrentDeckVersionByDeckId(deckId).stream()
                 .map(CardmarketCardDto::from)
                 .toList();
     }

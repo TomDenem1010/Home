@@ -11,6 +11,8 @@
                 <th scope="col" data-sort-type="text"><button class="sort-button" type="button">Deck name</button></th>
                 <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Total From</button></th>
                 <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Total Trend</button></th>
+                <th scope="col">Reload deck</th>
+                <th scope="col">Refresh prices</th>
             </tr>
             </thead>
             <tbody>
@@ -23,6 +25,16 @@
                     th:text="${#numbers.formatDecimal(summary.sumFromInEuro, 1, 2)} + ' €'">0.00 €</td>
                 <td th:attr="data-sort-value=${summary.sumTrendInEuro}"
                     th:text="${#numbers.formatDecimal(summary.sumTrendInEuro, 1, 2)} + ' €'">0.00 €</td>
+                <td>
+                    <form th:action="@{/tcg/decks/{deckId}/reload(deckId=${summary.deckId})}" method="post">
+                        <button type="submit">Reload</button>
+                    </form>
+                </td>
+                <td>
+                    <form th:action="@{/tcg/decks/{deckId}/refresh-prices(deckId=${summary.deckId})}" method="post">
+                        <button type="submit">Refresh prices</button>
+                    </form>
+                </td>
             </tr>
             </tbody>
         </table>

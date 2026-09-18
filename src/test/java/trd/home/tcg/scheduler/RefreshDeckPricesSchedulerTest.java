@@ -22,8 +22,10 @@ import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.repository.ApplicationEventRepository;
+import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.dto.CardmarketCardDto;
 import trd.home.tcg.repository.CardmarketCardRepository;
+import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.playwright.CardmarketCardPriceSaver;
 
 class RefreshDeckPricesSchedulerTest {
@@ -31,9 +33,10 @@ class RefreshDeckPricesSchedulerTest {
     private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
     private final CardmarketCardPriceSaver cardPriceSaver = mock(CardmarketCardPriceSaver.class);
     private final CardmarketCardRepository cardRepository = mock(CardmarketCardRepository.class);
+    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final RefreshDeckPricesScheduler scheduler =
-            new RefreshDeckPricesScheduler(eventRepository, cardPriceSaver, cardRepository, notificationPublisher);
+    private final RefreshDeckPricesScheduler scheduler = new RefreshDeckPricesScheduler(
+            eventRepository, cardPriceSaver, cardRepository, deckRepository, Runnable::run, notificationPublisher);
 
     @Test
     void processesOldestPendingEvent() {
@@ -43,7 +46,8 @@ class RefreshDeckPricesSchedulerTest {
         when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
                         EventType.REFRESH_DECK_PRICES, EventStatus.TO_DO))
                 .thenReturn(Optional.of(event));
-        when(cardRepository.findAllInActiveDeckCurrentVersions()).thenReturn(cards);
+        when(deckRepository.findIdsByStatus(DeckStatus.ACTIVE)).thenReturn(List.of("deck-id"));
+        when(cardRepository.findAllInDeckCurrentVersion("deck-id")).thenReturn(cards);
         doAnswer(invocation -> {
                     savedStatuses.add(event.getStatus());
                     return event;
@@ -71,7 +75,8 @@ class RefreshDeckPricesSchedulerTest {
         when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
                         EventType.REFRESH_DECK_PRICES, EventStatus.TO_DO))
                 .thenReturn(Optional.of(event));
-        when(cardRepository.findAllInActiveDeckCurrentVersions()).thenReturn(cards);
+        when(deckRepository.findIdsByStatus(DeckStatus.ACTIVE)).thenReturn(List.of("deck-id"));
+        when(cardRepository.findAllInDeckCurrentVersion("deck-id")).thenReturn(cards);
         doThrow(new IllegalStateException("Unable to refresh prices"))
                 .when(cardPriceSaver)
                 .updateCardPrice(cards);
@@ -99,7 +104,8 @@ class RefreshDeckPricesSchedulerTest {
         when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
                         EventType.REFRESH_DECK_PRICES, EventStatus.TO_DO))
                 .thenReturn(Optional.of(event));
-        when(cardRepository.findAllInActiveDeckCurrentVersions()).thenReturn(cards);
+        when(deckRepository.findIdsByStatus(DeckStatus.ACTIVE)).thenReturn(List.of("deck-id"));
+        when(cardRepository.findAllInDeckCurrentVersion("deck-id")).thenReturn(cards);
         doThrow(new IllegalStateException("Database unavailable"))
                 .when(notificationPublisher)
                 .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");

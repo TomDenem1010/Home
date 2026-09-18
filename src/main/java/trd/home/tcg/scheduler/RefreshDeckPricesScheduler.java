@@ -1,6 +1,11 @@
 package trd.home.tcg.scheduler;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import trd.home.common.constant.EventStatus;
@@ -8,7 +13,9 @@ import trd.home.common.constant.EventType;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.repository.ApplicationEventRepository;
+import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.repository.CardmarketCardRepository;
+import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.playwright.CardmarketCardPriceSaver;
 
 @Slf4j
@@ -18,16 +25,22 @@ public class RefreshDeckPricesScheduler {
     private final ApplicationEventRepository eventRepository;
     private final CardmarketCardPriceSaver cardPriceSaver;
     private final CardmarketCardRepository cardRepository;
+    private final CardmarketDeckRepository deckRepository;
+    private final Executor deckPriceUpdateExecutor;
     private final FrontendNotificationPublisher notificationPublisher;
 
     public RefreshDeckPricesScheduler(
             ApplicationEventRepository eventRepository,
             CardmarketCardPriceSaver cardPriceSaver,
             CardmarketCardRepository cardRepository,
+            CardmarketDeckRepository deckRepository,
+            @Qualifier("deckPriceUpdateExecutor") Executor deckPriceUpdateExecutor,
             FrontendNotificationPublisher notificationPublisher) {
         this.eventRepository = eventRepository;
         this.cardPriceSaver = cardPriceSaver;
         this.cardRepository = cardRepository;
+        this.deckRepository = deckRepository;
+        this.deckPriceUpdateExecutor = deckPriceUpdateExecutor;
         this.notificationPublisher = notificationPublisher;
     }
 
@@ -41,7 +54,7 @@ public class RefreshDeckPricesScheduler {
                     FrontendNotificationType notificationType;
                     String notificationMessage;
                     try {
-                        cardPriceSaver.updateCardPrice(cardRepository.findAllInActiveDeckCurrentVersions());
+                        refreshDecks(selectedDeckIds(event.getMessage()));
                         event.markDone();
                         notificationType = FrontendNotificationType.SUCCESS;
                         notificationMessage = "Deck prices were refreshed successfully.";
@@ -55,5 +68,26 @@ public class RefreshDeckPricesScheduler {
                     notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
                 });
         log.info("Finished processing refresh deck prices event");
+    }
+
+    private List<String> selectedDeckIds(String deckId) {
+        if (deckId == null || deckId.isBlank()) {
+            return deckRepository.findIdsByStatus(DeckStatus.ACTIVE);
+        }
+        return List.of(deckId);
+    }
+
+    private void refreshDecks(List<String> deckIds) {
+        try {
+            CompletableFuture.allOf(deckIds.stream()
+                            .map(deckId -> CompletableFuture.runAsync(
+                                    () -> cardPriceSaver.updateCardPrice(
+                                            cardRepository.findAllInDeckCurrentVersion(deckId)),
+                                    deckPriceUpdateExecutor))
+                            .toArray(CompletableFuture[]::new))
+                    .join();
+        } catch (CompletionException exception) {
+            throw (RuntimeException) exception.getCause();
+        }
     }
 }
