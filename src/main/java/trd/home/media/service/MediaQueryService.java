@@ -2,26 +2,26 @@ package trd.home.media.service;
 
 import java.nio.file.Path;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.media.constant.MediaStatus;
-import trd.home.media.dto.*;
-import trd.home.media.exception.*;
-import trd.home.media.repository.*;
+import trd.home.media.dto.ActorDto;
+import trd.home.media.dto.FolderDto;
+import trd.home.media.dto.VideoDto;
+import trd.home.media.exception.MediaVideoNotFoundException;
+import trd.home.media.repository.ActorRepository;
+import trd.home.media.repository.FolderRepository;
+import trd.home.media.repository.VideoRepository;
 
 @Service
 @Transactional(readOnly = true)
+@RequiredArgsConstructor
 public class MediaQueryService {
     private final ActorRepository actors;
     private final FolderRepository folders;
     private final VideoRepository videos;
-
-    public MediaQueryService(ActorRepository actors, FolderRepository folders, VideoRepository videos) {
-        this.actors = actors;
-        this.folders = folders;
-        this.videos = videos;
-    }
 
     @LogMethodCall
     public List<ActorDto> activeActors() {
@@ -63,7 +63,9 @@ public class MediaQueryService {
                 .orElseThrow(() -> new MediaVideoNotFoundException("Video is unavailable: " + id));
         Path folder = Path.of(video.getFolder().getPath()).toAbsolutePath().normalize();
         Path path = folder.resolve(video.getFileName()).normalize();
-        if (!folder.equals(path.getParent())) throw new MediaVideoNotFoundException("Video is unavailable: " + id);
+        if (!folder.equals(path.getParent())) {
+            throw new MediaVideoNotFoundException("Video is unavailable: " + id);
+        }
         return path;
     }
 }

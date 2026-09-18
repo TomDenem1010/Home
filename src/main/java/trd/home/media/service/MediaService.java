@@ -3,6 +3,7 @@ package trd.home.media.service;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -12,23 +13,17 @@ import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationEventRepository;
-import trd.home.media.dto.*;
-import trd.home.media.exception.*;
+import trd.home.media.dto.ActorDto;
+import trd.home.media.dto.FolderDto;
+import trd.home.media.dto.VideoDto;
+import trd.home.media.exception.MediaVideoNotFoundException;
 
 @Service
+@RequiredArgsConstructor
 public class MediaService {
     private final MediaQueryService query;
     private final ApplicationEventRepository eventRepository;
     private final FrontendNotificationPublisher notificationPublisher;
-
-    public MediaService(
-            MediaQueryService query,
-            ApplicationEventRepository eventRepository,
-            FrontendNotificationPublisher notificationPublisher) {
-        this.query = query;
-        this.eventRepository = eventRepository;
-        this.notificationPublisher = notificationPublisher;
-    }
 
     @LogMethodCall
     public void importPath(String path) {
