@@ -12,15 +12,12 @@ import org.springframework.ui.ConcurrentModel;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
-import trd.home.tcg.service.ChromeLauncher;
 import trd.home.tcg.service.TcgService;
 
 class TcgFrontendControllerTest {
 
     private final TcgService tcgService = mock(TcgService.class);
-    private final ChromeLauncher chromeLauncher = mock(ChromeLauncher.class);
-    private final TcgFrontendController controller =
-            new TcgFrontendController(tcgService, chromeLauncher, new FrontendPageRenderer());
+    private final TcgFrontendController controller = new TcgFrontendController(tcgService, new FrontendPageRenderer());
 
     @Test
     void tcgReturnsIndexAndMarksTcgAsActive() {
@@ -58,13 +55,6 @@ class TcgFrontendControllerTest {
         assertEquals("redirect:/tcg/statistics", controller.refreshDeckPrices("deck-id"));
 
         verify(tcgService).refreshDeckPrices("deck-id");
-    }
-
-    @Test
-    void startChromeCallsLauncher() {
-        assertEquals("redirect:/tcg", controller.startChrome());
-
-        verify(chromeLauncher).start();
     }
 
     @Test

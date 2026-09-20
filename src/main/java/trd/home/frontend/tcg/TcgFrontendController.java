@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.frontend.FrontendPageRenderer;
-import trd.home.tcg.service.ChromeLauncher;
 import trd.home.tcg.service.TcgService;
 
 @Controller
@@ -18,7 +17,6 @@ import trd.home.tcg.service.TcgService;
 public class TcgFrontendController {
 
     private final TcgService tcgService;
-    private final ChromeLauncher chromeLauncher;
     private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
@@ -53,13 +51,6 @@ public class TcgFrontendController {
     public String refreshDeckPrices(@PathVariable String deckId) {
         tcgService.refreshDeckPrices(deckId);
         return "redirect:/tcg/statistics";
-    }
-
-    @PostMapping("/start-chrome")
-    @LogMethodCall
-    public String startChrome() {
-        chromeLauncher.start();
-        return "redirect:/tcg";
     }
 
     @GetMapping("/statistics")

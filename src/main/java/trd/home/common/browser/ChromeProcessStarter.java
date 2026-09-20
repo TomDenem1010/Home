@@ -1,8 +1,8 @@
-package trd.home.tcg.service;
+package trd.home.common.browser;
 
 import java.io.IOException;
 import org.springframework.stereotype.Component;
-import trd.home.tcg.exception.ChromeLaunchException;
+import trd.home.common.exception.ChromeLaunchException;
 
 @Component
 public class ChromeProcessStarter {

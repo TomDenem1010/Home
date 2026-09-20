@@ -7,6 +7,7 @@ public enum CardFoilType {
     ETCHED_FOIL,
     FOIL,
     HALO_FOIL,
+    MANA_FOIL,
     MASTERPIECE_FOIL,
     NO,
     OIL_SLICK_RAISED_FOIL,

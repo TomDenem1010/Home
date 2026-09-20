@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
-import trd.home.tcg.exception.UnableToReadResourcesException;
+import trd.home.common.exception.ResourceReadException;
 import trd.home.tcg.exception.WrongDeckEncodingException;
 
 class ResourceDeckEncodingValidatorTest {
@@ -41,7 +41,7 @@ class ResourceDeckEncodingValidatorTest {
             }
         };
 
-        assertThrows(UnableToReadResourcesException.class, () -> validator.validateResource(resource));
+        assertThrows(ResourceReadException.class, () -> validator.validateResource(resource));
     }
 
     private static ByteArrayResource resource(String filename, byte[] content) {

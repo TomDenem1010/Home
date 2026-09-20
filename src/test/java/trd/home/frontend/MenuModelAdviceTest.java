@@ -15,27 +15,31 @@ class MenuModelAdviceTest {
     private final MenuModelAdvice advice = new MenuModelAdvice();
 
     @Test
-    void adminCanOnlySeeAuthMenu() {
+    void adminCanSeeAuthAndHelperMenus() {
         var menus = advice.menuItems(authentication("ROLE_ADMIN"));
         var authMenu = menu(menus, "Auth");
         var tcgMenu = menu(menus, "TCG");
+        var helperMenu = menu(menus, "Helper");
 
         assertAll(
                 () -> assertTrue(authMenu.authorized()),
                 () -> assertFalse(tcgMenu.authorized()),
+                () -> assertTrue(helperMenu.authorized()),
                 () -> assertTrue(authMenu.submenuItems().stream().allMatch(item -> item.authorized())),
                 () -> assertTrue(tcgMenu.submenuItems().stream().noneMatch(item -> item.authorized())));
     }
 
     @Test
-    void tcgUserCanOnlySeeTcgMenu() {
+    void tcgUserCanSeeTcgAndHelperMenus() {
         var menus = advice.menuItems(authentication("ROLE_TCG"));
         var authMenu = menu(menus, "Auth");
         var tcgMenu = menu(menus, "TCG");
+        var helperMenu = menu(menus, "Helper");
 
         assertAll(
                 () -> assertFalse(authMenu.authorized()),
                 () -> assertTrue(tcgMenu.authorized()),
+                () -> assertTrue(helperMenu.authorized()),
                 () -> assertTrue(authMenu.submenuItems().stream().noneMatch(item -> item.authorized())),
                 () -> assertTrue(tcgMenu.submenuItems().stream().allMatch(item -> item.authorized())));
     }
@@ -66,31 +70,37 @@ class MenuModelAdviceTest {
     }
 
     @Test
-    void unknownRoleCannotSeeProtectedMenus() {
+    void authenticatedUserWithUnknownRoleCanOnlySeeHelperMenu() {
         var menus = advice.menuItems(authentication("ROLE_UNKNOWN"));
 
-        assertTrue(menus.stream().noneMatch(menu -> menu.authorized()));
+        assertTrue(menu(menus, "Helper").authorized());
+        assertTrue(menus.stream().filter(menu -> !menu.label().equals("Helper")).noneMatch(MenuItem::authorized));
     }
 
     @Test
     void createsExpectedMenuStructure() {
         var menus = advice.menuItems(authentication("ROLE_ADMIN"));
 
-        assertEquals(3, menus.size());
+        assertEquals(4, menus.size());
         assertEquals(
                 List.of("/auth/users", "/auth/create-user", "/auth/update-roles", "/auth/update-password"),
                 menu(menus, "Auth").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of("/tcg/save-decks-from-resource", "/tcg/start-chrome", "/tcg/statistics"),
+                List.of("/tcg/save-decks-from-resource", "/tcg/statistics"),
                 menu(menus, "TCG").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of(SubmenuItem.Type.ACTION, SubmenuItem.Type.ACTION, SubmenuItem.Type.PAGE),
+                List.of(SubmenuItem.Type.ACTION, SubmenuItem.Type.PAGE),
                 menu(menus, "TCG").submenuItems().stream()
                         .map(item -> item.type())
+                        .toList());
+        assertEquals(
+                List.of("/helper/start-chrome"),
+                menu(menus, "Helper").submenuItems().stream()
+                        .map(SubmenuItem::path)
                         .toList());
     }
 

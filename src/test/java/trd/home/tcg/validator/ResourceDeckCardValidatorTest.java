@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
-import trd.home.tcg.exception.UnableToReadResourcesException;
+import trd.home.common.exception.ResourceReadException;
 import trd.home.tcg.exception.WrongCardLineException;
 
 class ResourceDeckCardValidatorTest {
@@ -45,7 +45,7 @@ class ResourceDeckCardValidatorTest {
 
     @Test
     void wrapsResourceReadFailure() {
-        assertThrows(UnableToReadResourcesException.class, () -> validator.validateResource(unreadableResource()));
+        assertThrows(ResourceReadException.class, () -> validator.validateResource(unreadableResource()));
     }
 
     @Test

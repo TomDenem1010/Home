@@ -1,6 +1,4 @@
-package trd.home.tcg.exception;
-
-import trd.home.common.exception.HomeException;
+package trd.home.common.exception;
 
 public class ChromeLaunchException extends HomeException {
 

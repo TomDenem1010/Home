@@ -3,24 +3,39 @@ package trd.home.tcg.service.playwright;
 import com.microsoft.playwright.Browser;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import trd.home.common.logging.LogMethodCall;
+import trd.home.common.playwright.PlaywrightBrowserSessionFactory;
 import trd.home.tcg.dto.CardmarketCardDto;
 
 @Service
-@AllArgsConstructor
 public class CardmarketCardPriceSaver {
 
     private final CardmarketCardPriceGatherer cardmarketCardPriceGatherer;
     private final CardmarketRequestThrottler requestThrottler;
     private final CardmarketCardPricePersister pricePersister;
+    private final PlaywrightBrowserSessionFactory browserSessionFactory;
+    private final String browserEndpoint;
+
+    public CardmarketCardPriceSaver(
+            CardmarketCardPriceGatherer cardmarketCardPriceGatherer,
+            CardmarketRequestThrottler requestThrottler,
+            CardmarketCardPricePersister pricePersister,
+            PlaywrightBrowserSessionFactory browserSessionFactory,
+            @Value("${tcg.cardmarket.browser-endpoint:http://localhost:9222}") String browserEndpoint) {
+        this.cardmarketCardPriceGatherer = cardmarketCardPriceGatherer;
+        this.requestThrottler = requestThrottler;
+        this.pricePersister = pricePersister;
+        this.browserSessionFactory = browserSessionFactory;
+        this.browserEndpoint = browserEndpoint;
+    }
 
     @LogMethodCall
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
         List<GatheredCardmarketPrice> gatheredPrices = new ArrayList<>();
-        try (PlaywrightBrowserContext playwrightBrowserContext = new PlaywrightBrowserContext()) {
-            Browser browser = playwrightBrowserContext.getBrowser();
+        try (var browserSession = browserSessionFactory.open(browserEndpoint)) {
+            Browser browser = browserSession.getBrowser();
             for (int index = 0; index < cardmarketCardDtos.size(); index++) {
                 if (index > 0) {
                     requestThrottler.waitBeforeNextRequest();

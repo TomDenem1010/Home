@@ -7,9 +7,9 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import trd.home.common.exception.ResourceReadException;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
-import trd.home.tcg.exception.UnableToReadResourcesException;
 import trd.home.tcg.exception.WrongDeckEncodingException;
 
 @Slf4j
@@ -25,7 +25,7 @@ public class ResourceDeckEncodingValidator implements ResourceValidator {
             throw new WrongDeckEncodingException("Deck file is not valid UTF-8.");
         } catch (Exception exception) {
             log.error("Failed to read deck file '{}' while validating its encoding", resource.getFilename(), exception);
-            throw new UnableToReadResourcesException("Unable to read deck file: " + resource.getFilename(), exception);
+            throw new ResourceReadException("Unable to read deck file: " + resource.getFilename(), exception);
         }
     }
 

@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import trd.home.common.exception.ResourceReadException;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
-import trd.home.tcg.exception.UnableToReadResourcesException;
 import trd.home.tcg.exception.WrongCardLineException;
 
 @Slf4j
@@ -32,7 +32,7 @@ public class ResourceDeckCardValidator implements ResourceValidator {
                     "Failed to read deck file '{}' while validating its card entries",
                     resource.getFilename(),
                     exception);
-            throw new UnableToReadResourcesException("Unable to read deck file: " + resource.getFilename(), exception);
+            throw new ResourceReadException("Unable to read deck file: " + resource.getFilename(), exception);
         }
     }
 

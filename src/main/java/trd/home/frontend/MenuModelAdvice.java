@@ -15,6 +15,7 @@ public class MenuModelAdvice {
         boolean admin = hasRole(authentication, "ADMIN");
         boolean tcg = hasRole(authentication, "TCG");
         boolean media = hasRole(authentication, "MEDIA");
+        boolean helper = authentication != null && authentication.isAuthenticated();
 
         return List.of(
                 new MenuItem(
@@ -35,7 +36,6 @@ public class MenuModelAdvice {
                                         "/tcg/save-decks-from-resource",
                                         SubmenuItem.Type.ACTION,
                                         tcg),
-                                new SubmenuItem("Start Chrome", "/tcg/start-chrome", SubmenuItem.Type.ACTION, tcg),
                                 new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
                         "MEDIA",
@@ -47,7 +47,12 @@ public class MenuModelAdvice {
                                         SubmenuItem.Type.PAGE,
                                         media),
                                 new SubmenuItem("ByActor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
-                                new SubmenuItem("ByFolder", "/media/by-folder", SubmenuItem.Type.PAGE, media))));
+                                new SubmenuItem("ByFolder", "/media/by-folder", SubmenuItem.Type.PAGE, media))),
+                new MenuItem(
+                        "Helper",
+                        helper,
+                        List.of(new SubmenuItem(
+                                "Start Chrome", "/helper/start-chrome", SubmenuItem.Type.ACTION, helper))));
     }
 
     private static boolean hasRole(Authentication authentication, String role) {

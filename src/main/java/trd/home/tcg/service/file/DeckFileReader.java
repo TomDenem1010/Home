@@ -1,21 +1,16 @@
 package trd.home.tcg.service.file;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import trd.home.common.file.ResourceFileReader;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckVersion;
-import trd.home.tcg.exception.UnableToReadResourcesException;
 
-@Slf4j
 @AllArgsConstructor
 public class DeckFileReader extends ResourceFileReader {
 
@@ -25,9 +20,7 @@ public class DeckFileReader extends ResourceFileReader {
 
     @LogMethodCall
     public List<CardmarketDeck> read() {
-        return Arrays.stream(readResources(DECK_RESOURCE_PATTERN))
-                .map(this::readDeck)
-                .toList();
+        return readResources(DECK_RESOURCE_PATTERN).stream().map(this::readDeck).toList();
     }
 
     private CardmarketDeck readDeck(Resource resource) {
@@ -48,15 +41,7 @@ public class DeckFileReader extends ResourceFileReader {
     }
 
     private void addCardsToVersion(CardmarketDeckVersion version, Resource resource) {
-        try (var reader = resource.getInputStream()) {
-            new String(reader.readAllBytes(), StandardCharsets.UTF_8)
-                    .lines()
-                    .filter(line -> !line.isBlank())
-                    .forEach(line -> addCard(version, line));
-        } catch (IOException exception) {
-            log.error("Failed to read cards from deck file '{}'", resource.getFilename(), exception);
-            throw new UnableToReadResourcesException("Unable to read deck file: " + resource.getFilename(), exception);
-        }
+        readUtf8Lines(resource).stream().filter(line -> !line.isBlank()).forEach(line -> addCard(version, line));
     }
 
     private static void addCard(CardmarketDeckVersion version, String line) {

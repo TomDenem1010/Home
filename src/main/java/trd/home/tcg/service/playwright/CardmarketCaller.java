@@ -1,37 +1,31 @@
 package trd.home.tcg.service.playwright;
 
 import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Response;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
 import trd.home.common.logging.LogMethodCall;
+import trd.home.common.playwright.BrowserPage;
+import trd.home.common.playwright.PlaywrightPageReader;
 import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
 
 @Slf4j
 @Service
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class CardmarketCaller {
+
+    private final PlaywrightPageReader pageReader;
 
     @LogMethodCall
     public Document callWithPlaywright(String url, Browser browser) {
         try {
-            BrowserContext context = browser.contexts().get(0);
-            Page page = context.pages().isEmpty()
-                    ? context.newPage()
-                    : context.pages().get(0);
-
-            Response response = page.navigate(url);
-            page.waitForLoadState();
-
+            BrowserPage page = pageReader.read(url, browser);
             Document document = parseHtml(page.content());
-            if ((response != null && response.status() == 429) || isRateLimitPage(document)) {
+            if (Integer.valueOf(429).equals(page.statusCode()) || isRateLimitPage(document)) {
                 throw new CardmarketRateLimitException("Cardmarket rate limit reached");
             }
             return document;

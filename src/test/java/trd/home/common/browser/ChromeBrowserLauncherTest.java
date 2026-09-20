@@ -1,4 +1,4 @@
-package trd.home.tcg.service;
+package trd.home.common.browser;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
-import trd.home.tcg.exception.ChromeLaunchException;
+import trd.home.common.exception.ChromeLaunchException;
 
-class ChromeLauncherTest {
+class ChromeBrowserLauncherTest {
 
     private final ChromeProcessStarter processStarter = mock(ChromeProcessStarter.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final ChromeLauncher launcher = new ChromeLauncher(processStarter, notificationPublisher);
+    private final ChromeBrowserLauncher launcher = new ChromeBrowserLauncher(processStarter, notificationPublisher);
 
     @Test
     void publishesStartedAndSuccessfulNotifications() {
