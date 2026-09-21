@@ -25,9 +25,11 @@ class FrontendEventServiceTest {
         service.subscribe("alice", "session-1");
 
         assertTrue(service.hasConnection("alice"));
-        assertTrue(service.sendToUser("alice", new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done")));
+        assertTrue(service.sendToUser(
+                "alice", "event-1", new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done")));
         assertFalse(service.hasConnection("bob"));
-        assertFalse(service.sendToUser("bob", new FrontendEvent("bob", FrontendNotificationType.SUCCESS, "Done")));
+        assertFalse(service.sendToUser(
+                "bob", "event-1", new FrontendEvent("bob", FrontendNotificationType.SUCCESS, "Done")));
     }
 
     @Test
@@ -89,7 +91,8 @@ class FrontendEventServiceTest {
         EmitterHarness harness = new EmitterHarness(emitter);
         harness.failWrites = true;
 
-        assertFalse(service.sendToUser("alice", new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done")));
+        assertFalse(service.sendToUser(
+                "alice", "event-1", new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done")));
         assertFalse(service.hasConnection("alice"));
     }
 

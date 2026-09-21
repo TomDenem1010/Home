@@ -14,7 +14,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.springframework.test.util.ReflectionTestUtils;
 import tools.jackson.databind.json.JsonMapper;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
@@ -35,20 +34,19 @@ class FrontendNotificationSchedulerTest {
         ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
         pendingEvent(event);
         when(frontendEventService.hasConnection("alice")).thenReturn(true);
-        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(true);
+        when(frontendEventService.sendToUser(eq("alice"), any(), any())).thenReturn(true);
 
         scheduler.processNextEvent();
 
         ArgumentCaptor<FrontendEvent> frontendEventCaptor = ArgumentCaptor.forClass(FrontendEvent.class);
         InOrder order = inOrder(eventRepository, frontendEventService);
-        order.verify(frontendEventService).sendToUser(eq("alice"), frontendEventCaptor.capture());
-        order.verify(eventRepository).save(event);
+        order.verify(frontendEventService).sendToUser(eq("alice"), any(), frontendEventCaptor.capture());
         FrontendEvent frontendEvent = frontendEventCaptor.getValue();
         assertEquals("alice", frontendEvent.username());
         assertEquals(FrontendNotificationType.SUCCESS, frontendEvent.type());
         assertEquals("Done", frontendEvent.message());
-        assertEquals(EventStatus.DONE, event.getStatus());
-        assertNotNull(event.getProcessedAt());
+        assertEquals(EventStatus.TO_DO, event.getStatus());
+        verify(eventRepository, never()).save(event);
     }
 
     @Test
@@ -56,7 +54,7 @@ class FrontendNotificationSchedulerTest {
         ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
         pendingEvent(event);
         when(frontendEventService.hasConnection("alice")).thenReturn(true);
-        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(false);
+        when(frontendEventService.sendToUser(eq("alice"), any(), any())).thenReturn(false);
 
         scheduler.processNextEvent();
 
@@ -73,7 +71,7 @@ class FrontendNotificationSchedulerTest {
 
         assertEquals(EventStatus.TO_DO, event.getStatus());
         verify(eventRepository, never()).save(event);
-        verify(frontendEventService, never()).sendToUser(any(), any());
+        verify(frontendEventService, never()).sendToUser(any(), any(), any());
     }
 
     @Test
@@ -95,29 +93,16 @@ class FrontendNotificationSchedulerTest {
                         EventType.FRONTEND_NOTIFICATION, EventStatus.TO_DO))
                 .thenReturn(List.of(disconnected, delivered));
         when(frontendEventService.hasConnection(any())).thenReturn(true);
-        when(frontendEventService.sendToUser(eq("alice"), any())).thenReturn(false);
-        when(frontendEventService.sendToUser(eq("bob"), any())).thenReturn(true);
+        when(frontendEventService.sendToUser(eq("alice"), any(), any())).thenReturn(false);
+        when(frontendEventService.sendToUser(eq("bob"), any(), any())).thenReturn(true);
 
         scheduler.processNextEvent();
 
         assertEquals(EventStatus.TO_DO, disconnected.getStatus());
-        assertEquals(EventStatus.DONE, delivered.getStatus());
-        verify(eventRepository).save(delivered);
-        verify(frontendEventService).sendToUser(eq("alice"), any());
-        verify(frontendEventService).sendToUser(eq("bob"), any());
-    }
-
-    @Test
-    void deliverReturnsTrueAfterPersistingSuccessfulNotification() {
-        ApplicationEvent event = frontendEvent("alice", "SUCCESS", "Done");
-        FrontendEvent frontendEvent = new FrontendEvent("alice", FrontendNotificationType.SUCCESS, "Done");
-        when(frontendEventService.sendToUser("alice", frontendEvent)).thenReturn(true);
-
-        Boolean delivered = ReflectionTestUtils.invokeMethod(scheduler, "deliver", event, frontendEvent);
-
-        assertEquals(Boolean.TRUE, delivered);
-        assertEquals(EventStatus.DONE, event.getStatus());
-        verify(eventRepository).save(event);
+        assertEquals(EventStatus.TO_DO, delivered.getStatus());
+        verify(eventRepository, never()).save(delivered);
+        verify(frontendEventService).sendToUser(eq("alice"), any(), any());
+        verify(frontendEventService).sendToUser(eq("bob"), any(), any());
     }
 
     private ApplicationEvent frontendEvent(String username, String type, String message) {

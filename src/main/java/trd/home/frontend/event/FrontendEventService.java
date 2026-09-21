@@ -56,12 +56,12 @@ public class FrontendEventService {
     }
 
     @LogMethodCall
-    public boolean sendToUser(String username, FrontendEvent event) {
+    public boolean sendToUser(String username, String eventId, FrontendEvent event) {
         Set<Connection> connections = connectionsByUsername.get(username);
         if (connections == null || connections.isEmpty()) {
             return false;
         }
-        return connections.stream().anyMatch(connection -> send(username, connection, event));
+        return connections.stream().anyMatch(connection -> send(username, connection, eventId, event));
     }
 
     @EventListener
@@ -76,9 +76,11 @@ public class FrontendEventService {
                 }));
     }
 
-    private boolean send(String username, Connection connection, FrontendEvent event) {
+    private boolean send(String username, Connection connection, String eventId, FrontendEvent event) {
         return send(
-                username, connection, SseEmitter.event().name("notification").data(event));
+                username,
+                connection,
+                SseEmitter.event().name("notification").id(eventId).data(event));
     }
 
     private void sendHeartbeat(String username, Connection connection) {

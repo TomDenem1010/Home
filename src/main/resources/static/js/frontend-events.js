@@ -1,25 +1,38 @@
 (() => {
     const storageKey = "home.frontend-notifications";
     const maximumEventCount = 10;
+    const seenEventIds = new Set(readStoredEvents().map(record => record.id));
 
     window.showFrontendNotification = addEvent;
     renderEvents(readStoredEvents());
 
     const source = new EventSource("/api/frontend-events");
-    source.addEventListener("notification", event => addEvent(JSON.parse(event.data)));
+    source.addEventListener("notification", event => {
+        if (!seenEventIds.has(event.lastEventId)) {
+            seenEventIds.add(event.lastEventId);
+            addEvent(JSON.parse(event.data), event.lastEventId);
+        }
+        const csrf = document.querySelector('input[name="_csrf"]')?.value;
+        fetch(`/api/frontend-events/${encodeURIComponent(event.lastEventId)}/ack`, {
+            method: "POST",
+            headers: csrf ? {"X-CSRF-TOKEN": csrf} : {}
+        }).then(response => {
+            if (!response.ok) throw new Error(`Notification acknowledgement failed with status ${response.status}`);
+        }).catch(error => console.error(error));
+    });
     source.onerror = () => {
         // EventSource reconnects automatically after temporary connection failures.
     };
 
-    function addEvent(notification) {
-        const records = [createRecord(notification), ...readStoredEvents()].slice(0, maximumEventCount);
+    function addEvent(notification, id) {
+        const records = [createRecord(notification, id), ...readStoredEvents()].slice(0, maximumEventCount);
         writeStoredEvents(records);
         renderEvents(records);
     }
 
-    function createRecord(notification) {
+    function createRecord(notification, id) {
         return {
-            id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`,
+            id: id || globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
             receivedAt: new Date().toISOString(),
             notification
         };

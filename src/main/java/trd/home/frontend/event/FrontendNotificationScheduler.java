@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
-import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.repository.ApplicationEventRepository;
 
@@ -37,18 +36,9 @@ public class FrontendNotificationScheduler {
                 continue;
             }
 
-            if (deliver(event, frontendEvent)) {
+            if (frontendEventService.sendToUser(frontendEvent.username(), event.getId(), frontendEvent)) {
                 return;
             }
         }
-    }
-
-    private boolean deliver(ApplicationEvent event, FrontendEvent frontendEvent) {
-        if (!frontendEventService.sendToUser(frontendEvent.username(), frontendEvent)) {
-            return false;
-        }
-        event.markDone();
-        eventRepository.save(event);
-        return true;
     }
 }
