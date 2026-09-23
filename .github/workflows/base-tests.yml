@@ -4,6 +4,9 @@ on:
     push:
         branches:
             - main
+    pull_request:
+        branches:
+            - main
     workflow_dispatch:
         inputs:
             branch:
@@ -22,7 +25,7 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v5
                 with:
-                    ref: ${{ inputs.branch || 'main' }}
+                    ref: ${{ inputs.branch || github.ref }}
 
             -   name: Set up JDK 25
                 uses: ./.github/actions/setup-jdk-25
@@ -37,7 +40,7 @@ jobs:
             -   name: Checkout repository
                 uses: actions/checkout@v5
                 with:
-                    ref: ${{ inputs.branch || 'main' }}
+                    ref: ${{ inputs.branch || github.ref }}
 
             -   name: Set up JDK 25
                 uses: ./.github/actions/setup-jdk-25
