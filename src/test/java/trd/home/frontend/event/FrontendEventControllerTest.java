@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import jakarta.servlet.http.HttpSession;
@@ -56,5 +57,38 @@ class FrontendEventControllerTest {
                 HttpStatus.NO_CONTENT, controller.acknowledge("event-1", alice).getStatusCode());
         assertEquals(EventStatus.DONE, event.getStatus());
         verify(eventRepository).save(event);
+    }
+
+    @Test
+    void rejectsMissingNonNotificationAndMalformedEvents() {
+        Principal alice = () -> "alice";
+        ApplicationEvent wrongType = new ApplicationEvent(EventType.IMPORT_MEDIA, "ignored");
+        ApplicationEvent malformed = new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, "not-json");
+        when(eventRepository.findById("missing")).thenReturn(Optional.empty());
+        when(eventRepository.findById("wrong-type")).thenReturn(Optional.of(wrongType));
+        when(eventRepository.findById("malformed")).thenReturn(Optional.of(malformed));
+
+        assertEquals(
+                HttpStatus.NOT_FOUND, controller.acknowledge("missing", alice).getStatusCode());
+        assertEquals(
+                HttpStatus.NOT_FOUND,
+                controller.acknowledge("wrong-type", alice).getStatusCode());
+        assertEquals(
+                HttpStatus.NOT_FOUND, controller.acknowledge("malformed", alice).getStatusCode());
+        verifyNoInteractions(eventService);
+    }
+
+    @Test
+    void acceptsAlreadyAcknowledgedNotificationWithoutSavingAgain() {
+        ApplicationEvent event = new ApplicationEvent(
+                EventType.FRONTEND_NOTIFICATION,
+                "{\"username\":\"alice\",\"type\":\"WARNING\",\"message\":\"Started\"}");
+        event.markDone();
+        when(eventRepository.findById("event-1")).thenReturn(Optional.of(event));
+
+        assertEquals(
+                HttpStatus.NO_CONTENT,
+                controller.acknowledge("event-1", () -> "alice").getStatusCode());
+        verify(eventRepository, org.mockito.Mockito.never()).save(event);
     }
 }

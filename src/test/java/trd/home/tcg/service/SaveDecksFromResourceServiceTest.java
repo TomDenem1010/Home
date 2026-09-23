@@ -2,10 +2,12 @@ package trd.home.tcg.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
@@ -40,5 +42,56 @@ class SaveDecksFromResourceServiceTest {
         verify(deckSaver).save(secondDeck);
         assertEquals(EventStatus.DONE, event.getStatus());
         verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
+    }
+
+    @Test
+    void savesOnlyTheResourceMatchingTheSelectedDeck() {
+        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "selected-id");
+        CardmarketDeck selected = deck("Selected");
+        CardmarketDeck other = deck("Other");
+        when(deckRepository.findById("selected-id")).thenReturn(Optional.of(deck("Selected")));
+        when(deckFileReader.read()).thenReturn(List.of(other, selected));
+
+        service.process(event);
+
+        assertEquals(EventStatus.DONE, event.getStatus());
+        verify(deckSaver).save(selected);
+        verify(deckSaver, never()).save(other);
+    }
+
+    @Test
+    void failsWhenSelectedDeckDoesNotExist() {
+        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "missing-id");
+        when(deckRepository.findById("missing-id")).thenReturn(Optional.empty());
+        when(deckFileReader.read()).thenReturn(List.of());
+
+        service.process(event);
+
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        verify(notificationPublisher)
+                .publish(null, FrontendNotificationType.ERROR, "Failed to save decks: Deck not found: missing-id");
+    }
+
+    @Test
+    void failsWhenSelectedDeckHasNoResourceFile() {
+        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "selected-id");
+        when(deckRepository.findById("selected-id")).thenReturn(Optional.of(deck("Selected")));
+        when(deckFileReader.read()).thenReturn(List.of(deck("Other")));
+
+        service.process(event);
+
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        verify(notificationPublisher)
+                .publish(
+                        null,
+                        FrontendNotificationType.ERROR,
+                        "Failed to save decks: No resource file found for deck: Selected");
+        verify(deckSaver, never()).save(org.mockito.ArgumentMatchers.any());
+    }
+
+    private static CardmarketDeck deck(String name) {
+        CardmarketDeck deck = new CardmarketDeck();
+        deck.setName(name);
+        return deck;
     }
 }

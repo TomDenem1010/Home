@@ -33,6 +33,14 @@ class ResourceFileReaderTest {
         assertEquals(List.of("first", "second"), reader.lines(resource));
     }
 
+    @Test
+    void resolvesResourcesMatchingClasspathPattern() {
+        List<Resource> resources = reader.resources("classpath*:application.properties");
+
+        assertEquals(1, resources.size());
+        assertEquals("application.properties", resources.getFirst().getFilename());
+    }
+
     private static class TestResourceFileReader extends ResourceFileReader {
 
         private List<Resource> resources(String pattern) {

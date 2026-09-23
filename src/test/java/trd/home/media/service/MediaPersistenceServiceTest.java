@@ -113,6 +113,24 @@ class MediaPersistenceServiceTest {
     }
 
     @Test
+    void acceptsDistinctVideosWithinOneImport() {
+        Folder folder = new Folder();
+        folder.setId("folder-1");
+        when(folders.findByPath(anyString())).thenReturn(Optional.of(folder));
+        Actor actor = new Actor();
+        when(actors.findByName("Alice")).thenReturn(Optional.of(actor));
+        when(videos.findByFolderIdAndNameAndActorKey(anyString(), anyString(), anyString()))
+                .thenReturn(Optional.empty());
+        MediaFile first =
+                new MediaFile(Path.of("a", "Movies", "one.mp4"), new ParsedVideoName("First", Set.of("Alice")));
+        MediaFile second =
+                new MediaFile(Path.of("a", "Movies", "two.mp4"), new ParsedVideoName("Second", Set.of("Alice")));
+
+        assertEquals(2, service.save(List.of(first, second)));
+        verify(videos, times(2)).save(any());
+    }
+
+    @Test
     void actorKeyHasStableSha256Value() {
         assertEquals(
                 "8ee2b723e57e8e0d5bc691a1ae7d107ae84c687da81b8294b6be8bac0d115e52",

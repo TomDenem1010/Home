@@ -14,6 +14,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import trd.home.common.exception.ResourceReadException;
 import trd.home.common.validator.ResourceValidator;
+import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dao.CardmarketDeck;
 
 class DeckFileReaderTest {
@@ -28,7 +29,14 @@ class DeckFileReaderTest {
 
         verify(validator).validateResource(resource);
         assertEquals(1, decks.size());
-        assertEquals(1, decks.getFirst().getCurrentVersion().getCards().size());
+        CardmarketDeck deck = decks.getFirst();
+        assertEquals("TestDeck", deck.getName());
+        assertEquals("v1", deck.getCurrentVersion().getVersion());
+        assertEquals(1, deck.getCurrentVersion().getCards().size());
+        var deckCard = deck.getCurrentVersion().getCards().iterator().next();
+        assertEquals(1, deckCard.getQuantity());
+        assertEquals("https://www.cardmarket.com/card", deckCard.getCard().getLink());
+        assertEquals(CardFoilType.FOIL, deckCard.getCard().getFoilType());
     }
 
     @Test

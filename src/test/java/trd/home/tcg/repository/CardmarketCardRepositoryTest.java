@@ -38,6 +38,16 @@ class CardmarketCardRepositoryTest {
         assertEquals("card-id", result.orElseThrow().id());
     }
 
+    @Test
+    void mapsCardsFromSelectedDeckToDtos() {
+        when(repository.findAllInCurrentDeckVersionByDeckId("deck-id")).thenReturn(List.of(card("card-id")));
+
+        var result = repository.findAllInDeckCurrentVersion("deck-id");
+
+        assertEquals(1, result.size());
+        assertEquals("card-id", result.getFirst().id());
+    }
+
     private static CardmarketCard card(String id) {
         CardmarketCard card = new CardmarketCard();
         card.setId(id);

@@ -38,6 +38,7 @@ class CardmarketDeckRepositoryTest {
     @Test
     void calculatesHistoryTotalsAndPreservesNullPrices() {
         var projection = mock(CardmarketDeckRepository.CardmarketDeckCardPriceProjection.class);
+        var unpricedProjection = mock(CardmarketDeckRepository.CardmarketDeckCardPriceProjection.class);
         Instant createdAt = Instant.parse("2026-01-01T00:00:00Z");
         when(projection.getCardName()).thenReturn("Card");
         when(projection.getCardLink()).thenReturn("https://example.test/card");
@@ -45,12 +46,15 @@ class CardmarketDeckRepositoryTest {
         when(projection.getLatestFromInEuro()).thenReturn(new BigDecimal("3.00"));
         when(projection.getLatestTrendInEuro()).thenReturn(new BigDecimal("4.00"));
         when(projection.getLatestPriceCreatedAt()).thenReturn(createdAt);
-        when(repository.calculateDeckCardPriceSummaryProjections("deck-id")).thenReturn(List.of(projection));
+        when(unpricedProjection.getCardName()).thenReturn("Unpriced");
+        when(unpricedProjection.getQuantity()).thenReturn(100);
+        when(repository.calculateDeckCardPriceSummaryProjections("deck-id"))
+                .thenReturn(List.of(projection, unpricedProjection));
 
         var result = repository.calculateDeckPriceHistorySummary("deck-id");
 
         assertEquals("deck-id", result.deckId());
-        assertEquals(1, result.cards().size());
+        assertEquals(2, result.cards().size());
         assertEquals("https://example.test/card", result.cards().getFirst().cardLink());
         assertEquals(new BigDecimal("6.00"), result.sumLatestFromInEuro());
         assertEquals(new BigDecimal("8.00"), result.sumLatestTrendInEuro());

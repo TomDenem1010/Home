@@ -3,11 +3,15 @@ package trd.home.media.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import trd.home.common.constant.EventStatus;
@@ -29,6 +33,13 @@ class MediaImportEventProcessorTest {
     @Test
     void completesSuccessfulImport() {
         ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_MEDIA, "C:\\Media");
+        List<EventStatus> savedStatuses = new ArrayList<>();
+        doAnswer(invocation -> {
+                    savedStatuses.add(event.getStatus());
+                    return event;
+                })
+                .when(eventRepository)
+                .save(event);
         when(importService.importPath("C:\\Media")).thenReturn(12);
 
         processor.process(event);
@@ -38,6 +49,8 @@ class MediaImportEventProcessorTest {
         verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Imported videos: 12");
         InOrder order = inOrder(eventRepository, importService);
         order.verify(eventRepository).save(event);
+        verify(eventRepository, times(2)).save(event);
+        assertEquals(List.of(EventStatus.PROCESSING, EventStatus.DONE), savedStatuses);
         order.verify(importService).importPath("C:\\Media");
         order.verify(eventRepository).save(event);
     }
@@ -55,5 +68,6 @@ class MediaImportEventProcessorTest {
         assertEquals("Directory is unavailable", event.getErrorMessage());
         verify(notificationPublisher)
                 .publish(null, FrontendNotificationType.ERROR, "Failed to import media: Directory is unavailable");
+        verify(eventRepository, times(2)).save(event);
     }
 }
