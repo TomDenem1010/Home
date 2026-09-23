@@ -2,6 +2,7 @@ package trd.home.common.logging;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -98,7 +99,7 @@ public class LogMethodCallAspect {
 
     private String formatInput(ProceedingJoinPoint joinPoint) {
         Object[] arguments = maskedArguments(joinPoint);
-        return arguments.length == 0 ? null : Arrays.deepToString(arguments);
+        return arguments.length == 0 ? "" : Arrays.deepToString(arguments);
     }
 
     private Object[] maskedArguments(ProceedingJoinPoint joinPoint) {
@@ -129,5 +130,9 @@ public class LogMethodCallAspect {
         return wrapped.substring(1, wrapped.length() - 1);
     }
 
-    private record MethodCallContext(String methodName, String input, long startedAt, LogMethodCall configuration) {}
+    private record MethodCallContext(
+            @NonNull String methodName,
+            @NonNull String input,
+            long startedAt,
+            @NonNull LogMethodCall configuration) {}
 }

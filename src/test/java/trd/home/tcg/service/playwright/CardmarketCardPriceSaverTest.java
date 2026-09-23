@@ -19,6 +19,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import trd.home.common.playwright.PlaywrightBrowserSession;
 import trd.home.common.playwright.PlaywrightBrowserSessionFactory;
+import trd.home.tcg.constant.CardFoilType;
+import trd.home.tcg.constant.CardGameType;
+import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCardPrice;
 import trd.home.tcg.dto.CardmarketCardDto;
 
@@ -91,6 +94,13 @@ class CardmarketCardPriceSaverTest {
     }
 
     private static CardmarketCardDto card(String id) {
-        return new CardmarketCardDto(id, "https://example.test/" + id, null, null, null, null, null);
+        return new CardmarketCardDto(
+                id,
+                "https://example.test/" + id,
+                CardFoilType.NO,
+                CardGameType.MAGIC_THE_GATHERING,
+                "",
+                "",
+                CardLanguage.ENGLISH);
     }
 }

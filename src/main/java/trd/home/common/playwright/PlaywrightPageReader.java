@@ -18,7 +18,7 @@ public class PlaywrightPageReader {
                     : context.pages().getFirst();
             Response response = page.navigate(url);
             page.waitForLoadState();
-            return new BrowserPage(response == null ? null : response.status(), page.content());
+            return new BrowserPage(response == null ? 0 : response.status(), page.content());
         } catch (RuntimeException exception) {
             throw new BrowserNavigationException("Unable to read browser page: " + url, exception);
         }

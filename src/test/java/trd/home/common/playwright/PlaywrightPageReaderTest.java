@@ -1,7 +1,6 @@
 package trd.home.common.playwright;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,7 +62,7 @@ class PlaywrightPageReaderTest {
 
         BrowserPage result = reader.read("https://example.test", browser);
 
-        assertNull(result.statusCode());
+        assertEquals(0, result.statusCode());
         assertEquals("content", result.content());
     }
 

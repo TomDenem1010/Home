@@ -1,3 +1,5 @@
 package trd.home.common.playwright;
 
-public record BrowserPage(Integer statusCode, String content) {}
+import lombok.NonNull;
+
+public record BrowserPage(int statusCode, @NonNull String content) {}

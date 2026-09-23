@@ -3,6 +3,7 @@ package trd.home.tcg.repository;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -62,10 +63,10 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
     default List<CardmarketDeckPriceSummary> calculateActiveDeckPriceSummaries() {
         return calculateActiveDeckPriceSummaryProjections().stream()
                 .map(projection -> new CardmarketDeckPriceSummary(
-                        projection.getDeckId(),
-                        projection.getDeckName(),
-                        projection.getSumFromInEuro(),
-                        projection.getSumTrendInEuro()))
+                        Objects.requireNonNullElse(projection.getDeckId(), ""),
+                        Objects.requireNonNullElse(projection.getDeckName(), ""),
+                        Objects.requireNonNullElse(projection.getSumFromInEuro(), BigDecimal.ZERO),
+                        Objects.requireNonNullElse(projection.getSumTrendInEuro(), BigDecimal.ZERO)))
                 .toList();
     }
 
@@ -111,24 +112,24 @@ public interface CardmarketDeckRepository extends JpaRepository<CardmarketDeck, 
     default CardmarketDeckPriceHistorySummary calculateDeckPriceHistorySummary(String deckId) {
         List<CardmarketDeckCardPriceSummary> cards = calculateDeckCardPriceSummaryProjections(deckId).stream()
                 .map(projection -> new CardmarketDeckCardPriceSummary(
-                        projection.getCardName(),
-                        projection.getCardLink(),
+                        Objects.requireNonNullElse(projection.getCardName(), ""),
+                        Objects.requireNonNullElse(projection.getCardLink(), ""),
                         projection.getQuantity(),
-                        projection.getLatestFromInEuro(),
-                        projection.getLatestTrendInEuro(),
-                        projection.getLatestPriceCreatedAt()))
+                        Objects.requireNonNullElse(projection.getLatestFromInEuro(), BigDecimal.ZERO),
+                        Objects.requireNonNullElse(projection.getLatestTrendInEuro(), BigDecimal.ZERO),
+                        Objects.requireNonNullElse(projection.getLatestPriceCreatedAt(), Instant.EPOCH)))
                 .toList();
 
         BigDecimal totalFrom = totalPrice(cards, CardmarketDeckCardPriceSummary::latestFromInEuro);
         BigDecimal totalTrend = totalPrice(cards, CardmarketDeckCardPriceSummary::latestTrendInEuro);
-        return new CardmarketDeckPriceHistorySummary(deckId, cards, totalFrom, totalTrend);
+        return new CardmarketDeckPriceHistorySummary(
+                Objects.requireNonNullElse(deckId, ""), cards, totalFrom, totalTrend);
     }
 
     private static BigDecimal totalPrice(
             List<CardmarketDeckCardPriceSummary> cards,
             Function<CardmarketDeckCardPriceSummary, BigDecimal> priceExtractor) {
         return cards.stream()
-                .filter(card -> priceExtractor.apply(card) != null)
                 .map(card -> priceExtractor.apply(card).multiply(BigDecimal.valueOf(card.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }

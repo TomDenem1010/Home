@@ -165,7 +165,7 @@ class LogMethodCallAspectTest {
         var constructor = contextType.getDeclaredConstructors()[0];
         constructor.setAccessible(true);
         Object context = constructor.newInstance(
-                "method", null, System.nanoTime() - TimeUnit.SECONDS.toNanos(2), annotation(method));
+                "method", "", System.nanoTime() - TimeUnit.SECONDS.toNanos(2), annotation(method));
 
         Long elapsed = ReflectionTestUtils.invokeMethod(aspect, "elapsedMilliseconds", context);
 

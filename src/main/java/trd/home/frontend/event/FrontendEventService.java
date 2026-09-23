@@ -3,6 +3,7 @@ package trd.home.frontend.event;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -105,5 +106,6 @@ public class FrontendEventService {
         });
     }
 
-    private record Connection(String sessionId, SseEmitter emitter) {}
+    private record Connection(
+            @NonNull String sessionId, @NonNull SseEmitter emitter) {}
 }

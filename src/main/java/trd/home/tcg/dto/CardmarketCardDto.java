@@ -2,6 +2,7 @@ package trd.home.tcg.dto;
 
 import java.net.URI;
 import java.util.Objects;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.constant.CardFoilType;
@@ -11,19 +12,26 @@ import trd.home.tcg.dao.CardmarketCard;
 
 @Slf4j
 public record CardmarketCardDto(
-        String id,
-        String link,
-        CardFoilType foilType,
-        CardGameType cardGameType,
-        String expansion,
-        String name,
-        CardLanguage cardLanguage) {
+        @NonNull String id,
+        @NonNull String link,
+        @NonNull CardFoilType foilType,
+        @NonNull CardGameType cardGameType,
+        @NonNull String expansion,
+        @NonNull String name,
+        @NonNull CardLanguage cardLanguage) {
 
     @LogMethodCall
     public static CardmarketCardDto from(CardmarketCard card) {
         String link = card.getLink();
         if (Objects.isNull(link) || link.isBlank()) {
-            return new CardmarketCardDto(card.getId(), link, card.getFoilType(), null, null, null, null);
+            return new CardmarketCardDto(
+                    Objects.requireNonNullElse(card.getId(), ""),
+                    "",
+                    Objects.requireNonNullElse(card.getFoilType(), CardFoilType.NO),
+                    CardGameType.MAGIC_THE_GATHERING,
+                    "",
+                    "",
+                    CardLanguage.ENGLISH);
         }
 
         URI uri = URI.create(link.trim());
@@ -31,14 +39,23 @@ public record CardmarketCardDto(
         int productsIndex = findPartIndex(parts, "Products");
         int singlesIndex = findPartIndex(parts, "Singles");
 
-        CardGameType cardGameType =
-                productsIndex > 0 ? CardGameType.findByCardmarketUrlPart(parts[productsIndex - 1]) : null;
-        String expansion = singlesIndex >= 0 && parts.length > singlesIndex + 1 ? parts[singlesIndex + 1] : null;
-        String name = singlesIndex >= 0 && parts.length > singlesIndex + 2 ? parts[singlesIndex + 2] : null;
+        CardGameType cardGameType = productsIndex > 0
+                ? Objects.requireNonNullElse(
+                        CardGameType.findByCardmarketUrlPart(parts[productsIndex - 1]),
+                        CardGameType.MAGIC_THE_GATHERING)
+                : CardGameType.MAGIC_THE_GATHERING;
+        String expansion = singlesIndex >= 0 && parts.length > singlesIndex + 1 ? parts[singlesIndex + 1] : "";
+        String name = singlesIndex >= 0 && parts.length > singlesIndex + 2 ? parts[singlesIndex + 2] : "";
         CardLanguage cardLanguage = findLanguage(uri.getQuery());
 
         return new CardmarketCardDto(
-                card.getId(), link, card.getFoilType(), cardGameType, expansion, name, cardLanguage);
+                Objects.requireNonNullElse(card.getId(), ""),
+                link,
+                Objects.requireNonNullElse(card.getFoilType(), CardFoilType.NO),
+                cardGameType,
+                expansion,
+                name,
+                cardLanguage);
     }
 
     private static int findPartIndex(String[] parts, String expectedPart) {
@@ -52,20 +69,21 @@ public record CardmarketCardDto(
 
     private static CardLanguage findLanguage(String query) {
         if (Objects.isNull(query)) {
-            return null;
+            return CardLanguage.ENGLISH;
         }
 
         for (String parameter : query.split("&")) {
             String[] keyValue = parameter.split("=", 2);
             if (keyValue.length == 2 && "language".equals(keyValue[0])) {
                 try {
-                    return CardLanguage.findByCardmarketUrlPart(Integer.parseInt(keyValue[1]));
+                    return Objects.requireNonNullElse(
+                            CardLanguage.findByCardmarketUrlPart(Integer.parseInt(keyValue[1])), CardLanguage.ENGLISH);
                 } catch (NumberFormatException exception) {
                     log.error("Failed to parse Cardmarket language identifier '{}'", keyValue[1], exception);
-                    return null;
+                    return CardLanguage.ENGLISH;
                 }
             }
         }
-        return null;
+        return CardLanguage.ENGLISH;
     }
 }

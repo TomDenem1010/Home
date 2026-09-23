@@ -1,6 +1,10 @@
 package trd.home.tcg.dto;
 
 import java.math.BigDecimal;
+import lombok.NonNull;
 
 public record CardmarketDeckPriceSummary(
-        String deckId, String deckName, BigDecimal sumFromInEuro, BigDecimal sumTrendInEuro) {}
+        @NonNull String deckId,
+        @NonNull String deckName,
+        @NonNull BigDecimal sumFromInEuro,
+        @NonNull BigDecimal sumTrendInEuro) {}

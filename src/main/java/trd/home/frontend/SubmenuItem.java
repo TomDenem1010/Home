@@ -1,6 +1,12 @@
 package trd.home.frontend;
 
-public record SubmenuItem(String label, String path, Type type, boolean authorized) {
+import lombok.NonNull;
+
+public record SubmenuItem(
+        @NonNull String label,
+        @NonNull String path,
+        @NonNull Type type,
+        boolean authorized) {
 
     public enum Type {
         ACTION,

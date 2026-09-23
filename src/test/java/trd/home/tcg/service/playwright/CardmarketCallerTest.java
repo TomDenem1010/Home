@@ -12,7 +12,6 @@ import trd.home.common.playwright.BrowserPage;
 import trd.home.common.playwright.PlaywrightPageReader;
 import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
-import trd.home.tcg.exception.HtmlParseException;
 
 class CardmarketCallerTest {
 
@@ -39,10 +38,12 @@ class CardmarketCallerTest {
     }
 
     @Test
-    void propagatesHtmlParseFailures() {
+    void usesDefaultsForMissingHttpResponseAndContent() {
         givenPage(null, null);
 
-        assertThrows(HtmlParseException.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
+        assertEquals(
+                "",
+                caller.callWithPlaywright("https://example.test/card", browser).text());
     }
 
     @Test
@@ -64,6 +65,7 @@ class CardmarketCallerTest {
     }
 
     private void givenPage(Integer statusCode, String content) {
-        when(pageReader.read("https://example.test/card", browser)).thenReturn(new BrowserPage(statusCode, content));
+        when(pageReader.read("https://example.test/card", browser))
+                .thenReturn(new BrowserPage(statusCode == null ? 0 : statusCode, content == null ? "" : content));
     }
 }

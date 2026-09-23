@@ -27,7 +27,7 @@ class CardmarketCardDtoTest {
 
         assertAll(
                 () -> assertEquals("card-id", dto.id()),
-                () -> assertEquals(link, dto.link()),
+                () -> assertEquals(link == null || link.isBlank() ? "" : link, dto.link()),
                 () -> assertEquals(CardFoilType.FOIL, dto.foilType()),
                 () -> assertEquals(expectedCardGameType, dto.cardGameType()),
                 () -> assertEquals(expectedExpansion, dto.expansion()),
@@ -72,58 +72,63 @@ class CardmarketCardDtoTest {
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products",
                         CardGameType.MAGIC_THE_GATHERING,
-                        null,
-                        null,
-                        null),
+                        "",
+                        "",
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles",
                         CardGameType.MAGIC_THE_GATHERING,
-                        null,
-                        null,
-                        null),
+                        "",
+                        "",
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles/Ravnica-Remastered-Extras",
                         CardGameType.MAGIC_THE_GATHERING,
                         "Ravnica-Remastered-Extras",
-                        null,
-                        null),
+                        "",
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/UnknownGame/Products/Singles/Set/Card?language=2",
-                        null,
+                        CardGameType.MAGIC_THE_GATHERING,
                         "Set",
                         "Card",
-                        null),
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language=abc",
                         CardGameType.MAGIC_THE_GATHERING,
                         "Set",
                         "Card",
-                        null),
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language=",
                         CardGameType.MAGIC_THE_GATHERING,
                         "Set",
                         "Card",
-                        null),
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?Language=1",
                         CardGameType.MAGIC_THE_GATHERING,
                         "Set",
                         "Card",
-                        null),
+                        CardLanguage.ENGLISH),
                 Arguments.of(
                         "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language",
                         CardGameType.MAGIC_THE_GATHERING,
                         "Set",
                         "Card",
-                        null),
-                Arguments.of("Products/Singles/Set/Card", null, "Set", "Card", null),
-                Arguments.of("Singles/Set/Card", null, "Set", "Card", null),
-                Arguments.of("Singles", null, null, null, null),
-                Arguments.of("Singles/Set", null, "Set", null, null),
-                Arguments.of("   ", null, null, null, null),
-                Arguments.of("", null, null, null, null),
-                Arguments.of((String) null, null, null, null, null));
+                        CardLanguage.ENGLISH),
+                Arguments.of(
+                        "Products/Singles/Set/Card",
+                        CardGameType.MAGIC_THE_GATHERING,
+                        "Set",
+                        "Card",
+                        CardLanguage.ENGLISH),
+                Arguments.of("Singles/Set/Card", CardGameType.MAGIC_THE_GATHERING, "Set", "Card", CardLanguage.ENGLISH),
+                Arguments.of("Singles", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
+                Arguments.of("Singles/Set", CardGameType.MAGIC_THE_GATHERING, "Set", "", CardLanguage.ENGLISH),
+                Arguments.of("   ", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
+                Arguments.of("", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
+                Arguments.of((String) null, CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH));
     }
 
     private static Stream<String> invalidLinks() {

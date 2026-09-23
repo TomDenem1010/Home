@@ -1,3 +1,6 @@
 package trd.home.tcg.dto;
 
-public record CardmarketDeckCardDto(String id, String deckId, String cardId, int quantity) {}
+import lombok.NonNull;
+
+public record CardmarketDeckCardDto(
+        @NonNull String id, @NonNull String deckId, @NonNull String cardId, int quantity) {}
