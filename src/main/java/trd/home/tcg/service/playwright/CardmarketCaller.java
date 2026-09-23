@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.playwright.BrowserPage;
 import trd.home.common.playwright.PlaywrightPageReader;
 import trd.home.tcg.exception.CardmarketRateLimitException;
@@ -20,7 +19,6 @@ public class CardmarketCaller {
 
     private final PlaywrightPageReader pageReader;
 
-    @LogMethodCall
     public Document callWithPlaywright(String url, Browser browser) {
         try {
             BrowserPage page = pageReader.read(url, browser);

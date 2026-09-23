@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.playwright.PlaywrightBrowserSessionFactory;
 import trd.home.tcg.dto.CardmarketCardDto;
 
@@ -31,7 +30,6 @@ public class CardmarketCardPriceSaver {
         this.browserEndpoint = browserEndpoint;
     }
 
-    @LogMethodCall
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
         List<GatheredCardmarketPrice> gatheredPrices = new ArrayList<>();
         try (var browserSession = browserSessionFactory.open(browserEndpoint)) {

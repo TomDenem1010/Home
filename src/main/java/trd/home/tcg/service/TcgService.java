@@ -1,58 +1,48 @@
 package trd.home.tcg.service;
 
 import java.util.List;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import trd.home.common.constant.EventType;
-import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.event.FrontendNotificationPublisher;
-import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.logging.LogMethodCall;
-import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
-import trd.home.tcg.repository.CardmarketDeckRepository;
+import trd.home.tcg.service.application.TcgCommandService;
+import trd.home.tcg.service.application.TcgQueryService;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TcgService {
 
-    private final ApplicationEventRepository eventRepository;
-    private final CardmarketDeckRepository cardmarketDeckRepository;
-    private final FrontendNotificationPublisher notificationPublisher;
+    private final TcgCommandService commands;
+    private final TcgQueryService queries;
 
     @LogMethodCall
     public void saveDecksFromResource() {
-        createEvent(EventType.SAVE_DECKS_FROM_RESOURCE, null, "Deck saving has started.");
+        commands.saveDecksFromResource(null);
     }
 
     @LogMethodCall
     public void saveDeckFromResource(String deckId) {
-        createEvent(EventType.SAVE_DECKS_FROM_RESOURCE, deckId, "Deck saving has started.");
+        commands.saveDecksFromResource(deckId);
     }
 
     @LogMethodCall
     public void refreshDeckPrices() {
-        createEvent(EventType.REFRESH_DECK_PRICES, null, "Deck price refresh has started.");
+        commands.refreshDeckPrices(null);
     }
 
     @LogMethodCall
     public void refreshDeckPrices(String deckId) {
-        createEvent(EventType.REFRESH_DECK_PRICES, deckId, "Deck price refresh has started.");
+        commands.refreshDeckPrices(deckId);
     }
 
     @LogMethodCall
     public List<CardmarketDeckPriceSummary> getDeckPriceSummary() {
-        return cardmarketDeckRepository.calculateActiveDeckPriceSummaries();
+        return queries.getDeckPriceSummary();
     }
 
     @LogMethodCall
     public CardmarketDeckPriceHistorySummary getDeckPriceHistorySummary(String deckId) {
-        return cardmarketDeckRepository.calculateDeckPriceHistorySummary(deckId);
-    }
-
-    private void createEvent(EventType eventType, String deckId, String notificationMessage) {
-        eventRepository.save(new ApplicationEvent(eventType, deckId));
-        notificationPublisher.publish(FrontendNotificationType.WARNING, notificationMessage);
+        return queries.getDeckPriceHistorySummary(deckId);
     }
 }

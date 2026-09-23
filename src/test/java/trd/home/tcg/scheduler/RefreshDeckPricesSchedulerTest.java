@@ -11,7 +11,7 @@ import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.repository.ApplicationEventRepository;
-import trd.home.tcg.service.RefreshDeckPricesService;
+import trd.home.tcg.service.event.RefreshDeckPricesService;
 
 class RefreshDeckPricesSchedulerTest {
 

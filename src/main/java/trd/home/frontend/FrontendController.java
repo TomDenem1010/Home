@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import trd.home.common.logging.LogMethodCall;
 
 @Controller
 @RequiredArgsConstructor
@@ -13,7 +12,6 @@ public class FrontendController {
     private final FrontendPageRenderer pageRenderer;
 
     @GetMapping("/")
-    @LogMethodCall
     public String home(Model model) {
         return pageRenderer.render(model, "/", "Kezdőlap", "Üdvözöllek az alkalmazásban!");
     }

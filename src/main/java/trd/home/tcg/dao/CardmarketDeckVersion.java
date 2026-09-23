@@ -14,7 +14,6 @@ import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.exception.WrongCardQuantityException;
 
 @Entity
@@ -36,7 +35,6 @@ public class CardmarketDeckVersion extends AuditedEntity {
     @OneToMany(mappedBy = "deckVersion", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CardmarketDeckCard> cards = new LinkedHashSet<>();
 
-    @LogMethodCall
     public void addCard(CardmarketCard card, int quantity) {
         if (quantity <= 0) {
             throw new WrongCardQuantityException("Card quantity must be positive.");

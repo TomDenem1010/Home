@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.core.io.Resource;
 import trd.home.common.file.ResourceFileReader;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dao.CardmarketCard;
@@ -18,7 +17,6 @@ public class DeckFileReader extends ResourceFileReader {
 
     private final List<ResourceValidator> resourceValidators;
 
-    @LogMethodCall
     public List<CardmarketDeck> read() {
         return readResources(DECK_RESOURCE_PATTERN).stream().map(this::readDeck).toList();
     }

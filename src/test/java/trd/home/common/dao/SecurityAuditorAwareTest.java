@@ -1,7 +1,7 @@
 package trd.home.common.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
@@ -45,10 +45,10 @@ class SecurityAuditorAwareTest {
     }
 
     @Test
-    void doesNotAuditAuditorResolutionToDatabase() throws NoSuchMethodException {
+    void doesNotLogAuditorResolution() throws NoSuchMethodException {
         LogMethodCall annotation =
                 SecurityAuditorAware.class.getMethod("getCurrentAuditor").getAnnotation(LogMethodCall.class);
 
-        assertFalse(annotation.audit());
+        assertNull(annotation);
     }
 }

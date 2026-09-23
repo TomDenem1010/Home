@@ -2,14 +2,12 @@ package trd.home.tcg.validator;
 
 import java.util.Objects;
 import org.springframework.core.io.Resource;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.exception.WrongDeckNameException;
 
 public class ResourceDeckNameValidator implements ResourceValidator {
 
     @Override
-    @LogMethodCall
     public void validateResource(Resource resource) {
         String filename = resource.getFilename();
 

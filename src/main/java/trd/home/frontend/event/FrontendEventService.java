@@ -11,7 +11,6 @@ import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import trd.home.common.dto.FrontendEvent;
-import trd.home.common.logging.LogMethodCall;
 
 @Slf4j
 @Service
@@ -21,7 +20,6 @@ public class FrontendEventService {
 
     private final ConcurrentHashMap<String, Set<Connection>> connectionsByUsername = new ConcurrentHashMap<>();
 
-    @LogMethodCall
     public SseEmitter subscribe(String username, String sessionId) {
         SseEmitter emitter = new SseEmitter(NO_SERVER_TIMEOUT);
         Connection connection = new Connection(sessionId, emitter);
@@ -44,7 +42,6 @@ public class FrontendEventService {
         return emitter;
     }
 
-    @LogMethodCall
     public boolean hasConnection(String username) {
         Set<Connection> connections = connectionsByUsername.get(username);
         return connections != null && !connections.isEmpty();
@@ -56,7 +53,6 @@ public class FrontendEventService {
                 (username, connections) -> connections.forEach(connection -> sendHeartbeat(username, connection)));
     }
 
-    @LogMethodCall
     public boolean sendToUser(String username, String eventId, FrontendEvent event) {
         Set<Connection> connections = connectionsByUsername.get(username);
         if (connections == null || connections.isEmpty()) {
@@ -66,7 +62,6 @@ public class FrontendEventService {
     }
 
     @EventListener
-    @LogMethodCall
     public void closeExpiredSession(SessionDestroyedEvent event) {
         connectionsByUsername.forEach((username, connections) -> connections.stream()
                 .filter(connection -> connection.sessionId().equals(event.getId()))

@@ -15,7 +15,6 @@ import tools.jackson.databind.ObjectMapper;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dto.FrontendEvent;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.repository.ApplicationEventRepository;
 
 @RestController
@@ -28,7 +27,6 @@ public class FrontendEventController {
     private final ObjectMapper objectMapper;
 
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @LogMethodCall
     public SseEmitter subscribe(Principal principal, HttpSession session) {
         return eventService.subscribe(principal.getName(), session.getId());
     }

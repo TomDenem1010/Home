@@ -6,7 +6,6 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import trd.home.common.exception.ResourceReadException;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.exception.WrongCardLineException;
@@ -15,7 +14,6 @@ import trd.home.tcg.exception.WrongCardLineException;
 public class ResourceDeckCardValidator implements ResourceValidator {
 
     @Override
-    @LogMethodCall
     public void validateResource(Resource resource) {
         try (var reader = resource.getInputStream()) {
             List<String> lines = new String(reader.readAllBytes(), StandardCharsets.UTF_8)

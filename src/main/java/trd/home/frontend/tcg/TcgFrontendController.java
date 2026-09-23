@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.service.TcgService;
 
@@ -20,41 +19,35 @@ public class TcgFrontendController {
     private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
-    @LogMethodCall
     public String tcg(Model model) {
         return renderPage(model, "/tcg", "TCG", "A TCG funkciók itt érhetők el.");
     }
 
     @PostMapping("/save-decks-from-resource")
-    @LogMethodCall
     public String saveDecksFromResource() {
         tcgService.saveDecksFromResource();
         return "redirect:/tcg";
     }
 
     @PostMapping("/refresh-deck-prices")
-    @LogMethodCall
     public String refreshDeckPrices() {
         tcgService.refreshDeckPrices();
         return "redirect:/tcg";
     }
 
     @PostMapping("/decks/{deckId}/reload")
-    @LogMethodCall
     public String reloadDeck(@PathVariable String deckId) {
         tcgService.saveDeckFromResource(deckId);
         return "redirect:/tcg/statistics";
     }
 
     @PostMapping("/decks/{deckId}/refresh-prices")
-    @LogMethodCall
     public String refreshDeckPrices(@PathVariable String deckId) {
         tcgService.refreshDeckPrices(deckId);
         return "redirect:/tcg/statistics";
     }
 
     @GetMapping("/statistics")
-    @LogMethodCall
     public String statistics(Model model) {
         model.addAttribute("deckPriceSummaries", tcgService.getDeckPriceSummary());
         model.addAttribute("contentTemplate", "tcg/statistics");
@@ -62,7 +55,6 @@ public class TcgFrontendController {
     }
 
     @GetMapping("/statistic/{deckId}")
-    @LogMethodCall
     public String deckPriceHistory(@PathVariable String deckId, Model model) {
         model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));
         model.addAttribute("contentTemplate", "tcg/statistics-uuid");

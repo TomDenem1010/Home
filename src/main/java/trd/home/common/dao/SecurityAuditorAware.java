@@ -6,7 +6,6 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import trd.home.common.logging.LogMethodCall;
 
 @Component
 public class SecurityAuditorAware implements AuditorAware<String> {
@@ -14,7 +13,6 @@ public class SecurityAuditorAware implements AuditorAware<String> {
     private static final String SYSTEM_AUDITOR = "system";
 
     @Override
-    @LogMethodCall(audit = false)
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null

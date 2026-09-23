@@ -16,7 +16,6 @@ import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
 import trd.home.common.logging.LogMasked;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.frontend.FrontendPageRenderer;
 
 @Controller
@@ -28,20 +27,17 @@ public class AuthFrontendController {
     private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
-    @LogMethodCall
     public String auth() {
         return "redirect:/auth/users";
     }
 
     @GetMapping("/users")
-    @LogMethodCall
     public String listUsers(Model model) {
         model.addAttribute("users", authService.getAllUsers());
         return renderPage(model, "/auth/users", "Users", "Registered users and their roles.", "auth/users");
     }
 
     @GetMapping("/create-user")
-    @LogMethodCall
     public String createUser(Model model) {
         model.addAttribute("availableRoles", authService.getAvailableRoles());
         return renderPage(
@@ -49,7 +45,6 @@ public class AuthFrontendController {
     }
 
     @PostMapping("/create-user")
-    @LogMethodCall
     public String createUser(
             @RequestParam String username,
             @RequestParam @LogMasked String password,
@@ -59,7 +54,6 @@ public class AuthFrontendController {
     }
 
     @GetMapping("/update-roles")
-    @LogMethodCall
     public String updateRoles(Model model) {
         model.addAttribute("users", authService.getAllUsers());
         model.addAttribute("availableRoles", authService.getAvailableRoles());
@@ -68,7 +62,6 @@ public class AuthFrontendController {
     }
 
     @PostMapping("/update-roles")
-    @LogMethodCall
     public String updateRoles(
             @RequestParam String userId,
             @RequestParam(required = false) Set<UserRole> roles,
@@ -84,7 +77,6 @@ public class AuthFrontendController {
     }
 
     @GetMapping("/update-password")
-    @LogMethodCall
     public String updatePassword(Model model) {
         model.addAttribute("users", authService.getAllUsers());
         return renderPage(
@@ -96,7 +88,6 @@ public class AuthFrontendController {
     }
 
     @PostMapping("/update-password")
-    @LogMethodCall
     public String updatePassword(@RequestParam String userId, @RequestParam @LogMasked String password) {
         authService.updatePassword(userId, password);
         return "redirect:/auth/users";

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.repository.ApplicationEventRepository;
-import trd.home.tcg.service.SaveDecksFromResourceService;
+import trd.home.tcg.service.event.SaveDecksFromResourceService;
 
 @Component
 @RequiredArgsConstructor

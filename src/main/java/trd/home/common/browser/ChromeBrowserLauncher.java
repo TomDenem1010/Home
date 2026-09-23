@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.exception.ChromeLaunchException;
-import trd.home.common.logging.LogMethodCall;
 
 @Slf4j
 @Service
@@ -20,7 +19,6 @@ public class ChromeBrowserLauncher {
     private final ChromeProcessStarter processStarter;
     private final FrontendNotificationPublisher notificationPublisher;
 
-    @LogMethodCall
     public void start() {
         notificationPublisher.publish(FrontendNotificationType.WARNING, STARTED_MESSAGE);
         try {

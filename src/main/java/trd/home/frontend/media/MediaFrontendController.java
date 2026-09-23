@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import trd.home.common.logging.LogMethodCall;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.media.service.MediaService;
 
@@ -28,13 +27,11 @@ public class MediaFrontendController {
     private final FrontendPageRenderer pageRenderer;
 
     @GetMapping
-    @LogMethodCall
     public String index() {
         return "redirect:/media/by-actor";
     }
 
     @GetMapping("/server-folder-path")
-    @LogMethodCall
     public String serverFolderPath(Model model) {
         return pageRenderer.render(
                 model,
@@ -45,7 +42,6 @@ public class MediaFrontendController {
     }
 
     @GetMapping("/by-actor")
-    @LogMethodCall
     public String byActor(@RequestParam(required = false) String actorId, Model model) {
         model.addAttribute("actors", mediaService.activeActors());
         model.addAttribute("videos", actorId == null ? List.of() : mediaService.videosByActor(actorId));
@@ -54,7 +50,6 @@ public class MediaFrontendController {
     }
 
     @GetMapping("/by-folder")
-    @LogMethodCall
     public String byFolder(@RequestParam(required = false) String folderId, Model model) {
         model.addAttribute("folders", mediaService.activeFolders());
         model.addAttribute("videos", folderId == null ? List.of() : mediaService.videosByFolder(folderId));
@@ -63,7 +58,6 @@ public class MediaFrontendController {
     }
 
     @PostMapping("/import")
-    @LogMethodCall
     public String importPath(@RequestParam String path) {
         mediaService.importPath(path);
         return "redirect:/media/server-folder-path";
