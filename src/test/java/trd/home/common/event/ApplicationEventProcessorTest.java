@@ -1,4 +1,4 @@
-package trd.home.tcg.service.event;
+package trd.home.common.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,62 +13,61 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.event.FrontendNotificationPublisher;
-import trd.home.common.event.FrontendNotificationType;
-import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.exception.DeckImportException;
 
-class TcgEventProcessorTest {
+class ApplicationEventProcessorTest {
 
-    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final TcgEventProcessor processor = new TcgEventProcessor(eventRepository, notificationPublisher);
+    private final ApplicationEventProcessor processor =
+            new ApplicationEventProcessor(eventQueue, notificationPublisher);
 
     @Test
     void completesSuccessfulEventAndPublishesNotification() {
         ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
-        Runnable operation = mock(Runnable.class);
+        @SuppressWarnings("unchecked")
+        Supplier<String> operation = mock(Supplier.class);
+        org.mockito.Mockito.when(operation.get()).thenReturn("Completed");
         List<EventStatus> savedStatuses = new ArrayList<>();
         doAnswer(invocation -> {
                     savedStatuses.add(event.getStatus());
                     return event;
                 })
-                .when(eventRepository)
+                .when(eventQueue)
                 .save(event);
 
-        processor.process(event, operation, "Completed", "Failed: ");
+        processor.process(event, operation, "Failed: ");
 
         assertEquals(EventStatus.DONE, event.getStatus());
         assertNotNull(event.getProcessedAt());
-        verify(operation).run();
-        verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Completed");
-        InOrder order = inOrder(eventRepository, operation, notificationPublisher);
-        order.verify(eventRepository).save(event);
-        order.verify(operation).run();
-        order.verify(eventRepository).save(event);
+        InOrder order = inOrder(eventQueue, operation, notificationPublisher);
+        order.verify(eventQueue).save(event);
+        order.verify(operation).get();
+        order.verify(eventQueue).save(event);
         order.verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Completed");
-        verify(eventRepository, times(2)).save(event);
         assertEquals(List.of(EventStatus.PROCESSING, EventStatus.DONE), savedStatuses);
     }
 
     @Test
     void failsEventWhenOperationFails() {
         ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
-        Runnable operation = mock(Runnable.class);
-        doThrow(new DeckImportException("resource missing")).when(operation).run();
+        @SuppressWarnings("unchecked")
+        Supplier<String> operation = mock(Supplier.class);
+        doThrow(new DeckImportException("resource missing")).when(operation).get();
 
-        processor.process(event, operation, "Completed", "Failed: ");
+        processor.process(event, operation, "Failed: ");
 
         assertEquals(EventStatus.ERROR, event.getStatus());
         assertNull(event.getProcessedAt());
         assertEquals("resource missing", event.getErrorMessage());
         verify(notificationPublisher).publish(null, FrontendNotificationType.ERROR, "Failed: resource missing");
-        verify(eventRepository, times(2)).save(event);
+        verify(eventQueue, times(2)).save(event);
     }
 
     @Test
@@ -78,7 +77,7 @@ class TcgEventProcessorTest {
                 .when(notificationPublisher)
                 .publish(null, FrontendNotificationType.SUCCESS, "Completed");
 
-        assertThrows(DeckImportException.class, () -> processor.process(event, () -> {}, "Completed", "Failed: "));
+        assertThrows(DeckImportException.class, () -> processor.process(event, () -> "Completed", "Failed: "));
 
         assertEquals(EventStatus.DONE, event.getStatus());
     }

@@ -12,9 +12,10 @@ import org.junit.jupiter.api.Test;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
+import trd.home.common.event.ApplicationEventProcessor;
+import trd.home.common.event.ApplicationEventQueue;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
-import trd.home.common.repository.ApplicationEventRepository;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.deck.CardmarketDeckSaver;
@@ -22,13 +23,16 @@ import trd.home.tcg.service.file.DeckFileReader;
 
 class SaveDecksFromResourceServiceTest {
 
-    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final CardmarketDeckSaver deckSaver = mock(CardmarketDeckSaver.class);
     private final DeckFileReader deckFileReader = mock(DeckFileReader.class);
     private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
     private final SaveDecksFromResourceService service = new SaveDecksFromResourceService(
-            new TcgEventProcessor(eventRepository, notificationPublisher), deckSaver, deckFileReader, deckRepository);
+            new ApplicationEventProcessor(eventQueue, notificationPublisher),
+            deckSaver,
+            deckFileReader,
+            deckRepository);
 
     @Test
     void readsAndSavesEveryResourceDeck() {

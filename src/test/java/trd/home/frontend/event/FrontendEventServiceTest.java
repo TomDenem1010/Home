@@ -13,12 +13,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.json.JsonMapper;
+import trd.home.common.constant.EventStatus;
+import trd.home.common.constant.EventType;
+import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
+import trd.home.common.event.ApplicationEventQueue;
 import trd.home.common.event.FrontendNotificationType;
 
 class FrontendEventServiceTest {
 
-    private final FrontendEventService service = new FrontendEventService();
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
+    private final FrontendEventService service = service();
 
     @Test
     void subscribesAndSendsToConnectedUser() {
@@ -75,7 +81,7 @@ class FrontendEventServiceTest {
     @Test
     void removesConnectionWhenEmitterCompletesTimesOutOrFails() throws Exception {
         for (String callback : new String[] {"completion", "timeout", "error"}) {
-            FrontendEventService testedService = new FrontendEventService();
+            FrontendEventService testedService = service();
             SseEmitter emitter = testedService.subscribe("alice", callback);
             EmitterHarness harness = new EmitterHarness(emitter);
 
@@ -118,6 +124,36 @@ class FrontendEventServiceTest {
             assertFalse(service.hasConnection("alice"));
             verify(emitter).completeWithError(any(IOException.class));
         }
+    }
+
+    @Test
+    void acknowledgesOnlyTheNotificationsRecipient() {
+        ApplicationEvent event = new ApplicationEvent(
+                EventType.FRONTEND_NOTIFICATION,
+                "{\"username\":\"alice\",\"type\":\"WARNING\",\"message\":\"Started\"}");
+        when(eventQueue.findById("event-1")).thenReturn(java.util.Optional.of(event));
+
+        assertFalse(service.acknowledge("event-1", "bob"));
+        assertTrue(service.acknowledge("event-1", "alice"));
+        assertEquals(EventStatus.DONE, event.getStatus());
+        verify(eventQueue).save(event);
+    }
+
+    @Test
+    void rejectsMissingWrongTypeAndMalformedEvents() {
+        when(eventQueue.findById("missing")).thenReturn(java.util.Optional.empty());
+        when(eventQueue.findById("wrong"))
+                .thenReturn(java.util.Optional.of(new ApplicationEvent(EventType.IMPORT_MEDIA)));
+        when(eventQueue.findById("malformed"))
+                .thenReturn(java.util.Optional.of(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, "invalid")));
+
+        assertFalse(service.acknowledge("missing", "alice"));
+        assertFalse(service.acknowledge("wrong", "alice"));
+        assertFalse(service.acknowledge("malformed", "alice"));
+    }
+
+    private FrontendEventService service() {
+        return new FrontendEventService(eventQueue, JsonMapper.builder().build());
     }
 
     private static final class EmitterHarness {

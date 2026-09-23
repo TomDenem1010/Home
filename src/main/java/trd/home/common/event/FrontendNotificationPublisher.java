@@ -7,22 +7,20 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import trd.home.common.constant.EventType;
-import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.exception.UnableToSerializeNotificationException;
-import trd.home.common.repository.ApplicationEventRepository;
 
 @Slf4j
 @Service
 public class FrontendNotificationPublisher {
 
-    private final ApplicationEventRepository eventRepository;
+    private final ApplicationEventQueue eventQueue;
     private final ObjectMapper objectMapper;
     private final AuditorAware<String> auditorAware;
 
     public FrontendNotificationPublisher(
-            ApplicationEventRepository eventRepository, ObjectMapper objectMapper, AuditorAware<String> auditorAware) {
-        this.eventRepository = eventRepository;
+            ApplicationEventQueue eventQueue, ObjectMapper objectMapper, AuditorAware<String> auditorAware) {
+        this.eventQueue = eventQueue;
         this.objectMapper = objectMapper;
         this.auditorAware = auditorAware;
     }
@@ -35,7 +33,7 @@ public class FrontendNotificationPublisher {
         try {
             String serializedNotification = objectMapper.writeValueAsString(
                     new FrontendEvent(Objects.requireNonNullElse(username, "system"), type, message));
-            eventRepository.save(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, serializedNotification));
+            eventQueue.enqueue(EventType.FRONTEND_NOTIFICATION, serializedNotification);
         } catch (JacksonException exception) {
             log.error("Failed to serialize frontend notification for user '{}'", username, exception);
             throw new UnableToSerializeNotificationException("Unable to serialize frontend notification", exception);

@@ -10,7 +10,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.session.SessionDestroyedEvent;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import tools.jackson.databind.ObjectMapper;
+import trd.home.common.constant.EventStatus;
+import trd.home.common.constant.EventType;
 import trd.home.common.dto.FrontendEvent;
+import trd.home.common.event.ApplicationEventQueue;
 
 @Slf4j
 @Service
@@ -19,6 +23,13 @@ public class FrontendEventService {
     private static final long NO_SERVER_TIMEOUT = 0L;
 
     private final ConcurrentHashMap<String, Set<Connection>> connectionsByUsername = new ConcurrentHashMap<>();
+    private final ApplicationEventQueue eventQueue;
+    private final ObjectMapper objectMapper;
+
+    public FrontendEventService(ApplicationEventQueue eventQueue, ObjectMapper objectMapper) {
+        this.eventQueue = eventQueue;
+        this.objectMapper = objectMapper;
+    }
 
     public SseEmitter subscribe(String username, String sessionId) {
         SseEmitter emitter = new SseEmitter(NO_SERVER_TIMEOUT);
@@ -59,6 +70,27 @@ public class FrontendEventService {
             return false;
         }
         return connections.stream().anyMatch(connection -> send(username, connection, eventId, event));
+    }
+
+    public boolean acknowledge(String eventId, String username) {
+        var event = eventQueue.findById(eventId).orElse(null);
+        if (event == null || event.getType() != EventType.FRONTEND_NOTIFICATION) {
+            return false;
+        }
+        FrontendEvent notification;
+        try {
+            notification = objectMapper.readValue(event.getMessage(), FrontendEvent.class);
+        } catch (RuntimeException exception) {
+            return false;
+        }
+        if (!username.equals(notification.username())) {
+            return false;
+        }
+        if (event.getStatus() == EventStatus.TO_DO) {
+            event.markDone();
+            eventQueue.save(event);
+        }
+        return true;
     }
 
     @EventListener

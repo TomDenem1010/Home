@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.dao.CardmarketCard;
-import trd.home.tcg.dto.CardmarketCardDto;
 
 public interface CardmarketCardRepository extends JpaRepository<CardmarketCard, String> {
 
@@ -33,20 +32,4 @@ public interface CardmarketCardRepository extends JpaRepository<CardmarketCard, 
             WHERE deck.id = :deckId
             """)
     List<CardmarketCard> findAllInCurrentDeckVersionByDeckId(@Param("deckId") String deckId);
-
-    default List<CardmarketCardDto> findAllInActiveDeckCurrentVersions() {
-        return findAllInCurrentDeckVersionsByStatus(DeckStatus.ACTIVE).stream()
-                .map(CardmarketCardDto::from)
-                .toList();
-    }
-
-    default List<CardmarketCardDto> findAllInDeckCurrentVersion(String deckId) {
-        return findAllInCurrentDeckVersionByDeckId(deckId).stream()
-                .map(CardmarketCardDto::from)
-                .toList();
-    }
-
-    default Optional<CardmarketCardDto> findByUuid(String uuid) {
-        return findById(uuid).map(CardmarketCardDto::from);
-    }
 }

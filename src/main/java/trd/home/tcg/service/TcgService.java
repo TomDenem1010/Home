@@ -3,6 +3,7 @@ package trd.home.tcg.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import trd.home.common.browser.ChromeBrowserLauncher;
 import trd.home.common.logging.LogMethodCall;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
@@ -15,6 +16,12 @@ public class TcgService {
 
     private final TcgCommandService commands;
     private final TcgQueryService queries;
+    private final ChromeBrowserLauncher chromeBrowserLauncher;
+
+    @LogMethodCall
+    public void startChrome() {
+        chromeBrowserLauncher.start();
+    }
 
     @LogMethodCall
     public void saveDecksFromResource() {

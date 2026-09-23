@@ -7,23 +7,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.repository.ApplicationEventRepository;
+import trd.home.common.event.ApplicationEventQueue;
 import trd.home.media.service.event.MediaImportEventProcessor;
 
 class MediaImportSchedulerTest {
 
-    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final MediaImportEventProcessor eventProcessor = mock(MediaImportEventProcessor.class);
-    private final MediaImportScheduler scheduler = new MediaImportScheduler(eventRepository, eventProcessor);
+    private final MediaImportScheduler scheduler = new MediaImportScheduler(eventQueue, eventProcessor);
 
     @Test
     void delegatesOldestPendingEvent() {
         ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_MEDIA, "C:\\Media");
-        when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(EventType.IMPORT_MEDIA, EventStatus.TO_DO))
-                .thenReturn(Optional.of(event));
+        when(eventQueue.claimNext(EventType.IMPORT_MEDIA)).thenReturn(Optional.of(event));
 
         scheduler.processNextEvent();
 

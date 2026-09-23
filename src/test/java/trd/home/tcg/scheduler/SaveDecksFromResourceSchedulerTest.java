@@ -7,25 +7,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
-import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.repository.ApplicationEventRepository;
+import trd.home.common.event.ApplicationEventQueue;
 import trd.home.tcg.service.event.SaveDecksFromResourceService;
 
 class SaveDecksFromResourceSchedulerTest {
 
-    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final SaveDecksFromResourceService service = mock(SaveDecksFromResourceService.class);
-    private final SaveDecksFromResourceScheduler scheduler =
-            new SaveDecksFromResourceScheduler(eventRepository, service);
+    private final SaveDecksFromResourceScheduler scheduler = new SaveDecksFromResourceScheduler(eventQueue, service);
 
     @Test
     void delegatesOldestPendingEventToService() {
         ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
-        when(eventRepository.findFirstByTypeAndStatusOrderByCreatedAtAsc(
-                        EventType.SAVE_DECKS_FROM_RESOURCE, EventStatus.TO_DO))
-                .thenReturn(Optional.of(event));
+        when(eventQueue.claimNext(EventType.SAVE_DECKS_FROM_RESOURCE)).thenReturn(Optional.of(event));
 
         scheduler.processNextEvent();
 

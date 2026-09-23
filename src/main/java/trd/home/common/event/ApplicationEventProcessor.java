@@ -1,41 +1,39 @@
-package trd.home.tcg.service.event;
+package trd.home.common.event;
 
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import trd.home.common.dao.ApplicationEvent;
-import trd.home.common.event.FrontendNotificationPublisher;
-import trd.home.common.event.FrontendNotificationType;
-import trd.home.common.repository.ApplicationEventRepository;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class TcgEventProcessor {
+public class ApplicationEventProcessor {
 
-    private final ApplicationEventRepository eventRepository;
+    private final ApplicationEventQueue eventQueue;
     private final FrontendNotificationPublisher notificationPublisher;
 
-    public void process(
-            ApplicationEvent event, Runnable operation, String successMessage, String failureMessagePrefix) {
-        event.markProcessing();
-        eventRepository.save(event);
+    public void process(ApplicationEvent event, Supplier<String> operation, String failureMessagePrefix) {
+        if (event.getStatus() != trd.home.common.constant.EventStatus.PROCESSING) {
+            event.markProcessing();
+            eventQueue.save(event);
+        }
 
         FrontendNotificationType notificationType;
         String notificationMessage;
         try {
-            operation.run();
+            notificationMessage = operation.get();
             event.markDone();
             notificationType = FrontendNotificationType.SUCCESS;
-            notificationMessage = successMessage;
         } catch (RuntimeException exception) {
-            log.error("Failed to process TCG event '{}'", event.getType(), exception);
+            log.error("Failed to process application event '{}'", event.getType(), exception);
             event.markFailed(exception);
             notificationType = FrontendNotificationType.ERROR;
             notificationMessage = failureMessagePrefix + exception.getMessage();
         }
 
-        eventRepository.save(event);
+        eventQueue.save(event);
         notificationPublisher.publish(event.getCreatedBy(), notificationType, notificationMessage);
     }
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.CompletionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import trd.home.common.dao.ApplicationEvent;
+import trd.home.common.event.ApplicationEventProcessor;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.exception.DeckImportException;
 import trd.home.tcg.repository.CardmarketDeckRepository;
@@ -19,14 +20,19 @@ public class SaveDecksFromResourceService {
     private static final String SUCCESS_MESSAGE = "Decks were saved successfully.";
     private static final String FAILURE_MESSAGE_PREFIX = "Failed to save decks: ";
 
-    private final TcgEventProcessor eventProcessor;
+    private final ApplicationEventProcessor eventProcessor;
     private final CardmarketDeckSaver deckSaver;
     private final DeckFileReader deckFileReader;
     private final CardmarketDeckRepository deckRepository;
 
     public void process(ApplicationEvent event) {
         eventProcessor.process(
-                event, () -> saveDecks(selectedDecks(event.getMessage())), SUCCESS_MESSAGE, FAILURE_MESSAGE_PREFIX);
+                event,
+                () -> {
+                    saveDecks(selectedDecks(event.getMessage()));
+                    return SUCCESS_MESSAGE;
+                },
+                FAILURE_MESSAGE_PREFIX);
     }
 
     private List<CardmarketDeck> selectedDecks(String deckId) {

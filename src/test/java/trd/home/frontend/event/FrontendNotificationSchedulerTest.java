@@ -19,15 +19,15 @@ import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
+import trd.home.common.event.ApplicationEventQueue;
 import trd.home.common.event.FrontendNotificationType;
-import trd.home.common.repository.ApplicationEventRepository;
 
 class FrontendNotificationSchedulerTest {
 
-    private final ApplicationEventRepository eventRepository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final FrontendEventService frontendEventService = mock(FrontendEventService.class);
     private final FrontendNotificationScheduler scheduler = new FrontendNotificationScheduler(
-            eventRepository, frontendEventService, JsonMapper.builder().build());
+            eventQueue, frontendEventService, JsonMapper.builder().build());
 
     @Test
     void marksNotificationDoneAfterSendingIt() {
@@ -39,14 +39,14 @@ class FrontendNotificationSchedulerTest {
         scheduler.processNextEvent();
 
         ArgumentCaptor<FrontendEvent> frontendEventCaptor = ArgumentCaptor.forClass(FrontendEvent.class);
-        InOrder order = inOrder(eventRepository, frontendEventService);
+        InOrder order = inOrder(eventQueue, frontendEventService);
         order.verify(frontendEventService).sendToUser(eq("alice"), any(), frontendEventCaptor.capture());
         FrontendEvent frontendEvent = frontendEventCaptor.getValue();
         assertEquals("alice", frontendEvent.username());
         assertEquals(FrontendNotificationType.SUCCESS, frontendEvent.type());
         assertEquals("Done", frontendEvent.message());
         assertEquals(EventStatus.TO_DO, event.getStatus());
-        verify(eventRepository, never()).save(event);
+        verify(eventQueue, never()).save(event);
     }
 
     @Test
@@ -59,7 +59,7 @@ class FrontendNotificationSchedulerTest {
         scheduler.processNextEvent();
 
         assertEquals(EventStatus.TO_DO, event.getStatus());
-        verify(eventRepository, never()).save(event);
+        verify(eventQueue, never()).save(event);
     }
 
     @Test
@@ -70,7 +70,7 @@ class FrontendNotificationSchedulerTest {
         scheduler.processNextEvent();
 
         assertEquals(EventStatus.TO_DO, event.getStatus());
-        verify(eventRepository, never()).save(event);
+        verify(eventQueue, never()).save(event);
         verify(frontendEventService, never()).sendToUser(any(), any(), any());
     }
 
@@ -89,9 +89,7 @@ class FrontendNotificationSchedulerTest {
     void continuesAfterFailedDeliveryAndStopsAfterSuccessfulDelivery() {
         ApplicationEvent disconnected = frontendEvent("alice", "SUCCESS", "First");
         ApplicationEvent delivered = frontendEvent("bob", "SUCCESS", "Second");
-        when(eventRepository.findTop100ByTypeAndStatusOrderByCreatedAtAsc(
-                        EventType.FRONTEND_NOTIFICATION, EventStatus.TO_DO))
-                .thenReturn(List.of(disconnected, delivered));
+        when(eventQueue.findPending(EventType.FRONTEND_NOTIFICATION, 100)).thenReturn(List.of(disconnected, delivered));
         when(frontendEventService.hasConnection(any())).thenReturn(true);
         when(frontendEventService.sendToUser(eq("alice"), any(), any())).thenReturn(false);
         when(frontendEventService.sendToUser(eq("bob"), any(), any())).thenReturn(true);
@@ -100,7 +98,7 @@ class FrontendNotificationSchedulerTest {
 
         assertEquals(EventStatus.TO_DO, disconnected.getStatus());
         assertEquals(EventStatus.TO_DO, delivered.getStatus());
-        verify(eventRepository, never()).save(delivered);
+        verify(eventQueue, never()).save(delivered);
         verify(frontendEventService).sendToUser(eq("alice"), any(), any());
         verify(frontendEventService).sendToUser(eq("bob"), any(), any());
     }
@@ -112,8 +110,6 @@ class FrontendNotificationSchedulerTest {
     }
 
     private void pendingEvent(ApplicationEvent event) {
-        when(eventRepository.findTop100ByTypeAndStatusOrderByCreatedAtAsc(
-                        EventType.FRONTEND_NOTIFICATION, EventStatus.TO_DO))
-                .thenReturn(List.of(event));
+        when(eventQueue.findPending(EventType.FRONTEND_NOTIFICATION, 100)).thenReturn(List.of(event));
     }
 }

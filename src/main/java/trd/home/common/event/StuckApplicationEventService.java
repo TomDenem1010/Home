@@ -9,12 +9,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
-import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.dto.FrontendEvent;
 import trd.home.common.exception.EventProcessingTimeoutException;
-import trd.home.common.repository.ApplicationEventRepository;
 
 @Slf4j
 @Service
@@ -23,17 +21,17 @@ public class StuckApplicationEventService {
     private static final int MAX_EVENTS_IN_NOTIFICATION = 20;
     private static final String SYSTEM_USER = "system";
 
-    private final ApplicationEventRepository eventRepository;
+    private final ApplicationEventQueue eventQueue;
     private final FrontendNotificationPublisher notificationPublisher;
     private final ObjectMapper objectMapper;
     private final Duration processingTimeout;
 
     public StuckApplicationEventService(
-            ApplicationEventRepository eventRepository,
+            ApplicationEventQueue eventQueue,
             FrontendNotificationPublisher notificationPublisher,
             ObjectMapper objectMapper,
             @Value("${event.processing-timeout:1h}") Duration processingTimeout) {
-        this.eventRepository = eventRepository;
+        this.eventQueue = eventQueue;
         this.notificationPublisher = notificationPublisher;
         this.objectMapper = objectMapper;
         this.processingTimeout = processingTimeout;
@@ -51,14 +49,13 @@ public class StuckApplicationEventService {
     }
 
     private List<ApplicationEvent> findStuckEvents() {
-        return eventRepository.findAllByStatusAndLastModifiedAtBeforeOrderByLastModifiedAtAsc(
-                EventStatus.PROCESSING, Instant.now().minus(processingTimeout));
+        return eventQueue.findStuckBefore(Instant.now().minus(processingTimeout));
     }
 
     private void markFailed(List<ApplicationEvent> events) {
         var timeoutException = new EventProcessingTimeoutException(processingTimeout);
         events.forEach(event -> event.markFailed(timeoutException));
-        eventRepository.saveAll(events);
+        eventQueue.saveAll(events);
     }
 
     private void notifyUsers(List<ApplicationEvent> events) {
