@@ -1,6 +1,7 @@
 (() => {
     const player = document.getElementById("media-player");
     if (!player) return;
+    player.volume = 0.5;
     const status = document.getElementById("media-playback-status");
     document.querySelectorAll(".media-video").forEach(button => {
         button.addEventListener("click", () => {
@@ -16,4 +17,3 @@
     player.addEventListener("playing", () => { status.textContent = ""; });
     player.addEventListener("error", () => { status.textContent = "Video unavailable or its format is not supported by your browser."; });
 })();
-
