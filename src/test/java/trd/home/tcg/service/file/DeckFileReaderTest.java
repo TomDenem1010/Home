@@ -40,6 +40,17 @@ class DeckFileReaderTest {
     }
 
     @Test
+    void parsesFoilTypeCaseInsensitively() {
+        Resource resource = resource("1,https://www.cardmarket.com/card,foil\n");
+        DeckFileReader reader = new TestDeckFileReader(List.of(), resource);
+
+        CardmarketDeck deck = reader.read().getFirst();
+
+        var deckCard = deck.getCurrentVersion().getCards().iterator().next();
+        assertEquals(CardFoilType.FOIL, deckCard.getCard().getFoilType());
+    }
+
+    @Test
     void wrapsCardResourceReadFailure() {
         Resource resource = new ByteArrayResource(new byte[0]) {
             @Override

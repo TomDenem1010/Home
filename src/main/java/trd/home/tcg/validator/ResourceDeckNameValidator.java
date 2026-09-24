@@ -13,6 +13,7 @@ public class ResourceDeckNameValidator implements ResourceValidator {
 
         checkCsvExtension(filename);
         checkNameAndVersionSeparator(filename);
+        checkVersion(filename);
     }
 
     private void checkCsvExtension(String filename) {
@@ -25,6 +26,15 @@ public class ResourceDeckNameValidator implements ResourceValidator {
         if (filename.chars().filter(character -> character == '_').count() != 1) {
             throw new WrongDeckNameException(
                     "Deck filename must contain a name and version separated by an underscore and nothing else: name_version.csv");
+        }
+    }
+
+    private void checkVersion(String filename) {
+        int versionSeparator = filename.lastIndexOf('_');
+        String version = filename.substring(versionSeparator + 1, filename.length() - ".csv".length());
+        if (!version.matches("[vV]?\\d+")) {
+            throw new WrongDeckNameException(
+                    "Deck filename version must be numeric with an optional v prefix: name_version.csv");
         }
     }
 }

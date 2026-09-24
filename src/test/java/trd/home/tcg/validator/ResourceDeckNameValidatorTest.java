@@ -13,13 +13,14 @@ class ResourceDeckNameValidatorTest {
     private final ResourceDeckNameValidator validator = new ResourceDeckNameValidator();
 
     @ParameterizedTest
-    @ValueSource(strings = {"KiloApogeeMind_v1.csv", "mydeck_v2.csv"})
+    @ValueSource(strings = {"KiloApogeeMind_v1.csv", "mydeck_V2.csv", "deck_3.csv"})
     void acceptsCsvFilenamesContainingDeckNameAndVersion(String filename) {
         assertDoesNotThrow(() -> validator.validateResource(resource(filename)));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"deck.csv", "deck_v1.txt", "deck_name_v1.csv"})
+    @ValueSource(
+            strings = {"deck.csv", "deck_v1.txt", "deck_name_v1.csv", "Deck_abc.csv", "deck_v.csv", "deck_V12x.csv"})
     void rejectsInvalidDeckFilenames(String filename) {
         assertThrows(WrongDeckNameException.class, () -> validator.validateResource(resource(filename)));
     }

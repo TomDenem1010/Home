@@ -48,7 +48,7 @@ public class DeckFileReader extends ResourceFileReader {
         String[] values = line.split(",", -1);
         CardmarketCard card = new CardmarketCard();
         card.setLink(values[1]);
-        card.setFoilType(CardFoilType.valueOf(values[2]));
+        card.setFoilType(CardFoilType.fromString(values[2]));
         version.addCard(card, Integer.parseInt(values[0]));
     }
 }
