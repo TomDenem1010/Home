@@ -59,7 +59,7 @@ class MediaPersistenceServiceTest {
         assertEquals(MediaPersistenceService.actorKey(Set.of("Alice", "Bob")), video.getActorKey());
         assertEquals(
                 Set.of("Alice", "Bob"),
-                video.getActors().stream().map(Actor::getName).collect(java.util.stream.Collectors.toSet()));
+                video.getActors().stream().map(actor -> actor.getName()).collect(java.util.stream.Collectors.toSet()));
         ArgumentCaptor<Folder> folderCaptor = ArgumentCaptor.forClass(Folder.class);
         verify(folders).save(folderCaptor.capture());
         assertEquals(
@@ -69,7 +69,9 @@ class MediaPersistenceServiceTest {
         verify(actors, times(2)).save(actorCaptor.capture());
         assertEquals(
                 Set.of("Alice", "Bob"),
-                actorCaptor.getAllValues().stream().map(Actor::getName).collect(java.util.stream.Collectors.toSet()));
+                actorCaptor.getAllValues().stream()
+                        .map(actor -> actor.getName())
+                        .collect(java.util.stream.Collectors.toSet()));
     }
 
     @Test

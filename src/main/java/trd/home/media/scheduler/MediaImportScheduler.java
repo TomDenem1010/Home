@@ -16,6 +16,6 @@ public class MediaImportScheduler {
 
     @Scheduled(fixedDelayString = "${media.scheduler.import.delay:5s}")
     public void processNextEvent() {
-        eventQueue.claimNext(EventType.IMPORT_MEDIA).ifPresent(eventProcessor::process);
+        eventQueue.claimNext(EventType.IMPORT_MEDIA).ifPresent(event -> eventProcessor.process(event));
     }
 }

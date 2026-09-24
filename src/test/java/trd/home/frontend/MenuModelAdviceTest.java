@@ -74,7 +74,7 @@ class MenuModelAdviceTest {
         var menus = advice.menuItems(authentication("ROLE_UNKNOWN"));
 
         assertTrue(menu(menus, "Helper").authorized());
-        assertTrue(menus.stream().filter(menu -> !menu.label().equals("Helper")).noneMatch(MenuItem::authorized));
+        assertTrue(menus.stream().filter(menu -> !menu.label().equals("Helper")).noneMatch(menu -> menu.authorized()));
     }
 
     @Test
@@ -100,7 +100,7 @@ class MenuModelAdviceTest {
         assertEquals(
                 List.of("/helper/start-chrome"),
                 menu(menus, "Helper").submenuItems().stream()
-                        .map(SubmenuItem::path)
+                        .map(item -> item.path())
                         .toList());
     }
 

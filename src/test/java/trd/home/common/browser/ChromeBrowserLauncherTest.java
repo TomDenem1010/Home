@@ -33,7 +33,7 @@ class ChromeBrowserLauncherTest {
         ChromeLaunchException failure = new ChromeLaunchException("Process unavailable", null);
         org.mockito.Mockito.doThrow(failure).when(processStarter).start();
 
-        assertThrows(ChromeLaunchException.class, launcher::start);
+        assertThrows(ChromeLaunchException.class, () -> launcher.start());
 
         verify(notificationPublisher)
                 .publish(FrontendNotificationType.ERROR, "Failed to start Chrome: Process unavailable");

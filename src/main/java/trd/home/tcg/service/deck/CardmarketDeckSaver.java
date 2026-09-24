@@ -33,7 +33,7 @@ public class CardmarketDeckSaver {
             return;
         }
 
-        deck.getVersions().forEach(this::saveCards);
+        deck.getVersions().forEach(version -> saveCards(version));
         deckRepository.save(deck);
     }
 

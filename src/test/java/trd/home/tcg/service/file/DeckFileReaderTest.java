@@ -54,7 +54,7 @@ class DeckFileReaderTest {
         };
         DeckFileReader reader = new TestDeckFileReader(List.of(), resource);
 
-        assertThrows(ResourceReadException.class, reader::read);
+        assertThrows(ResourceReadException.class, () -> reader.read());
     }
 
     private static Resource resource(String content) {

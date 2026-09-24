@@ -16,6 +16,6 @@ public class RefreshDeckPricesScheduler {
 
     @Scheduled(fixedDelayString = "${tcg.scheduler.refresh-prices.delay:5s}")
     public void processNextEvent() {
-        eventQueue.claimNext(EventType.REFRESH_DECK_PRICES).ifPresent(service::process);
+        eventQueue.claimNext(EventType.REFRESH_DECK_PRICES).ifPresent(event -> service.process(event));
     }
 }

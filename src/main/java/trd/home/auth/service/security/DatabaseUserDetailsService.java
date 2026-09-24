@@ -21,7 +21,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
                 .findByUsername(username)
                 .orElseThrow(() -> new InvalidCredentialException("Invalid username"));
 
-        String[] roles = user.getRoles().stream().map(this::roleName).toArray(String[]::new);
+        String[] roles = user.getRoles().stream().map(role -> roleName(role)).toArray(String[]::new);
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles(roles)

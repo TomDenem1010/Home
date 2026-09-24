@@ -121,6 +121,8 @@ class FrontendEventServiceTest {
                         .send(any(SseEmitter.SseEventBuilder.class)))) {
             SseEmitter emitter = service.subscribe("alice", "session-1");
 
+            assertEquals(1, emitters.constructed().size());
+            assertSame(emitter, emitters.constructed().getFirst());
             assertFalse(service.hasConnection("alice"));
             verify(emitter).completeWithError(any(IOException.class));
         }
@@ -159,7 +161,7 @@ class FrontendEventServiceTest {
     private static final class EmitterHarness {
         private final AtomicReference<Runnable> timeout = new AtomicReference<>();
         private final AtomicReference<Runnable> completion = new AtomicReference<>();
-        private final AtomicReference<Consumer<Throwable>> error = new AtomicReference<>();
+        private final AtomicReference<Object> error = new AtomicReference<>();
         private final AtomicInteger completeCalls = new AtomicInteger();
         private boolean failWrites;
 
@@ -174,7 +176,7 @@ class FrontendEventServiceTest {
                             }
                             case "onTimeout" -> timeout.set((Runnable) arguments[0]);
                             case "onCompletion" -> completion.set((Runnable) arguments[0]);
-                            case "onError" -> error.set((Consumer<Throwable>) arguments[0]);
+                            case "onError" -> error.set(arguments[0]);
                             case "complete" -> completeCalls.incrementAndGet();
                             default -> {}
                         }
@@ -185,11 +187,14 @@ class FrontendEventServiceTest {
             initialize.invoke(emitter, handler);
         }
 
-        private void invoke(String callback) {
+        private void invoke(String callback) throws Exception {
             switch (callback) {
                 case "timeout" -> timeout.get().run();
                 case "completion" -> completion.get().run();
-                case "error" -> error.get().accept(new IOException("disconnected"));
+                case "error" ->
+                    Consumer.class
+                            .getMethod("accept", Object.class)
+                            .invoke(error.get(), new IOException("disconnected"));
                 default -> throw new IllegalArgumentException(callback);
             }
         }

@@ -18,7 +18,9 @@ public class DeckFileReader extends ResourceFileReader {
     private final List<ResourceValidator> resourceValidators;
 
     public List<CardmarketDeck> read() {
-        return readResources(DECK_RESOURCE_PATTERN).stream().map(this::readDeck).toList();
+        return readResources(DECK_RESOURCE_PATTERN).stream()
+                .map(resource -> readDeck(resource))
+                .toList();
     }
 
     private CardmarketDeck readDeck(Resource resource) {

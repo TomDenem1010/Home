@@ -64,7 +64,7 @@ class CardmarketRequestThrottlerTest {
     void completesWaitWhenRequestIsNotInterrupted() {
         CardmarketRequestThrottler throttler = new CardmarketRequestThrottler(Duration.ZERO, Duration.ZERO);
 
-        assertDoesNotThrow(throttler::waitBeforeNextRequest);
+        assertDoesNotThrow(() -> throttler.waitBeforeNextRequest());
     }
 
     @Test
@@ -79,7 +79,8 @@ class CardmarketRequestThrottlerTest {
             CardmarketRequestThrottler throttler =
                     new CardmarketRequestThrottler(Duration.ofSeconds(1), Duration.ofSeconds(1));
 
-            ThrottlerException exception = assertThrows(ThrottlerException.class, throttler::waitBeforeNextRequest);
+            ThrottlerException exception =
+                    assertThrows(ThrottlerException.class, () -> throttler.waitBeforeNextRequest());
 
             assertTrue(Thread.currentThread().isInterrupted());
             assertTrue(exception.getCause() instanceof InterruptedException);

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,9 +30,9 @@ class AuthConfigurationTest {
         when(http.build()).thenReturn(chain);
 
         assertSame(chain, configuration.securityFilterChain(http, sessions));
-        verify(http).authorizeHttpRequests(any(Customizer.class));
-        verify(http).formLogin(any(Customizer.class));
-        verify(http).logout(any(Customizer.class));
-        verify(http).sessionManagement(any(Customizer.class));
+        verify(http).authorizeHttpRequests(any());
+        verify(http).formLogin(any());
+        verify(http).logout(any());
+        verify(http).sessionManagement(any());
     }
 }

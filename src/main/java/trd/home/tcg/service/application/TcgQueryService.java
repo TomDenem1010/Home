@@ -2,7 +2,6 @@ package trd.home.tcg.service.application;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ public class TcgQueryService {
     public List<CardmarketDeckPriceSummary> getDeckPriceSummary() {
         List<CardmarketDeck> decks = deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE);
         List<String> versionIds = decks.stream()
-                .map(CardmarketDeck::getCurrentVersion)
+                .map(deck -> deck.getCurrentVersion())
                 .filter(Objects::nonNull)
                 .map(version -> version.getId())
                 .toList();
@@ -47,8 +46,9 @@ public class TcgQueryService {
                 : deckCardRepository.findAllByDeckVersionIdIn(versionIds).stream()
                         .collect(Collectors.groupingBy(
                                 deckCard -> deckCard.getDeckVersion().getId()));
-        Map<String, CardmarketCardPrice> latestPrices = latestPrices(
-                cardsByVersion.values().stream().flatMap(Collection::stream).toList());
+        Map<String, CardmarketCardPrice> latestPrices = latestPrices(cardsByVersion.values().stream()
+                .flatMap(deckCards -> deckCards.stream())
+                .toList());
 
         return decks.stream()
                 .map(deck -> summarizeDeck(deck, cardsByVersion, latestPrices))
@@ -68,14 +68,14 @@ public class TcgQueryService {
         Map<String, CardmarketCardPrice> latestPrices = latestPrices(deckCards);
         List<CardmarketDeckCardPriceSummary> summaries = deckCards.stream()
                 .map(deckCard -> summarizeCard(deckCard, cards, latestPrices))
-                .sorted(Comparator.comparing(CardmarketDeckCardPriceSummary::cardName))
+                .sorted(Comparator.comparing(summary -> summary.cardName()))
                 .toList();
 
         return new CardmarketDeckPriceHistorySummary(
                 Objects.requireNonNullElse(deckId, ""),
                 summaries,
-                totalPrice(summaries, CardmarketDeckCardPriceSummary::latestFromInEuro),
-                totalPrice(summaries, CardmarketDeckCardPriceSummary::latestTrendInEuro));
+                totalPrice(summaries, summary -> summary.latestFromInEuro()),
+                totalPrice(summaries, summary -> summary.latestTrendInEuro()));
     }
 
     private CardmarketDeckPriceSummary summarizeDeck(
@@ -88,8 +88,8 @@ public class TcgQueryService {
         return new CardmarketDeckPriceSummary(
                 Objects.requireNonNullElse(deck.getId(), ""),
                 Objects.requireNonNullElse(deck.getName(), ""),
-                totalPrice(deckCards, latestPrices, CardmarketCardPrice::getFromInEuro),
-                totalPrice(deckCards, latestPrices, CardmarketCardPrice::getTrendInEuro));
+                totalPrice(deckCards, latestPrices, price -> price.getFromInEuro()),
+                totalPrice(deckCards, latestPrices, price -> price.getTrendInEuro()));
     }
 
     private CardmarketDeckCardPriceSummary summarizeCard(
@@ -103,14 +103,14 @@ public class TcgQueryService {
                 cardName(card == null ? null : card.getLink()),
                 card == null ? "" : Objects.requireNonNullElse(card.getLink(), ""),
                 deckCard.getQuantity(),
-                nullablePriceValue(price, CardmarketCardPrice::getFromInEuro),
-                nullablePriceValue(price, CardmarketCardPrice::getTrendInEuro),
+                nullablePriceValue(price, cardPrice -> cardPrice.getFromInEuro()),
+                nullablePriceValue(price, cardPrice -> cardPrice.getTrendInEuro()),
                 price == null ? null : price.getCreatedAt());
     }
 
     private Map<String, CardmarketCard> cardsById(List<CardmarketDeckCard> deckCards) {
         return cardRepository.findAllById(distinctCardIds(deckCards)).stream()
-                .collect(Collectors.toMap(CardmarketCard::getId, Function.identity()));
+                .collect(Collectors.toMap(card -> card.getId(), Function.identity()));
     }
 
     private Map<String, CardmarketCardPrice> latestPrices(List<CardmarketDeckCard> deckCards) {
@@ -137,7 +137,7 @@ public class TcgQueryService {
         return cards.stream()
                 .map(card -> priceValue(latestPrices.get(card.getCard().getId()), priceExtractor)
                         .multiply(BigDecimal.valueOf(card.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, (total, price) -> total.add(price));
     }
 
     private static BigDecimal priceValue(
@@ -172,6 +172,6 @@ public class TcgQueryService {
         return cards.stream()
                 .map(card -> Objects.requireNonNullElse(priceExtractor.apply(card), BigDecimal.ZERO)
                         .multiply(BigDecimal.valueOf(card.quantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, (total, price) -> total.add(price));
     }
 }

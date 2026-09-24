@@ -60,7 +60,7 @@ public class StuckApplicationEventService {
 
     private void notifyUsers(List<ApplicationEvent> events) {
         events.stream()
-                .collect(Collectors.groupingBy(this::recipientUsername))
+                .collect(Collectors.groupingBy(event -> recipientUsername(event)))
                 .forEach((username, userEvents) -> notificationPublisher.publish(
                         username, FrontendNotificationType.ERROR, timeoutMessage(userEvents)));
     }

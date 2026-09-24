@@ -19,7 +19,7 @@ public class CardmarketCardPricePersister {
     @Transactional
     public void saveAll(List<GatheredCardmarketPrice> gatheredPrices) {
         List<CardmarketCardPrice> prices = gatheredPrices.stream()
-                .map(this::removeZeroValues)
+                .map(gatheredPrice -> removeZeroValues(gatheredPrice))
                 .filter(gatheredPrice -> hasKnownPrice(gatheredPrice.price()))
                 .map(gatheredPrice -> {
                     CardmarketCardPrice price = gatheredPrice.price();

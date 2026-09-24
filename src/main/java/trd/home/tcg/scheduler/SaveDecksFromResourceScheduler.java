@@ -16,6 +16,6 @@ public class SaveDecksFromResourceScheduler {
 
     @Scheduled(fixedDelayString = "${tcg.scheduler.save-decks.delay:5s}")
     public void processNextEvent() {
-        eventQueue.claimNext(EventType.SAVE_DECKS_FROM_RESOURCE).ifPresent(service::process);
+        eventQueue.claimNext(EventType.SAVE_DECKS_FROM_RESOURCE).ifPresent(event -> service.process(event));
     }
 }

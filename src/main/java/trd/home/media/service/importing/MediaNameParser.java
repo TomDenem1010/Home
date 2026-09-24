@@ -22,7 +22,7 @@ public class MediaNameParser {
         }
         String name = stem.substring(separator + TITLE_SEPARATOR.length()).strip();
         var actors = Arrays.stream(stem.substring(0, separator).split(ACTOR_SEPARATOR, -1))
-                .map(String::strip)
+                .map(actor -> actor.strip())
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         if (name.isEmpty()
                 || name.length() > 255

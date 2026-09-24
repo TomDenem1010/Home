@@ -13,8 +13,8 @@ public class AuthSessionService {
 
     public void expireSessions(String username) {
         sessionRegistry.getAllPrincipals().stream()
-                .filter(UserDetails.class::isInstance)
-                .map(UserDetails.class::cast)
+                .filter(principal -> UserDetails.class.isInstance(principal))
+                .map(principal -> UserDetails.class.cast(principal))
                 .filter(principal -> principal.getUsername().equals(username))
                 .flatMap(principal -> sessionRegistry.getAllSessions(principal, false).stream())
                 .forEach(session -> session.expireNow());

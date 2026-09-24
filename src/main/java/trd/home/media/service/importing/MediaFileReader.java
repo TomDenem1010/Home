@@ -28,9 +28,9 @@ public class MediaFileReader {
             }
             try (var paths = Files.walk(directory)) {
                 return paths.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                        .filter(this::isVideo)
+                        .filter(path -> isVideo(path))
                         .sorted()
-                        .map(this::toMediaFile)
+                        .map(path -> toMediaFile(path))
                         .toList();
             }
         } catch (IOException | java.io.UncheckedIOException | SecurityException exception) {
