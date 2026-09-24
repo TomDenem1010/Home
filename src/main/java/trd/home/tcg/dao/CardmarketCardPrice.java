@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
 
@@ -22,10 +23,12 @@ public class CardmarketCardPrice extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "card_id", nullable = false)
+    @NonNull
     private CardmarketCard card;
 
     @Column(precision = 10, scale = 4)

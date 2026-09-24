@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
 import trd.home.tcg.exception.WrongCardQuantityException;
@@ -24,15 +25,19 @@ public class CardmarketDeckVersion extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "deck_id", nullable = false)
+    @NonNull
     private CardmarketDeck deck;
 
+    @NonNull
     private String version;
 
     @OneToMany(mappedBy = "deckVersion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @NonNull
     private Set<CardmarketDeckCard> cards = new LinkedHashSet<>();
 
     public void addCard(CardmarketCard card, int quantity) {

@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import trd.home.auth.constant.UserRole;
 import trd.home.common.dao.AuditedEntity;
@@ -27,15 +28,19 @@ public class User extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
+    @NonNull
     private String username;
 
+    @NonNull
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "APPLICATION_USER_ROLE", joinColumns = @JoinColumn(name = "USER_ID"))
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false, length = 32)
+    @NonNull
     private Set<UserRole> roles = new HashSet<>();
 }

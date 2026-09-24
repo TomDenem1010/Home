@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
 import trd.home.tcg.constant.CardFoilType;
@@ -20,10 +21,13 @@ public class CardmarketCard extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
+    @NonNull
     private String link;
 
     @Enumerated(EnumType.STRING)
+    @NonNull
     private CardFoilType foilType = CardFoilType.NO;
 }

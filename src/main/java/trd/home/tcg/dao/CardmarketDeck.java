@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
 import trd.home.tcg.constant.DeckStatus;
@@ -27,11 +28,14 @@ public class CardmarketDeck extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
+    @NonNull
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @NonNull
     private DeckStatus status = DeckStatus.ACTIVE;
 
     private Instant deletedAt;
@@ -41,6 +45,7 @@ public class CardmarketDeck extends AuditedEntity {
     private CardmarketDeckVersion currentVersion;
 
     @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
+    @NonNull
     private List<CardmarketDeckVersion> versions = new ArrayList<>();
 
     public void addVersion(CardmarketDeckVersion version) {

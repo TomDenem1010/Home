@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 
@@ -25,10 +26,12 @@ public class ApplicationEvent extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "TYPE", nullable = false, length = 64)
+    @NonNull
     private EventType type;
 
     @Column(name = "PROCESSED_AT")
@@ -42,6 +45,7 @@ public class ApplicationEvent extends AuditedEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false, length = 20)
+    @NonNull
     private EventStatus status;
 
     public ApplicationEvent(EventType type) {

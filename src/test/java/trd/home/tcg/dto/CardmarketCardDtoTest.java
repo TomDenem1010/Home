@@ -27,7 +27,7 @@ class CardmarketCardDtoTest {
 
         assertAll(
                 () -> assertEquals("card-id", dto.id()),
-                () -> assertEquals(link == null || link.isBlank() ? "" : link, dto.link()),
+                () -> assertEquals(link.isBlank() ? "" : link, dto.link()),
                 () -> assertEquals(CardFoilType.FOIL, dto.foilType()),
                 () -> assertEquals(expectedCardGameType, dto.cardGameType()),
                 () -> assertEquals(expectedExpansion, dto.expansion()),
@@ -127,8 +127,7 @@ class CardmarketCardDtoTest {
                 Arguments.of("Singles", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
                 Arguments.of("Singles/Set", CardGameType.MAGIC_THE_GATHERING, "Set", "", CardLanguage.ENGLISH),
                 Arguments.of("   ", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
-                Arguments.of("", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH),
-                Arguments.of((String) null, CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH));
+                Arguments.of("", CardGameType.MAGIC_THE_GATHERING, "", "", CardLanguage.ENGLISH));
     }
 
     private static Stream<String> invalidLinks() {

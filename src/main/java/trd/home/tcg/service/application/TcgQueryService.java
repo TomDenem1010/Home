@@ -2,7 +2,6 @@ package trd.home.tcg.service.application;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -104,9 +103,9 @@ public class TcgQueryService {
                 cardName(card == null ? null : card.getLink()),
                 card == null ? "" : Objects.requireNonNullElse(card.getLink(), ""),
                 deckCard.getQuantity(),
-                priceValue(price, CardmarketCardPrice::getFromInEuro),
-                priceValue(price, CardmarketCardPrice::getTrendInEuro),
-                price == null ? Instant.EPOCH : Objects.requireNonNullElse(price.getCreatedAt(), Instant.EPOCH));
+                nullablePriceValue(price, CardmarketCardPrice::getFromInEuro),
+                nullablePriceValue(price, CardmarketCardPrice::getTrendInEuro),
+                price == null ? null : price.getCreatedAt());
     }
 
     private Map<String, CardmarketCard> cardsById(List<CardmarketDeckCard> deckCards) {
@@ -117,7 +116,8 @@ public class TcgQueryService {
     private Map<String, CardmarketCardPrice> latestPrices(List<CardmarketDeckCard> deckCards) {
         return distinctCardIds(deckCards).stream()
                 .map(cardId -> priceRepository
-                        .findFirstByCardIdOrderByCreatedAtDescIdDesc(cardId)
+                        .findFirstByCardIdAndFromInEuroNotOrCardIdAndTrendInEuroNotOrderByCreatedAtDescIdDesc(
+                                cardId, BigDecimal.ZERO, cardId, BigDecimal.ZERO)
                         .orElse(null))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(price -> price.getCard().getId(), Function.identity()));
@@ -147,6 +147,11 @@ public class TcgQueryService {
                 : Objects.requireNonNullElse(priceExtractor.apply(price), BigDecimal.ZERO);
     }
 
+    private static BigDecimal nullablePriceValue(
+            CardmarketCardPrice price, Function<CardmarketCardPrice, BigDecimal> priceExtractor) {
+        return price == null ? null : priceExtractor.apply(price);
+    }
+
     private static String cardName(String link) {
         if (link == null || link.isBlank()) {
             return "";
@@ -165,7 +170,8 @@ public class TcgQueryService {
             List<CardmarketDeckCardPriceSummary> cards,
             Function<CardmarketDeckCardPriceSummary, BigDecimal> priceExtractor) {
         return cards.stream()
-                .map(card -> priceExtractor.apply(card).multiply(BigDecimal.valueOf(card.quantity())))
+                .map(card -> Objects.requireNonNullElse(priceExtractor.apply(card), BigDecimal.ZERO)
+                        .multiply(BigDecimal.valueOf(card.quantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

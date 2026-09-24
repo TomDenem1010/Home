@@ -1,6 +1,7 @@
 package trd.home.tcg.service.playwright;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Browser;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import trd.home.tcg.dao.CardmarketCardPrice;
+import trd.home.tcg.exception.CardmarketPriceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CardmarketCardPriceGathererTest {
@@ -38,25 +40,32 @@ class CardmarketCardPriceGathererTest {
     }
 
     @Test
-    void usesZeroForMissingPrices() {
+    void throwsSpecificExceptionForMissingPrices() {
         when(caller.callWithPlaywright("https://example.test/card", browser)).thenReturn(Jsoup.parse("<dl />"));
 
-        CardmarketCardPrice price =
-                new CardmarketCardPriceGatherer(caller).getCardmarketCardPrice("https://example.test/card", browser);
-
-        assertEquals(BigDecimal.ZERO, price.getFromInEuro());
-        assertEquals(BigDecimal.ZERO, price.getTrendInEuro());
+        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
+                .getCardmarketCardPrice("https://example.test/card", browser));
     }
 
     @Test
-    void usesZeroWhenPriceLabelHasNoValue() {
+    void throwsSpecificExceptionWhenPriceLabelHasNoValue() {
         when(caller.callWithPlaywright("https://example.test/card", browser))
                 .thenReturn(Jsoup.parse("<dl><dt>Price Trend</dt><dd>2,50</dd><dt>From</dt></dl>"));
 
-        CardmarketCardPrice price =
-                new CardmarketCardPriceGatherer(caller).getCardmarketCardPrice("https://example.test/card", browser);
+        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
+                .getCardmarketCardPrice("https://example.test/card", browser));
+    }
 
-        assertEquals(BigDecimal.ZERO, price.getFromInEuro());
-        assertEquals(new BigDecimal("2.50"), price.getTrendInEuro());
+    @Test
+    void throwsSpecificExceptionForZeroPrice() {
+        when(caller.callWithPlaywright("https://example.test/card", browser)).thenReturn(Jsoup.parse("""
+                        <dl>
+                          <dt>From</dt><dd>0,00</dd>
+                          <dt>Price Trend</dt><dd>2,50</dd>
+                        </dl>
+                        """));
+
+        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
+                .getCardmarketCardPrice("https://example.test/card", browser));
     }
 }

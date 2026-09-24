@@ -9,6 +9,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Entity
 @Table(name = "APPLICATION_LOG")
@@ -18,9 +19,11 @@ public class ApplicationLog extends AuditedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @NonNull
     private String id;
 
     @Column(name = "METHOD_NAME", nullable = false, length = 1000)
+    @NonNull
     private String method;
 
     @Lob

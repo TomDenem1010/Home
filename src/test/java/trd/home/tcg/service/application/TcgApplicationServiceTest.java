@@ -1,6 +1,7 @@
 package trd.home.tcg.service.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,9 @@ class TcgApplicationServiceTest {
         CardmarketCardPrice price = price(card, "5.25", "5.75", Instant.parse("2026-01-01T00:00:00Z"));
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
         when(deckCards.findAllByDeckVersionIdIn(List.of("version-id"))).thenReturn(List.of(deckCard));
-        when(prices.findFirstByCardIdOrderByCreatedAtDescIdDesc("card-id")).thenReturn(Optional.of(price));
+        when(prices.findFirstByCardIdAndFromInEuroNotOrCardIdAndTrendInEuroNotOrderByCreatedAtDescIdDesc(
+                        "card-id", BigDecimal.ZERO, "card-id", BigDecimal.ZERO))
+                .thenReturn(Optional.of(price));
 
         List<CardmarketDeckPriceSummary> result = service().getDeckPriceSummary();
 
@@ -86,14 +89,18 @@ class TcgApplicationServiceTest {
         when(decks.findById("deck-id")).thenReturn(Optional.of(deck));
         when(deckCards.findAllByDeckVersionId("version-id")).thenReturn(versionCards);
         when(cards.findAllById(List.of("priced", "unpriced"))).thenReturn(List.of(pricedCard, unpricedCard));
-        when(prices.findFirstByCardIdOrderByCreatedAtDescIdDesc("priced")).thenReturn(Optional.of(price));
+        when(prices.findFirstByCardIdAndFromInEuroNotOrCardIdAndTrendInEuroNotOrderByCreatedAtDescIdDesc(
+                        "priced", BigDecimal.ZERO, "priced", BigDecimal.ZERO))
+                .thenReturn(Optional.of(price));
 
         CardmarketDeckPriceHistorySummary result = service().getDeckPriceHistorySummary("deck-id");
 
         assertEquals("deck-id", result.deckId());
         assertEquals(2, result.cards().size());
         assertEquals(createdAt, result.cards().getFirst().latestPriceCreatedAt());
-        assertEquals(Instant.EPOCH, result.cards().getLast().latestPriceCreatedAt());
+        assertNull(result.cards().getLast().latestPriceCreatedAt());
+        assertNull(result.cards().getLast().latestFromInEuro());
+        assertNull(result.cards().getLast().latestTrendInEuro());
         assertEquals(new BigDecimal("6.00"), result.sumLatestFromInEuro());
         assertEquals(new BigDecimal("8.00"), result.sumLatestTrendInEuro());
     }
