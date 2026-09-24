@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import trd.home.common.browser.ChromeBrowserLauncher;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.application.TcgCommandService;
@@ -17,15 +16,7 @@ class TcgServiceTest {
 
     private final TcgCommandService commands = mock(TcgCommandService.class);
     private final TcgQueryService queries = mock(TcgQueryService.class);
-    private final ChromeBrowserLauncher chromeBrowserLauncher = mock(ChromeBrowserLauncher.class);
-    private final TcgService service = new TcgService(commands, queries, chromeBrowserLauncher);
-
-    @Test
-    void startsChrome() {
-        service.startChrome();
-
-        verify(chromeBrowserLauncher).start();
-    }
+    private final TcgService service = new TcgService(commands, queries);
 
     @Test
     void createsSaveDecksFromResourceEvent() {
