@@ -23,7 +23,7 @@ class InitialAdminUserInitializerTest {
     private final ApplicationArguments arguments = mock(ApplicationArguments.class);
 
     @Test
-    void createsInitialAdminWhenNoAdminExists() {
+    void createsConfiguredAdminWhenThatUsernameIsNotAnAdmin() {
         InitialAdminUserInitializer initializer = initializer("admin", "strong-password");
 
         assertDoesNotThrow(() -> initializer.run(arguments));
@@ -32,8 +32,9 @@ class InitialAdminUserInitializerTest {
     }
 
     @Test
-    void leavesExistingAdminUntouched() {
-        when(userRepository.existsByRolesContaining(UserRole.ADMIN)).thenReturn(true);
+    void leavesConfiguredAdminUntouched() {
+        when(userRepository.existsByUsernameAndRolesContaining("admin", UserRole.ADMIN))
+                .thenReturn(true);
         InitialAdminUserInitializer initializer = initializer("admin", "strong-password");
 
         assertDoesNotThrow(() -> initializer.run(arguments));
