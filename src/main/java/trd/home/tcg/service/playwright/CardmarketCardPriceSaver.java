@@ -1,7 +1,6 @@
 package trd.home.tcg.service.playwright;
 
 import com.microsoft.playwright.Browser;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,6 @@ public class CardmarketCardPriceSaver {
     }
 
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
-        List<GatheredCardmarketPrice> gatheredPrices = new ArrayList<>();
         try (var browserSession = browserSessionFactory.open(browserEndpoint)) {
             Browser browser = browserSession.getBrowser();
             for (int index = 0; index < cardmarketCardDtos.size(); index++) {
@@ -39,11 +37,9 @@ public class CardmarketCardPriceSaver {
                     requestThrottler.waitBeforeNextRequest();
                 }
                 CardmarketCardDto cardDto = cardmarketCardDtos.get(index);
-                gatheredPrices.add(new GatheredCardmarketPrice(
-                        cardDto.id(), cardmarketCardPriceGatherer.getCardmarketCardPrice(cardDto.link(), browser)));
+                pricePersister.saveAll(List.of(new GatheredCardmarketPrice(
+                        cardDto.id(), cardmarketCardPriceGatherer.getCardmarketCardPrice(cardDto.link(), browser))));
             }
         }
-
-        pricePersister.saveAll(gatheredPrices);
     }
 }

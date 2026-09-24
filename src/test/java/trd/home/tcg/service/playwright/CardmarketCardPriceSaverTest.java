@@ -1,9 +1,7 @@
 package trd.home.tcg.service.playwright;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -15,7 +13,6 @@ import com.microsoft.playwright.Browser;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import trd.home.common.playwright.PlaywrightBrowserSession;
 import trd.home.common.playwright.PlaywrightBrowserSessionFactory;
@@ -43,8 +40,7 @@ class CardmarketCardPriceSaverTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    void gathersEveryPriceBeforePersistingThemTogether() {
+    void persistsEachPriceImmediatelyAfterGatheringIt() {
         CardmarketCardDto firstCard = card("card-1");
         CardmarketCardDto secondCard = card("card-2");
         CardmarketCardPrice firstPrice = new CardmarketCardPrice();
@@ -56,29 +52,25 @@ class CardmarketCardPriceSaverTest {
 
         InOrder order = inOrder(gatherer, throttler, persister);
         order.verify(gatherer).getCardmarketCardPrice(firstCard.link(), browser);
+        order.verify(persister).saveAll(List.of(new GatheredCardmarketPrice("card-1", firstPrice)));
         order.verify(throttler).waitBeforeNextRequest();
         order.verify(gatherer).getCardmarketCardPrice(secondCard.link(), browser);
-        ArgumentCaptor<List<GatheredCardmarketPrice>> captor = ArgumentCaptor.forClass(List.class);
-        order.verify(persister).saveAll(captor.capture());
-        assertEquals(
-                List.of(
-                        new GatheredCardmarketPrice("card-1", firstPrice),
-                        new GatheredCardmarketPrice("card-2", secondPrice)),
-                captor.getValue());
+        order.verify(persister).saveAll(List.of(new GatheredCardmarketPrice("card-2", secondPrice)));
         verify(session).close();
     }
 
     @Test
-    void doesNotPersistAnyPriceWhenGatheringFails() {
+    void keepsPricesPersistedBeforeGatheringFails() {
         CardmarketCardDto firstCard = card("card-1");
         CardmarketCardDto secondCard = card("card-2");
-        when(gatherer.getCardmarketCardPrice(firstCard.link(), browser)).thenReturn(new CardmarketCardPrice());
+        CardmarketCardPrice firstPrice = new CardmarketCardPrice();
+        when(gatherer.getCardmarketCardPrice(firstCard.link(), browser)).thenReturn(firstPrice);
         when(gatherer.getCardmarketCardPrice(secondCard.link(), browser))
                 .thenThrow(new IllegalStateException("Rate limited"));
 
         assertThrows(IllegalStateException.class, () -> saver.updateCardPrice(List.of(firstCard, secondCard)));
 
-        verify(persister, never()).saveAll(anyList());
+        verify(persister).saveAll(List.of(new GatheredCardmarketPrice("card-1", firstPrice)));
         verify(session).close();
     }
 
