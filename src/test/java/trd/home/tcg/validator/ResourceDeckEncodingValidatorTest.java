@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
 import trd.home.common.exception.ResourceReadException;
@@ -42,6 +43,27 @@ class ResourceDeckEncodingValidatorTest {
         };
 
         assertThrows(ResourceReadException.class, () -> validator.validateResource(resource));
+    }
+
+    @Test
+    void closesResourceStreamAfterValidation() {
+        AtomicBoolean closed = new AtomicBoolean();
+        ByteArrayResource resource = new ByteArrayResource("deck".getBytes(UTF_8)) {
+            @Override
+            public InputStream getInputStream() {
+                return new java.io.ByteArrayInputStream(getByteArray()) {
+                    @Override
+                    public void close() throws IOException {
+                        closed.set(true);
+                        super.close();
+                    }
+                };
+            }
+        };
+
+        validator.validateResource(resource);
+
+        org.junit.jupiter.api.Assertions.assertTrue(closed.get());
     }
 
     private static ByteArrayResource resource(String filename, byte[] content) {

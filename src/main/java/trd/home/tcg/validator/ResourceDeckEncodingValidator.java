@@ -16,8 +16,8 @@ public class ResourceDeckEncodingValidator implements ResourceValidator {
 
     @Override
     public void validateResource(Resource resource) {
-        try {
-            createUtf8Decoder().decode(ByteBuffer.wrap(resource.getInputStream().readAllBytes()));
+        try (var input = resource.getInputStream()) {
+            createUtf8Decoder().decode(ByteBuffer.wrap(input.readAllBytes()));
         } catch (CharacterCodingException exception) {
             log.error("Deck file '{}' is not valid UTF-8", resource.getFilename(), exception);
             throw new WrongDeckEncodingException("Deck file is not valid UTF-8.");
