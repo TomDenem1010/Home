@@ -1,6 +1,7 @@
 package trd.home.tcg.service.event;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.mockito.InOrder;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
@@ -43,8 +45,9 @@ class SaveDecksFromResourceServiceTest {
 
         service.process(event);
 
-        verify(deckSaver).save(firstDeck);
-        verify(deckSaver).save(secondDeck);
+        InOrder order = inOrder(deckSaver);
+        order.verify(deckSaver).save(firstDeck);
+        order.verify(deckSaver).save(secondDeck);
         assertEquals(EventStatus.DONE, event.getStatus());
         verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
     }

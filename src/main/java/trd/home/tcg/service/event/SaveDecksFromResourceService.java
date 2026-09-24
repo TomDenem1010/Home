@@ -1,8 +1,6 @@
 package trd.home.tcg.service.event;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import trd.home.common.dao.ApplicationEvent;
@@ -55,12 +53,11 @@ public class SaveDecksFromResourceService {
 
     private void saveDecks(List<CardmarketDeck> decks) {
         try {
-            CompletableFuture.allOf(decks.stream()
-                            .map(deck -> CompletableFuture.runAsync(() -> deckSaver.save(deck)))
-                            .toArray(CompletableFuture[]::new))
-                    .join();
-        } catch (CompletionException exception) {
-            throw new DeckImportException("Unable to save decks from resource", exception.getCause());
+            for (CardmarketDeck deck : decks) {
+                deckSaver.save(deck);
+            }
+        } catch (RuntimeException exception) {
+            throw new DeckImportException("Unable to save decks from resource", exception);
         }
     }
 }
