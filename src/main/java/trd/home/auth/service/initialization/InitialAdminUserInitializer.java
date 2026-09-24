@@ -1,5 +1,6 @@
 package trd.home.auth.service.initialization;
 
+import java.util.HashSet;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import trd.home.auth.constant.UserRole;
+import trd.home.auth.dao.User;
 import trd.home.auth.repository.UserRepository;
 import trd.home.auth.service.AuthService;
 import trd.home.auth.service.validation.AuthInputValidator;
@@ -36,7 +38,9 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (userRepository.existsByUsernameAndRolesContaining(username, UserRole.ADMIN)) {
+        User existingUser = userRepository.findByUsername(username).orElse(null);
+        if (existingUser != null) {
+            grantAdminRoleIfMissing(existingUser);
             return;
         }
 
@@ -45,5 +49,18 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
 
         authService.save(username, password, Set.of(UserRole.ADMIN));
         log.info("Initial admin user created successfully.");
+    }
+
+    private void grantAdminRoleIfMissing(User user) {
+        if (user.getRoles().contains(UserRole.ADMIN)) {
+            return;
+        }
+
+        log.info("Granting admin role to initial admin user.");
+        Set<UserRole> roles = new HashSet<>(user.getRoles());
+        roles.add(UserRole.ADMIN);
+        user.setRoles(roles);
+        userRepository.save(user);
+        log.info("Admin role granted to initial admin user successfully.");
     }
 }
