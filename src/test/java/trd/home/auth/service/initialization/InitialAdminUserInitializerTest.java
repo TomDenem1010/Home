@@ -33,7 +33,7 @@ class InitialAdminUserInitializerTest {
 
     @Test
     void leavesExistingAdminUntouched() {
-        when(userRepository.existsByRole(UserRole.ADMIN)).thenReturn(true);
+        when(userRepository.existsByRolesContaining(UserRole.ADMIN)).thenReturn(true);
         InitialAdminUserInitializer initializer = initializer("admin", "strong-password");
 
         assertDoesNotThrow(() -> initializer.run(arguments));

@@ -36,7 +36,7 @@ public class InitialAdminUserInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (userRepository.existsByRole(UserRole.ADMIN)) {
+        if (userRepository.existsByRolesContaining(UserRole.ADMIN)) {
             return;
         }
 
