@@ -9,9 +9,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dao.User;
-import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 
 class DatabaseUserDetailsServiceTest {
@@ -42,6 +42,6 @@ class DatabaseUserDetailsServiceTest {
     void rejectsUnknownUsername() {
         when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
 
-        assertThrows(InvalidCredentialException.class, () -> service.loadUserByUsername("unknown"));
+        assertThrows(UsernameNotFoundException.class, () -> service.loadUserByUsername("unknown"));
     }
 }

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.exception.InvalidCredentialException;
@@ -19,7 +20,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) {
         var user = userRepository
                 .findByUsername(username)
-                .orElseThrow(() -> new InvalidCredentialException("Invalid username"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid username"));
 
         String[] roles = user.getRoles().stream().map(role -> roleName(role)).toArray(String[]::new);
         return User.withUsername(user.getUsername())
