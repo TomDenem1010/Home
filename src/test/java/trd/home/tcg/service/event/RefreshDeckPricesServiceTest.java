@@ -3,7 +3,9 @@ package trd.home.tcg.service.event;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -45,21 +47,14 @@ class RefreshDeckPricesServiceTest {
             deckRepository);
 
     @Test
-    void refreshesRequestedDecksSequentially() {
-        ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES);
+    void refreshesOnlyDeckStoredInEvent() {
+        ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES, "deck-1");
         CardmarketDeck firstDeck = deck("deck-1", "version-1");
-        CardmarketDeck secondDeck = deck("deck-2", "version-2");
         CardmarketCard firstCard = card("card-1");
-        CardmarketCard secondCard = card("card-2");
-        when(deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(firstDeck, secondDeck));
         when(deckRepository.findById("deck-1")).thenReturn(Optional.of(firstDeck));
-        when(deckRepository.findById("deck-2")).thenReturn(Optional.of(secondDeck));
         when(deckCardRepository.findAllByDeckVersionId("version-1"))
                 .thenReturn(List.of(deckCard(firstDeck.getCurrentVersion(), firstCard)));
-        when(deckCardRepository.findAllByDeckVersionId("version-2"))
-                .thenReturn(List.of(deckCard(secondDeck.getCurrentVersion(), secondCard)));
         when(cardRepository.findAllById(List.of("card-1"))).thenReturn(List.of(firstCard));
-        when(cardRepository.findAllById(List.of("card-2"))).thenReturn(List.of(secondCard));
 
         service.process(event);
 
@@ -67,16 +62,14 @@ class RefreshDeckPricesServiceTest {
         order.verify(deckCardRepository).findAllByDeckVersionId("version-1");
         order.verify(cardRepository).findAllById(List.of("card-1"));
         order.verify(cardPriceSaver).updateCardPrice(List.of(CardmarketCardDto.from(firstCard)));
-        order.verify(deckCardRepository).findAllByDeckVersionId("version-2");
-        order.verify(cardRepository).findAllById(List.of("card-2"));
-        order.verify(cardPriceSaver).updateCardPrice(List.of(CardmarketCardDto.from(secondCard)));
+        verify(deckRepository, never()).findAllByStatusOrderByName(DeckStatus.ACTIVE);
         assertEquals(EventStatus.DONE, event.getStatus());
         verify(notificationPublisher)
                 .publish(null, FrontendNotificationType.SUCCESS, "Deck prices were refreshed successfully.");
     }
 
     @Test
-    void refreshesOnlyDeckStoredInEvent() {
+    void refreshesDeckWithoutCards() {
         ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES, "deck-1");
         List<CardmarketCardDto> cards = List.of();
         CardmarketDeck deck = deck("deck-1", "version-1");
@@ -88,6 +81,16 @@ class RefreshDeckPricesServiceTest {
 
         verify(cardPriceSaver).updateCardPrice(cards);
         assertEquals(EventStatus.DONE, event.getStatus());
+    }
+
+    @Test
+    void marksEventAsErrorWhenDeckDoesNotExist() {
+        ApplicationEvent event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES, "missing-deck");
+
+        service.process(event);
+
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        verifyNoInteractions(cardPriceSaver);
     }
 
     private static CardmarketCard card(String id) {
