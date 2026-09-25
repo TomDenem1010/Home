@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Browser;
@@ -83,6 +84,13 @@ class CardmarketCardPriceSaverTest {
 
         verify(throttler, never()).waitBeforeNextRequest();
         verify(gatherer, times(1)).getCardmarketCardPrice(card.link(), browser);
+    }
+
+    @Test
+    void doesNotOpenSessionForEmptyCardList() {
+        saver.updateCardPrice(List.of());
+
+        verifyNoInteractions(sessionFactory, gatherer, throttler, persister);
     }
 
     private static CardmarketCardDto card(String id) {

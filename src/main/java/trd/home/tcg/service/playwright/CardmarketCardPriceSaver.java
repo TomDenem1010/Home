@@ -30,6 +30,10 @@ public class CardmarketCardPriceSaver {
     }
 
     public void updateCardPrice(List<CardmarketCardDto> cardmarketCardDtos) {
+        if (cardmarketCardDtos.isEmpty()) {
+            return;
+        }
+
         try (var browserSession = browserSessionFactory.open(browserEndpoint)) {
             Browser browser = browserSession.getBrowser();
             for (int index = 0; index < cardmarketCardDtos.size(); index++) {
