@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.event.ApplicationEventProcessor;
-import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.exception.DeckPriceRefreshException;
 import trd.home.tcg.repository.CardmarketCardRepository;
@@ -30,39 +29,35 @@ public class RefreshDeckPricesService {
         eventProcessor.process(
                 event,
                 () -> {
-                    refreshDecks(selectedDecks(event.getMessage()));
+                    refreshDecks(selectedDeck(event.getMessage()));
                     return SUCCESS_MESSAGE;
                 },
                 FAILURE_MESSAGE_PREFIX);
     }
 
-    private List<CardmarketDeck> selectedDecks(String deckId) {
-        return deckId == null || deckId.isBlank()
-                ? deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE)
-                : List.of(deckRepository
-                        .findById(deckId)
-                        .orElseThrow(() -> new DeckPriceRefreshException(
-                                "Deck not found: " + deckId, new IllegalArgumentException(deckId))));
+    private CardmarketDeck selectedDeck(String deckId) {
+        return deckRepository
+                .findById(deckId)
+                .orElseThrow(() -> new DeckPriceRefreshException(
+                        "Deck not found: " + deckId, new IllegalArgumentException(deckId)));
     }
 
-    private void refreshDecks(List<CardmarketDeck> decks) {
-        for (CardmarketDeck deck : decks) {
-            String deckId = deck.getId();
-            try {
-                List<String> cardIds = deck.getCurrentVersion() == null
-                        ? List.of()
-                        : deckCardRepository
-                                .findAllByDeckVersionId(deck.getCurrentVersion().getId())
-                                .stream()
-                                .map(deckCard -> deckCard.getCard().getId())
-                                .distinct()
-                                .toList();
-                cardPriceSaver.updateCardPrice(cardRepository.findAllById(cardIds).stream()
-                        .map(trd.home.tcg.dto.CardmarketCardDto::from)
-                        .toList());
-            } catch (RuntimeException exception) {
-                throw new DeckPriceRefreshException("Unable to refresh prices for deck: " + deckId, exception);
-            }
+    private void refreshDecks(CardmarketDeck deck) {
+        String deckId = deck.getId();
+        try {
+            List<String> cardIds = deck.getCurrentVersion() == null
+                    ? List.of()
+                    : deckCardRepository
+                            .findAllByDeckVersionId(deck.getCurrentVersion().getId())
+                            .stream()
+                            .map(deckCard -> deckCard.getCard().getId())
+                            .distinct()
+                            .toList();
+            cardPriceSaver.updateCardPrice(cardRepository.findAllById(cardIds).stream()
+                    .map(trd.home.tcg.dto.CardmarketCardDto::from)
+                    .toList());
+        } catch (RuntimeException exception) {
+            throw new DeckPriceRefreshException("Unable to refresh prices for deck: " + deckId, exception);
         }
     }
 }
