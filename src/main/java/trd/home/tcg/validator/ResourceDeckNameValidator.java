@@ -13,7 +13,15 @@ public class ResourceDeckNameValidator implements ResourceValidator {
 
         checkCsvExtension(filename);
         checkNameAndVersionSeparator(filename);
+        checkDeckName(filename);
         checkVersion(filename);
+    }
+
+    private void checkDeckName(String filename) {
+        String deckName = filename.substring(0, filename.lastIndexOf('_'));
+        if (deckName.isBlank() || deckName.contains("/") || deckName.contains("\\")) {
+            throw new WrongDeckNameException("Deck filename must start with a valid deck name: name_version.csv");
+        }
     }
 
     private void checkCsvExtension(String filename) {

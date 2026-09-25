@@ -20,7 +20,19 @@ class ResourceDeckNameValidatorTest {
 
     @ParameterizedTest
     @ValueSource(
-            strings = {"deck.csv", "deck_v1.txt", "deck_name_v1.csv", "Deck_abc.csv", "deck_v.csv", "deck_V12x.csv"})
+            strings = {
+                "deck.csv",
+                "deck_v1.txt",
+                "deck_name_v1.csv",
+                "Deck_abc.csv",
+                "deck_v.csv",
+                "deck_V12x.csv",
+                "_v1.csv",
+                "\\_v1.csv",
+                "/_v1.csv",
+                "deck\\name_v1.csv",
+                "deck/name_v1.csv"
+            })
     void rejectsInvalidDeckFilenames(String filename) {
         assertThrows(WrongDeckNameException.class, () -> validator.validateResource(resource(filename)));
     }
