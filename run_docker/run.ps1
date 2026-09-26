@@ -1,7 +1,7 @@
 param(
     [string]$Image = 'home:local',
     [string]$DataRoot = 'C:\DockerData\Home',
-    [string]$EnvFile = (Join-Path $PSScriptRoot '..\.env.docker')
+    [string]$EnvFile = (Join-Path $PSScriptRoot '.env.docker')
 )
 
 $ErrorActionPreference = 'Stop'

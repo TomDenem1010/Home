@@ -1,4 +1,4 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
-Dockerfile text eol=lf
-docker/*.sh text eol=lf
+run_docker/Dockerfile text eol=lf
+run_docker/*.sh text eol=lf

@@ -8,3 +8,7 @@ target
 docs
 *.log
 *.iml
+
+run_local
+run_docker/.env
+run_docker/.env.*

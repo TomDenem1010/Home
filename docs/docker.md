@@ -9,13 +9,13 @@ alkalmazza a migrációkat. A Chrome a frontendből indítható, grafikus módba
 
 ### Docker Compose (ajánlott)
 
-A repository gyökerében lévő `compose.yaml` eltárolja a portokat, mountokat és
+A `run_docker` mappában lévő `compose.yaml` eltárolja a portokat, mountokat és
 futtatási beállításokat. A Docker Desktop tartalmazza a Compose-ot.
 
-Első alkalommal készítsd el a `.env.docker` fájlt a `.env.docker.example` alapján,
+A `run_docker/.env.docker` fájlban add meg a futtatási beállításokat,
 és állítsd be a jelszavakat. Meglévő `.env.docker` fájlt tarts meg.
 Alapértelmezett image: `tomdenem1010/home:latest`, adatkönyvtár: `C:/DockerData/Home`.
-Ha ezeket módosítanád, másold a `.env.example` fájlt `.env` néven, és szerkeszd.
+Ha ezeket módosítanád, hozz létre egy `.env` fájlt a `run_docker` mappában, és add meg a `HOME_IMAGE` és `HOME_DATA_ROOT` értékeket.
 A `.env` a Compose beállításait, a `.env.docker` az alkalmazás jelszavait tartalmazza;
 mindkettő helyi, Git által figyelmen kívül hagyott fájl.
 
@@ -27,7 +27,7 @@ A korábbi, `docker run`-nal indított konténert az első Compose-indítás el�
 állítsd le, hogy ne használják egyszerre ugyanazt az adatbázist és Chrome-profilt,
 és felszabaduljanak a portok.
 
-Indítás a repository gyökeréből:
+Indítás a `run_docker` mappából (a repository gyökerében: `cd run_docker`):
 
 ```powershell
 docker compose up -d
@@ -44,13 +44,14 @@ docker compose up -d
 A Docker Desktop Containers nézetében `home` Compose-csoportként jelenik meg.
 Leállítás: `docker compose stop`. A fenti parancsok nem törlik a host adatkönyvtárait.
 Helyi image-hez állítsd a `.env` fájlban a `HOME_IMAGE=home:local` értéket,
-majd `docker build -t home:local .` és `docker compose up -d` (pull nélkül).
+majd `docker build -f Dockerfile -t home:local ..` és `docker compose up -d` (pull nélkül).
 
 ### Közvetlen docker run
 
+Ezeket a parancsokat is a `run_docker` mappából futtasd.
+
 ```powershell
-docker build -t home:local .
-Copy-Item .env.docker.example .env.docker
+docker build -f Dockerfile -t home:local ..
 # Szerkeszd a .env.docker fájlt, cseréld le az összes jelszót.
 # A VNC_PASSWORD pontosan 8 karakteres legyen.
 New-Item -ItemType Directory -Force C:\DockerData\Home\oracle
@@ -64,7 +65,7 @@ docker logs -f home
 Ugyanez az indítás a könyvtárak automatikus létrehozásával:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\docker\run.ps1 -Image home:local -DataRoot C:\DockerData\Home
+powershell -NoProfile -ExecutionPolicy Bypass -File .\run.ps1 -Image home:local -DataRoot C:\DockerData\Home
 ```
 
 Az indítóscript az üres TCG-könyvtárba bemásolja a repository meglévő deck CSV-it.
