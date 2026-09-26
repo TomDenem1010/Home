@@ -1,0 +1,31 @@
+name: home
+
+services:
+  home:
+    image: ${HOME_IMAGE:-tomdenem1010/home:latest}
+    hostname: home
+    init: true
+    restart: unless-stopped
+    stop_grace_period: 120s
+    shm_size: 1gb
+    mem_limit: 4g
+    env_file:
+      - .env.docker
+    ports:
+      - "127.0.0.1:5050:5050"
+      - "127.0.0.1:6080:6080"
+    volumes:
+      - type: bind
+        source: ${HOME_DATA_ROOT:-C:/DockerData/Home}/oracle
+        target: /opt/oracle/oradata
+      - type: bind
+        source: ${HOME_DATA_ROOT:-C:/DockerData/Home}/chrome
+        target: /opt/home/chrome-profile
+      - type: bind
+        source: ${HOME_DATA_ROOT:-C:/DockerData/Home}/media
+        target: /media
+        read_only: true
+      - type: bind
+        source: ${HOME_DATA_ROOT:-C:/DockerData/Home}/tcg
+        target: /tcg
+        read_only: true

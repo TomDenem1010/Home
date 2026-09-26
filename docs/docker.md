@@ -7,6 +7,47 @@ alkalmazza a migrációkat. A Chrome a frontendből indítható, grafikus módba
 
 ## Indítás PowerShellből
 
+### Docker Compose (ajánlott)
+
+A repository gyökerében lévő `compose.yaml` eltárolja a portokat, mountokat és
+futtatási beállításokat. A Docker Desktop tartalmazza a Compose-ot.
+
+Első alkalommal készítsd el a `.env.docker` fájlt a `.env.docker.example` alapján,
+és állítsd be a jelszavakat. Meglévő `.env.docker` fájlt tarts meg.
+Alapértelmezett image: `tomdenem1010/home:latest`, adatkönyvtár: `C:/DockerData/Home`.
+Ha ezeket módosítanád, másold a `.env.example` fájlt `.env` néven, és szerkeszd.
+A `.env` a Compose beállításait, a `.env.docker` az alkalmazás jelszavait tartalmazza;
+mindkettő helyi, Git által figyelmen kívül hagyott fájl.
+
+Hozd létre az `oracle`, `chrome`, `media` és `tcg` alkönyvtárakat az adatkönyvtárban.
+A deck CSV-ket másold a `tcg` könyvtárba; a Compose nem másolja be őket automatikusan.
+Meglévő telepítésnél pontosan a korábbi adatkönyvtárakat és a korábbi hostname-et
+használd (alapértelmezés: `home`). A hostname a `compose.yaml` fájlban állítható.
+A korábbi, `docker run`-nal indított konténert az első Compose-indítás előtt
+állítsd le, hogy ne használják egyszerre ugyanazt az adatbázist és Chrome-profilt,
+és felszabaduljanak a portok.
+
+Indítás a repository gyökeréből:
+
+```powershell
+docker compose up -d
+docker compose logs -f
+```
+
+Új Docker Hub image telepítése ugyanazokkal a beállításokkal és mountokkal:
+
+```powershell
+docker compose pull
+docker compose up -d
+```
+
+A Docker Desktop Containers nézetében `home` Compose-csoportként jelenik meg.
+Leállítás: `docker compose stop`. A fenti parancsok nem törlik a host adatkönyvtárait.
+Helyi image-hez állítsd a `.env` fájlban a `HOME_IMAGE=home:local` értéket,
+majd `docker build -t home:local .` és `docker compose up -d` (pull nélkül).
+
+### Közvetlen docker run
+
 ```powershell
 docker build -t home:local .
 Copy-Item .env.docker.example .env.docker
