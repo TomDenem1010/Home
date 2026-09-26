@@ -28,7 +28,7 @@ public class ChromeProcessStarter {
 
     public void start() {
         try {
-            new ProcessBuilder(command()).start();
+            new ProcessBuilder(command()).inheritIO().start();
         } catch (IOException exception) {
             throw new ChromeLaunchException("Unable to create Chrome process", exception);
         }

@@ -98,7 +98,7 @@ class MenuModelAdviceTest {
                         .map(item -> item.type())
                         .toList());
         assertEquals(
-                List.of("/helper/start-chrome"),
+                List.of("/helper/start-chrome", "/helper/chrome"),
                 menu(menus, "Helper").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());

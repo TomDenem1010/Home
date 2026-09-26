@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section th:fragment="content">
+    <th:block th:if="${!#strings.isEmpty(chromeDesktopUrl)}">
+        <p>Enter the desktop password to access Chrome. Keep the website signed in for price refreshes.</p>
+        <p><a th:href="${chromeDesktopUrl}" target="_blank" rel="noopener noreferrer">Open Chrome in a new tab</a></p>
+        <iframe th:src="${chromeDesktopUrl}" title="Chrome desktop"
+                style="width: 100%; height: 75vh; min-height: 500px; border: 0;" allow="clipboard-read; clipboard-write"></iframe>
+    </th:block>
+    <p th:if="${#strings.isEmpty(chromeDesktopUrl)}">Chrome opens on this computer. Its desktop view is available when running in Docker.</p>
+</section>
+</body>
+</html>

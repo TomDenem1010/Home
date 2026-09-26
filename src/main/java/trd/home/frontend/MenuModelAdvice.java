@@ -49,8 +49,10 @@ public class MenuModelAdvice {
                 new MenuItem(
                         "Helper",
                         helper,
-                        List.of(new SubmenuItem(
-                                "Start Chrome", "/helper/start-chrome", SubmenuItem.Type.ACTION, helper))));
+                        List.of(
+                                new SubmenuItem(
+                                        "Start Chrome", "/helper/start-chrome", SubmenuItem.Type.ACTION, helper),
+                                new SubmenuItem("Open Chrome", "/helper/chrome", SubmenuItem.Type.PAGE, helper))));
     }
 
     private static boolean hasRole(Authentication authentication, String role) {
