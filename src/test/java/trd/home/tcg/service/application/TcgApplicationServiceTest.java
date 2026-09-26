@@ -49,10 +49,10 @@ class TcgApplicationServiceTest {
 
     @Test
     void createsPriceRefreshEvent() {
-        new TcgCommandService(events, notifications).refreshDeckPrices(null);
+        new TcgCommandService(events, notifications).refreshDeckPrices("deck-id");
 
         InOrder order = inOrder(events, notifications);
-        order.verify(events).enqueue(EventType.REFRESH_DECK_PRICES, null);
+        order.verify(events).enqueue(EventType.REFRESH_DECK_PRICES, "deck-id");
         order.verify(notifications).publish(FrontendNotificationType.WARNING, "Deck price refresh has started.");
     }
 

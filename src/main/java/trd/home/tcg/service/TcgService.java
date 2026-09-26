@@ -27,11 +27,6 @@ public class TcgService {
     }
 
     @LogMethodCall
-    public void refreshDeckPrices() {
-        commands.refreshDeckPrices(null);
-    }
-
-    @LogMethodCall
     public void refreshDeckPrices(String deckId) {
         commands.refreshDeckPrices(deckId);
     }

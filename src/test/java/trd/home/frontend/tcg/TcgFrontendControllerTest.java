@@ -37,13 +37,6 @@ class TcgFrontendControllerTest {
     }
 
     @Test
-    void refreshDeckPricesCallsTcgService() {
-        assertEquals("redirect:/tcg", controller.refreshDeckPrices());
-
-        verify(tcgService).refreshDeckPrices();
-    }
-
-    @Test
     void reloadDeckCreatesEventForSelectedDeck() {
         assertEquals("redirect:/tcg/statistics", controller.reloadDeck("deck-id"));
 

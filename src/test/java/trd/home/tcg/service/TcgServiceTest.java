@@ -25,12 +25,6 @@ class TcgServiceTest {
     }
 
     @Test
-    void createsRefreshDeckPricesEvent() {
-        service.refreshDeckPrices();
-        verify(commands).refreshDeckPrices(null);
-    }
-
-    @Test
     void createsSaveDeckEventForSelectedDeck() {
         service.saveDeckFromResource("deck-id");
 

@@ -29,12 +29,6 @@ public class TcgFrontendController {
         return "redirect:/tcg";
     }
 
-    @PostMapping("/refresh-deck-prices")
-    public String refreshDeckPrices() {
-        tcgService.refreshDeckPrices();
-        return "redirect:/tcg";
-    }
-
     @PostMapping("/decks/{deckId}/reload")
     public String reloadDeck(@PathVariable String deckId) {
         tcgService.saveDeckFromResource(deckId);
