@@ -37,7 +37,6 @@ ENV JAVA_HOME=/opt/java/openjdk \
     CHROME_DESKTOP_URL=http://localhost:6080/vnc.html?autoconnect=1\&resize=scale \
     HOME_AUTH_INITIALADMIN_USERNAME=admin
 WORKDIR /opt/home
-USER root
 VOLUME ["/opt/oracle/oradata", "/opt/home/chrome-profile", "/media", "/tcg"]
 EXPOSE 5050 6080
 STOPSIGNAL SIGTERM
