@@ -42,7 +42,8 @@ public class MenuModelAdvice {
                                         "/tcg/save-decks-from-resource",
                                         SubmenuItem.Type.ACTION,
                                         tcg),
-                                new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg))),
+                                new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
+                                new SubmenuItem("SearchCard", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
                         "MEDIA",
                         media,

@@ -4,10 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.frontend.FrontendPageRenderer;
+import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.service.TcgService;
 
 @Controller
@@ -17,6 +20,29 @@ public class TcgFrontendController {
 
     private final TcgService tcgService;
     private final FrontendPageRenderer pageRenderer;
+
+    @GetMapping("/search-card")
+    public String searchCard(
+            @ModelAttribute("filter") CardSearchFilter filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String direction,
+            Model model) {
+        model.addAttribute("size", size);
+        model.addAttribute("sort", sort);
+        model.addAttribute("direction", direction);
+        model.addAttribute("foilTypes", tcgService.getCardFoilTypes());
+        model.addAttribute("cardGameTypes", tcgService.getCardGameTypes());
+        model.addAttribute("cardPriceTypes", tcgService.getCardPriceTypes());
+        model.addAttribute("contentTemplate", "tcg/search-card");
+        model.addAttribute("searchResults", tcgService.searchCards(filter, page, size, sort, direction));
+        return renderPage(
+                model,
+                "/tcg/search-card",
+                "SearchCard",
+                "Search cards in active decks. Latest known prices in EUR per card.");
+    }
 
     @GetMapping
     public String tcg(Model model) {

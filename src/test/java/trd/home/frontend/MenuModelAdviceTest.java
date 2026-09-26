@@ -88,12 +88,12 @@ class MenuModelAdviceTest {
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of("/tcg/save-decks-from-resource", "/tcg/statistics"),
+                List.of("/tcg/save-decks-from-resource", "/tcg/statistics", "/tcg/search-card"),
                 menu(menus, "TCG").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of(SubmenuItem.Type.ACTION, SubmenuItem.Type.PAGE),
+                List.of(SubmenuItem.Type.ACTION, SubmenuItem.Type.PAGE, SubmenuItem.Type.PAGE),
                 menu(menus, "TCG").submenuItems().stream()
                         .map(item -> item.type())
                         .toList());

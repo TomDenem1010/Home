@@ -1,4 +1,17 @@
 (() => {
+    const searchForm = document.querySelector("#card-search-form");
+    document.querySelector("[data-page-size]")?.addEventListener("change", () => searchForm?.requestSubmit());
+    searchForm?.addEventListener("submit", event => {
+        const button = event.submitter;
+        const sort = button?.dataset.serverSort;
+        if (sort) {
+            const currentSort = searchForm.elements.namedItem("sort");
+            const direction = searchForm.elements.namedItem("direction");
+            direction.value = currentSort.value === sort && direction.value === "asc" ? "desc" : "asc";
+            currentSort.value = sort;
+        }
+        searchForm.elements.namedItem("page").value = button?.dataset.searchPage ?? "0";
+    });
     document.querySelectorAll("[data-sortable-table]").forEach(table => {
         const headers = [...table.querySelectorAll("thead th")];
         const body = table.tBodies[0];

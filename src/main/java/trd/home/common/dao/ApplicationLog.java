@@ -41,19 +41,19 @@ public class ApplicationLog extends AuditedEntity {
     @Column(name = "DURATION_MS", nullable = false)
     private long durationMs;
 
-    private ApplicationLog(String method, String input, String output, String error, long durationMs) {
-        this.method = method;
-        this.input = input;
-        this.output = output;
-        this.error = error;
-        this.durationMs = durationMs;
-    }
-
     public static ApplicationLog successful(String method, String input, String output, long durationMs) {
         return new ApplicationLog(method, input, output, null, durationMs);
     }
 
     public static ApplicationLog failed(String method, String input, Throwable throwable, long durationMs) {
         return new ApplicationLog(method, input, null, throwable.toString(), durationMs);
+    }
+
+    private ApplicationLog(String method, String input, String output, String error, long durationMs) {
+        this.method = method;
+        this.input = input;
+        this.output = output;
+        this.error = error;
+        this.durationMs = durationMs;
     }
 }

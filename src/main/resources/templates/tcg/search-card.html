@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="tcg-page card-search" th:fragment="content" aria-label="Search cards">
+    <form id="card-search-form" class="card-search-form" method="get" th:action="@{/tcg/search-card}" th:object="${filter}">
+        <input type="hidden" name="page" value="0">
+        <input type="hidden" name="sort" th:value="${sort}">
+        <input type="hidden" name="direction" th:value="${direction}">
+        <label>Foil type
+            <select th:field="*{foilType}">
+                <option value="">All</option>
+                <option th:each="type : ${foilTypes}" th:value="${type}" th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}"></option>
+            </select>
+        </label>
+        <label>Card name <input type="text" th:field="*{name}"></label>
+        <label>Card game
+            <select th:field="*{cardGameType}">
+                <option value="">All</option>
+                <option th:each="type : ${cardGameTypes}" th:value="${type}" th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}"></option>
+            </select>
+        </label>
+        <label>Minimum price (EUR/card) <input type="number" step="any" th:field="*{priceMin}"></label>
+        <label>Maximum price (EUR/card) <input type="number" step="any" th:field="*{priceMax}"></label>
+        <label>Price type
+            <select th:field="*{priceType}">
+                <option th:each="type : ${cardPriceTypes}" th:value="${type}" th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(type.name(), '_', ' ')))}"></option>
+            </select>
+        </label>
+        <button type="submit">search</button>
+    </form>
+    <th:block th:if="${searchResults != null}">
+        <div class="card-search-toolbar">
+            <label>Cards per page
+                <select name="size" form="card-search-form" data-page-size>
+                    <option th:each="option : ${ {10, 25, 50, 100, 200} }" th:value="${option}" th:text="${option}" th:selected="${size == option}"></option>
+                    <option th:if="${size != 10 and size != 25 and size != 50 and size != 100 and size != 200}" th:value="${size}" th:text="${size}" selected></option>
+                </select>
+            </label>
+        </div>
+        <p th:if="${searchResults.empty}">No matching cards.</p>
+        <div class="table-container card-search-results" th:unless="${searchResults.empty}">
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col" th:attr="aria-sort=${sort == 'name' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="name">Card name</button></th>
+                    <th scope="col" th:attr="aria-sort=${sort == 'foilType' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="foilType">Foil type</button></th>
+                    <th scope="col" th:attr="aria-sort=${sort == 'quantity' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="quantity">Quantity</button></th>
+                    <th scope="col" th:attr="aria-sort=${sort == 'priceFrom' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="priceFrom">From (EUR/card)</button></th>
+                    <th scope="col" th:attr="aria-sort=${sort == 'priceTrend' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="priceTrend">Trend (EUR/card)</button></th>
+                    <th scope="col" th:attr="aria-sort=${sort == 'decks' ? (direction == 'asc' ? 'ascending' : 'descending') : 'none'}"><button class="sort-button" type="submit" form="card-search-form" data-server-sort="decks">Decks</button></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="card : ${searchResults.content}">
+                    <td><a th:href="${card.link}" th:text="${card.name}" target="_blank" rel="noopener noreferrer"></a></td>
+                    <td th:text="${#strings.capitalizeWords(#strings.toLowerCase(#strings.replace(card.foilType.name(), '_', ' ')))}"></td>
+                    <td th:text="${card.quantity}"></td>
+                    <td th:text="${card.priceFrom != null ? #numbers.formatDecimal(card.priceFrom, 1, 2) : 'Unknown'}"></td>
+                    <td th:text="${card.priceTrend != null ? #numbers.formatDecimal(card.priceTrend, 1, 2) : 'Unknown'}"></td>
+                    <td><ul class="card-search-decks"><li th:each="deck : ${card.decks}"><a th:href="@{/tcg/statistic/{deckId}(deckId=${deck.id})}" th:text="${deck.name}"></a> <span th:text="${'(' + deck.quantity + ')'}"></span></li></ul></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <nav class="card-search-pagination" aria-label="Search result pages">
+            <button type="submit" form="card-search-form" th:disabled="${!searchResults.hasPrevious()}" th:attr="data-search-page=${searchResults.number - 1}">Previous</button>
+            <span th:text="${'Page ' + (searchResults.number + 1) + ' / ' + (searchResults.totalPages > 0 ? searchResults.totalPages : 1) + ' (' + searchResults.totalElements + ' cards)'}"></span>
+            <button type="submit" form="card-search-form" th:disabled="${!searchResults.hasNext()}" th:attr="data-search-page=${searchResults.number + 1}">Next</button>
+        </nav>
+    </th:block>
+</section>
+</body>
+</html>

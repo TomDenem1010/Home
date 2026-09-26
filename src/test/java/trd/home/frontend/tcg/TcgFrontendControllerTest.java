@@ -8,8 +8,12 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.ui.ConcurrentModel;
 import trd.home.frontend.FrontendPageRenderer;
+import trd.home.tcg.constant.CardFoilType;
+import trd.home.tcg.constant.CardGameType;
+import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.TcgService;
@@ -18,6 +22,50 @@ class TcgFrontendControllerTest {
 
     private final TcgService tcgService = mock(TcgService.class);
     private final TcgFrontendController controller = new TcgFrontendController(tcgService, new FrontendPageRenderer());
+
+    @Test
+    void searchPageGetsEnumsThroughTcgServiceAndAssemblesModel() {
+        var model = new ConcurrentModel();
+        var filter = new CardSearchFilter();
+        when(tcgService.getCardFoilTypes()).thenReturn(CardFoilType.values());
+        when(tcgService.getCardGameTypes()).thenReturn(CardGameType.values());
+        when(tcgService.getCardPriceTypes()).thenReturn(trd.home.tcg.constant.CardPriceType.values());
+        assertEquals("index", controller.searchCard(filter, 0, 50, "name", "asc", model));
+        assertEquals("tcg/search-card", model.getAttribute("contentTemplate"));
+        assertEquals(50, model.getAttribute("size"));
+        assertEquals("name", model.getAttribute("sort"));
+        assertEquals("asc", model.getAttribute("direction"));
+        assertEquals(List.of(CardFoilType.values()), List.of((CardFoilType[]) model.getAttribute("foilTypes")));
+        assertEquals(List.of(CardGameType.values()), List.of((CardGameType[]) model.getAttribute("cardGameTypes")));
+        verify(tcgService).getCardFoilTypes();
+        verify(tcgService).getCardGameTypes();
+        verify(tcgService).getCardPriceTypes();
+        verify(tcgService).searchCards(filter, 0, 50, "name", "asc");
+        org.mockito.Mockito.verifyNoMoreInteractions(tcgService);
+    }
+
+    @Test
+    void searchPassesFiltersAndPagingParametersThroughTcgService() {
+        var filter = new CardSearchFilter();
+        var model = new ConcurrentModel();
+        var results = new PageImpl<trd.home.tcg.dto.CardSearchResult>(List.of());
+        when(tcgService.searchCards(filter, 2, 25, "quantity", "desc")).thenReturn(results);
+        controller.searchCard(filter, 2, 25, "quantity", "desc", model);
+        assertEquals(results, model.getAttribute("searchResults"));
+        assertEquals(25, model.getAttribute("size"));
+        assertEquals("quantity", model.getAttribute("sort"));
+        assertEquals("desc", model.getAttribute("direction"));
+        verify(tcgService).searchCards(filter, 2, 25, "quantity", "desc");
+    }
+
+    @Test
+    void searchForwardsPriceRangeWithoutValidation() {
+        var filter = new CardSearchFilter();
+        filter.setPriceMin(new BigDecimal("10"));
+        filter.setPriceMax(new BigDecimal("-5"));
+        controller.searchCard(filter, 0, 50, "name", "asc", new ConcurrentModel());
+        verify(tcgService).searchCards(filter, 0, 50, "name", "asc");
+    }
 
     @Test
     void tcgReturnsIndexAndMarksTcgAsActive() {

@@ -20,7 +20,7 @@
         <button type="submit">Logout</button>
     </form>
 </aside>
-<main>
+<main th:classappend="${contentTemplate == 'tcg/search-card'} ? 'card-search-main'">
     <div class="page-content">
         <h1 th:text="${pageTitle}">Kezdőlap</h1>
         <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>
