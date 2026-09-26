@@ -82,12 +82,13 @@ class DeckFileReaderTest {
         private final List<Resource> resources;
 
         TestDeckFileReader(List<ResourceValidator> validators, Resource... resources) {
-            super(validators);
+            super("file:/mounted/decks/*.csv", validators);
             this.resources = List.of(resources);
         }
 
         @Override
         protected List<Resource> readResources(String resourcePattern) {
+            assertEquals("file:/mounted/decks/*.csv", resourcePattern);
             return resources;
         }
     }

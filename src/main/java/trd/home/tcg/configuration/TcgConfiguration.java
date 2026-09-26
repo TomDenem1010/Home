@@ -1,6 +1,7 @@
 package trd.home.tcg.configuration;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import trd.home.tcg.service.file.DeckFileReader;
@@ -30,8 +31,10 @@ public class TcgConfiguration {
     DeckFileReader deckFileReader(
             ResourceDeckEncodingValidator resourceDeckEncodingValidator,
             ResourceDeckNameValidator resourceDeckNameValidator,
-            ResourceDeckCardValidator resourceDeckCardValidator) {
+            ResourceDeckCardValidator resourceDeckCardValidator,
+            @Value("${tcg.deck.resource-pattern}") String resourcePattern) {
         return new DeckFileReader(
+                resourcePattern,
                 List.of(resourceDeckEncodingValidator, resourceDeckNameValidator, resourceDeckCardValidator));
     }
 }

@@ -17,6 +17,7 @@ class TcgConfigurationTest {
         assertNotNull(encodingValidator);
         assertNotNull(nameValidator);
         assertNotNull(cardValidator);
-        assertNotNull(configuration.deckFileReader(encodingValidator, nameValidator, cardValidator));
+        assertNotNull(configuration.deckFileReader(
+                encodingValidator, nameValidator, cardValidator, "classpath*:tcg/deck/*.csv"));
     }
 }
