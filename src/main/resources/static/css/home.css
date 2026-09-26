@@ -1,4 +1,5 @@
 :root {
+    --sidebar-width: 240px;
     color: #20242b;
     font-family: system-ui, sans-serif;
     background: #f5f7fa;
@@ -7,18 +8,19 @@
 * { box-sizing: border-box; }
 
 body {
-    display: flex;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--sidebar-width);
     min-height: 100vh;
     margin: 0;
 }
 
-.sidebar {
+.sidebar, .event-sidebar {
     position: sticky;
     top: 0;
     align-self: flex-start;
     flex-shrink: 0;
     z-index: 10;
-    width: 240px;
+    width: var(--sidebar-width);
     height: 100dvh;
     overflow: hidden;
     padding: 2rem 1rem;
@@ -37,7 +39,7 @@ body {
     text-decoration: none;
 }
 
-.event-history { display: flex; flex: 1; flex-direction: column; min-height: 0; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #34445f; }
+.event-history { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .event-history h2 { margin: 0 0 .75rem; padding-inline: .25rem; color: #aebbd0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
 .event-history__list { display: grid; flex: 1; gap: .5rem; min-height: 0; margin: 0; padding: 0 .25rem 0 0; overflow-y: auto; overscroll-behavior: contain; list-style: none; scrollbar-gutter: stable; }
 .event-history__list:empty { flex: 0; }
@@ -126,10 +128,14 @@ main {
     max-width: 1200px;
     margin-inline: auto;
 }
+.page-content > * { margin-inline: auto; }
+.page-content > h1, .page-content > p { text-align: center; }
+.page-content table { margin-inline: auto; }
 h1 { margin-top: 0; }
 
 @media (max-width: 640px) {
     body { display: block; }
-    .sidebar { width: 100%; height: auto; max-height: 50dvh; }
+    .sidebar, .event-sidebar { position: static; width: 100%; height: auto; max-height: 50dvh; }
+    .event-sidebar { height: 50dvh; }
     main { padding: 2rem; }
 }

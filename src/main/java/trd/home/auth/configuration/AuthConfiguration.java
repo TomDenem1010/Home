@@ -35,7 +35,7 @@ public class AuthConfiguration {
                         .anyRequest()
                         .authenticated())
                 .formLogin(form -> form.defaultSuccessUrl("/", true).permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll())
+                .logout(logout -> logout.logoutSuccessUrl("/login").permitAll())
                 .sessionManagement(session -> session.maximumSessions(-1)
                         .sessionRegistry(sessionRegistry)
                         .expiredUrl("/login?expired"));

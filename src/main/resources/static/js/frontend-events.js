@@ -1,5 +1,16 @@
 (() => {
     const storageKey = "home.frontend-notifications";
+    const scopeKey = `${storageKey}.scope`;
+    const scope = document.querySelector('meta[name="frontend-event-history-scope"]')?.content;
+    try {
+        if (!scope || sessionStorage.getItem(scopeKey) !== scope) {
+            sessionStorage.removeItem(storageKey);
+            if (scope) sessionStorage.setItem(scopeKey, scope);
+            else sessionStorage.removeItem(scopeKey);
+        }
+    } catch {
+        // Storage may be unavailable in the browser.
+    }
     const maximumEventCount = 10;
     const seenEventIds = new Set(readStoredEvents().map(record => record.id));
 

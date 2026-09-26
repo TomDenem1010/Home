@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="frontend-event-history-scope" th:content="${frontendEventHistoryScope}">
     <title th:text="${pageTitle} + ' | Home'">Home</title>
     <link rel="stylesheet" th:href="@{/css/home.css}" href="/css/home.css">
     <link rel="stylesheet" th:if="${featureStylesheet != null}" th:href="@{${featureStylesheet}}">
@@ -15,11 +16,6 @@
     <nav aria-label="Főmenü">
         <th:block th:replace="~{menu :: menu(${menuItems}, ${activePath})}"/>
     </nav>
-    <section class="event-history" aria-labelledby="event-history-title">
-        <h2 id="event-history-title">Latest events</h2>
-        <ol id="event-history-list" class="event-history__list" aria-live="polite"></ol>
-        <p id="event-history-empty" class="event-history__empty">No events yet.</p>
-    </section>
     <form class="logout-form" th:action="@{/logout}" method="post">
         <button type="submit">Logout</button>
     </form>
@@ -33,5 +29,12 @@
         </th:block>
     </div>
 </main>
+<aside class="event-sidebar" aria-labelledby="event-history-title">
+    <section class="event-history">
+        <h2 id="event-history-title">Latest events</h2>
+        <ol id="event-history-list" class="event-history__list" aria-live="polite"></ol>
+        <p id="event-history-empty" class="event-history__empty">No events yet.</p>
+    </section>
+</aside>
 </body>
 </html>

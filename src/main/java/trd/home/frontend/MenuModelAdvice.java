@@ -1,12 +1,20 @@
 package trd.home.frontend;
 
 import java.util.List;
+import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 @ControllerAdvice
 public class MenuModelAdvice {
+
+    private final String frontendEventHistoryScope = UUID.randomUUID().toString();
+
+    @ModelAttribute("frontendEventHistoryScope")
+    public String frontendEventHistoryScope() {
+        return frontendEventHistoryScope;
+    }
 
     @ModelAttribute("menuItems")
     public List<MenuItem> menuItems(Authentication authentication) {
@@ -17,7 +25,7 @@ public class MenuModelAdvice {
 
         return List.of(
                 new MenuItem(
-                        "Auth",
+                        "AUTH",
                         admin,
                         List.of(
                                 new SubmenuItem("List users", "/auth/users", SubmenuItem.Type.PAGE, admin),
@@ -47,7 +55,7 @@ public class MenuModelAdvice {
                                 new SubmenuItem("ByActor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
                                 new SubmenuItem("ByFolder", "/media/by-folder", SubmenuItem.Type.PAGE, media))),
                 new MenuItem(
-                        "Helper",
+                        "HELPER",
                         helper,
                         List.of(
                                 new SubmenuItem(

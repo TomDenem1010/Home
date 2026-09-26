@@ -17,9 +17,9 @@ class MenuModelAdviceTest {
     @Test
     void adminCanSeeAuthAndHelperMenus() {
         var menus = advice.menuItems(authentication("ROLE_ADMIN"));
-        var authMenu = menu(menus, "Auth");
+        var authMenu = menu(menus, "AUTH");
         var tcgMenu = menu(menus, "TCG");
-        var helperMenu = menu(menus, "Helper");
+        var helperMenu = menu(menus, "HELPER");
 
         assertAll(
                 () -> assertTrue(authMenu.authorized()),
@@ -32,9 +32,9 @@ class MenuModelAdviceTest {
     @Test
     void tcgUserCanSeeTcgAndHelperMenus() {
         var menus = advice.menuItems(authentication("ROLE_TCG"));
-        var authMenu = menu(menus, "Auth");
+        var authMenu = menu(menus, "AUTH");
         var tcgMenu = menu(menus, "TCG");
-        var helperMenu = menu(menus, "Helper");
+        var helperMenu = menu(menus, "HELPER");
 
         assertAll(
                 () -> assertFalse(authMenu.authorized()),
@@ -53,7 +53,7 @@ class MenuModelAdviceTest {
         var menus = advice.menuItems(authentication);
 
         assertAll(
-                () -> assertTrue(menu(menus, "Auth").authorized()),
+                () -> assertTrue(menu(menus, "AUTH").authorized()),
                 () -> assertTrue(menu(menus, "TCG").authorized()));
     }
 
@@ -62,7 +62,7 @@ class MenuModelAdviceTest {
         var menus = advice.menuItems(null);
 
         assertAll(
-                () -> assertFalse(menu(menus, "Auth").authorized()),
+                () -> assertFalse(menu(menus, "AUTH").authorized()),
                 () -> assertFalse(menu(menus, "TCG").authorized()),
                 () -> assertTrue(menus.stream()
                         .flatMap(item -> item.submenuItems().stream())
@@ -73,8 +73,8 @@ class MenuModelAdviceTest {
     void authenticatedUserWithUnknownRoleCanOnlySeeHelperMenu() {
         var menus = advice.menuItems(authentication("ROLE_UNKNOWN"));
 
-        assertTrue(menu(menus, "Helper").authorized());
-        assertTrue(menus.stream().filter(menu -> !menu.label().equals("Helper")).noneMatch(menu -> menu.authorized()));
+        assertTrue(menu(menus, "HELPER").authorized());
+        assertTrue(menus.stream().filter(menu -> !menu.label().equals("HELPER")).noneMatch(menu -> menu.authorized()));
     }
 
     @Test
@@ -84,7 +84,7 @@ class MenuModelAdviceTest {
         assertEquals(4, menus.size());
         assertEquals(
                 List.of("/auth/users", "/auth/create-user", "/auth/update-roles", "/auth/update-password"),
-                menu(menus, "Auth").submenuItems().stream()
+                menu(menus, "AUTH").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
         assertEquals(
@@ -99,7 +99,7 @@ class MenuModelAdviceTest {
                         .toList());
         assertEquals(
                 List.of("/helper/start-chrome", "/helper/chrome"),
-                menu(menus, "Helper").submenuItems().stream()
+                menu(menus, "HELPER").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
     }
