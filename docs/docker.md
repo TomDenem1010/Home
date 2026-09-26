@@ -32,8 +32,15 @@ Ha már van CSV a könyvtárban, nem módosítja annak tartalmát.
 Docker Desktop Linux konténerekkel szükséges. Az app: http://localhost:5050.
 Az első indítás több percig tarthat; a timeout `ORACLE_STARTUP_TIMEOUT_SECONDS`
 (alapérték 600). Linuxon a mount source például `/srv/home/oracle` és
-`/srv/home/chrome`. A könyvtárak legyenek írhatók az image oracle felhasználójának
-(UID/GID 54321); üres könyvtárak tulajdonosát ehhez igazítsd.
+`/srv/home/chrome`. Az image induláskor automatikusan beállítja az adatbázis- és
+profilkönyvtár tulajdonosát. Üres, írható mount és az env változók elegendők;
+előre telepített Oracle vagy konfigurációs fájl nem szükséges. Az előkészítés root
+felhasználóval fut, majd az Oracle és az alkalmazás az oracle felhasználóval indul.
+
+Üres mounttal ugyanaz a konténer is újrainicializálható: az image megőrzi az ehhez
+szükséges eredeti Oracle-fájlokat. Adatbázisfájlok nélküli, félbemaradt konfigurációt
+átnevezve megőriz, majd inicializál. Meglévő adatbázisfájlokat nem cserél le;
+hiányzó paraméterfájl esetén egyértelmű hibával leáll.
 
 Az Oracle fájljai és a Chrome profilja a host megadott könyvtáraiban maradnak,
 akkor is, ha a konténert törlöd és ugyanazokkal a mountokkal újra létrehozod.

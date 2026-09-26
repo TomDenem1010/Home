@@ -8,6 +8,10 @@ if ((${#VNC_PASSWORD} != 8)); then
     echo "VNC_PASSWORD must contain exactly 8 characters." >&2
     exit 1
 fi
+if [[ "$(id -u)" == 0 ]]; then
+    /opt/home/prepare-oracle.sh
+    exec setpriv --reuid=oracle --regid=oinstall --init-groups "$0" "$@"
+fi
 if [[ ! -d "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}" ]]; then
     : "${ORACLE_PASSWORD:?ORACLE_PASSWORD is required on first startup}"
 fi

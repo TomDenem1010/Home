@@ -19,8 +19,13 @@ RUN microdnf install -y dnf \
     && rm /tmp/chrome.rpm && dnf clean all
 COPY --from=java /opt/java/openjdk /opt/java/openjdk
 COPY --from=build /build/target/home-0.0.1-SNAPSHOT.jar /opt/home/home.jar
-COPY --chmod=755 docker/entrypoint.sh docker/healthcheck.sh /opt/home/
-RUN mkdir -p /opt/home/chrome-profile /media /tcg && chown -R oracle:oinstall /opt/home /media /tcg
+COPY --chmod=755 docker/entrypoint.sh docker/healthcheck.sh docker/prepare-oracle.sh /opt/home/
+RUN mkdir -p /opt/home/chrome-profile /opt/home/oracle-bootstrap /media /tcg \
+    && cp "${ORACLE_BASE_CONFIG}/dbs/spfileFREE.ora" "${ORACLE_BASE_CONFIG}/dbs/orapwFREE" \
+          "${ORACLE_BASE_HOME}/network/admin/listener.ora" "${ORACLE_BASE_HOME}/network/admin/tnsnames.ora" \
+          "${ORACLE_BASE_HOME}/network/admin/sqlnet.ora" /opt/home/oracle-bootstrap/ \
+    && ln "${ORACLE_BASE}/FREE.7z" /opt/home/oracle-bootstrap/FREE.7z \
+    && chown -R oracle:oinstall /opt/home/chrome-profile /media /tcg
 ENV JAVA_HOME=/opt/java/openjdk \
     DISPLAY=:99 \
     APP_USER=home \
@@ -32,7 +37,7 @@ ENV JAVA_HOME=/opt/java/openjdk \
     CHROME_DESKTOP_URL=http://localhost:6080/vnc.html?autoconnect=1\&resize=scale \
     HOME_AUTH_INITIALADMIN_USERNAME=admin
 WORKDIR /opt/home
-USER oracle
+USER root
 VOLUME ["/opt/oracle/oradata", "/opt/home/chrome-profile", "/media", "/tcg"]
 EXPOSE 5050 6080
 STOPSIGNAL SIGTERM
