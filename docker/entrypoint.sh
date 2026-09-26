@@ -10,6 +10,9 @@ if ((${#VNC_PASSWORD} != 8)); then
 fi
 if [[ "$(id -u)" == 0 ]]; then
     /opt/home/prepare-oracle.sh
+    # setpriv changes credentials but preserves root's HOME by default.
+    export HOME="$(getent passwd oracle | cut -d: -f6)"
+    export USER=oracle LOGNAME=oracle
     exec setpriv --reuid=oracle --regid=oinstall --init-groups "$0" "$@"
 fi
 if [[ ! -d "${ORACLE_BASE}/oradata/dbconfig/${ORACLE_SID}" ]]; then
