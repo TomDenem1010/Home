@@ -26,7 +26,7 @@ class TcgFrontendControllerTest {
     @Test
     void searchPageGetsEnumsThroughTcgServiceAndAssemblesModel() {
         var model = new ConcurrentModel();
-        var filter = new CardSearchFilter();
+        var filter = new CardSearchFilter(null, null, null, null, null, null);
         when(tcgService.getCardFoilTypes()).thenReturn(CardFoilType.values());
         when(tcgService.getCardGameTypes()).thenReturn(CardGameType.values());
         when(tcgService.getCardPriceTypes()).thenReturn(trd.home.tcg.constant.CardPriceType.values());
@@ -46,7 +46,7 @@ class TcgFrontendControllerTest {
 
     @Test
     void searchPassesFiltersAndPagingParametersThroughTcgService() {
-        var filter = new CardSearchFilter();
+        var filter = new CardSearchFilter(null, null, null, null, null, null);
         var model = new ConcurrentModel();
         var results = new PageImpl<trd.home.tcg.dto.CardSearchResult>(List.of());
         when(tcgService.searchCards(filter, 2, 25, "quantity", "desc")).thenReturn(results);
@@ -60,9 +60,7 @@ class TcgFrontendControllerTest {
 
     @Test
     void searchForwardsPriceRangeWithoutValidation() {
-        var filter = new CardSearchFilter();
-        filter.setPriceMin(new BigDecimal("10"));
-        filter.setPriceMax(new BigDecimal("-5"));
+        var filter = new CardSearchFilter(null, null, null, new BigDecimal("10"), new BigDecimal("-5"), null);
         controller.searchCard(filter, 0, 50, "name", "asc", new ConcurrentModel());
         verify(tcgService).searchCards(filter, 0, 50, "name", "asc");
     }

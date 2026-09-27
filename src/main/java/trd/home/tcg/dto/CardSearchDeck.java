@@ -1,3 +1,6 @@
 package trd.home.tcg.dto;
 
-public record CardSearchDeck(String id, String name, int quantity) {}
+import lombok.NonNull;
+
+public record CardSearchDeck(
+        @NonNull String id, @NonNull String name, @NonNull Integer quantity) {}

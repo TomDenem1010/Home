@@ -56,13 +56,13 @@ class CardSearchQueryServiceTest {
                                 new CardSearchPrice("match", new BigDecimal("2"), new BigDecimal("5")),
                                 new CardSearchPrice("match", new BigDecimal("1"), new BigDecimal("3")))
                         .onClose(() -> closed.set(true)));
-        var filter = new CardSearchFilter();
-        filter.setName(" FIRE ");
-        filter.setCardGameType(CardGameType.MAGIC_THE_GATHERING);
-        filter.setFoilType(CardFoilType.FOIL);
-        filter.setPriceType(CardPriceType.TREND);
-        filter.setPriceMin(new BigDecimal("5"));
-        filter.setPriceMax(new BigDecimal("5"));
+        var filter = new CardSearchFilter(
+                CardFoilType.FOIL,
+                " FIRE ",
+                CardGameType.MAGIC_THE_GATHERING,
+                new BigDecimal("5"),
+                new BigDecimal("5"),
+                CardPriceType.TREND);
 
         var page = service.searchCards(filter, PageRequest.of(0, 10));
         assertEquals(1, page.getTotalElements());
@@ -95,8 +95,7 @@ class CardSearchQueryServiceTest {
                 .thenReturn(Stream.of(
                         new CardSearchPrice("c", new BigDecimal("20"), new BigDecimal("30")),
                         new CardSearchPrice("c", new BigDecimal("2"), new BigDecimal("3"))));
-        var filter = new CardSearchFilter();
-        filter.setPriceMax(new BigDecimal("5"));
+        var filter = new CardSearchFilter(null, null, null, null, new BigDecimal("5"), null);
         assertTrue(service.searchCards(filter, PageRequest.of(0, 10)).isEmpty());
     }
 
@@ -114,8 +113,10 @@ class CardSearchQueryServiceTest {
                         new CardSearchPrice("a", new BigDecimal("1"), new BigDecimal("2")),
                         new CardSearchPrice("b", new BigDecimal("10"), new BigDecimal("20"))));
         var sort = Sort.by(Sort.Direction.DESC, "priceFrom");
-        var first = service.searchCards(new CardSearchFilter(), PageRequest.of(0, 1, sort));
-        var last = service.searchCards(new CardSearchFilter(), PageRequest.of(2, 1, sort));
+        var first = service.searchCards(
+                new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 1, sort));
+        var last = service.searchCards(
+                new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(2, 1, sort));
         assertEquals(3, first.getTotalElements());
         assertEquals(3, first.getTotalPages());
         assertEquals("Beta", first.getContent().getFirst().name());
@@ -126,7 +127,7 @@ class CardSearchQueryServiceTest {
     @Test
     void emptyActiveDecksDoNotTriggerCardOrPriceQueries() {
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of());
-        assertTrue(service.searchCards(new CardSearchFilter(), PageRequest.of(0, 10))
+        assertTrue(service.searchCards(new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 10))
                 .isEmpty());
         verifyNoInteractions(deckCards, cards, prices);
     }

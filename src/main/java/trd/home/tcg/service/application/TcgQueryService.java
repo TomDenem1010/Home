@@ -127,22 +127,22 @@ public class TcgQueryService {
     }
 
     private static boolean matchesFoilType(CardmarketCard card, CardSearchFilter filter) {
-        return filter.getFoilType() == null || card.getFoilType() == filter.getFoilType();
+        return filter.foilType() == null || card.getFoilType() == filter.foilType();
     }
 
     private static boolean matchesName(CardmarketCard card, CardSearchFilter filter) {
-        return filter.getName() == null
-                || filter.getName().isBlank()
+        return filter.name() == null
+                || filter.name().isBlank()
                 || cardName(card.getLink())
                         .toLowerCase(Locale.ROOT)
-                        .contains(filter.getName().strip().toLowerCase(Locale.ROOT));
+                        .contains(filter.name().strip().toLowerCase(Locale.ROOT));
     }
 
     private static boolean matchesGameType(CardmarketCard card, CardSearchFilter filter) {
-        return filter.getCardGameType() == null
+        return filter.cardGameType() == null
                 || URI.create(card.getLink())
                         .getPath()
-                        .contains("/" + filter.getCardGameType().getCardmarketUrlPart() + "/");
+                        .contains("/" + filter.cardGameType().getCardmarketUrlPart() + "/");
     }
 
     private Map<String, CardSearchPrice> latestSearchPrices(List<String> cardIds) {
@@ -181,7 +181,7 @@ public class TcgQueryService {
                 cardName(card.getLink()),
                 card.getLink(),
                 card.getFoilType(),
-                cards.stream().mapToLong(CardmarketDeckCard::getQuantity).sum(),
+                cards.stream().mapToLong(deckCard -> deckCard.getQuantity()).sum(),
                 price == null ? null : price.fromInEuro(),
                 price == null ? null : price.trendInEuro(),
                 searchDecks(cards, decksByVersion));
@@ -192,7 +192,8 @@ public class TcgQueryService {
         return cards.stream()
                 .map(card -> searchDeck(
                         card, decksByVersion.get(card.getDeckVersion().getId())))
-                .sorted(Comparator.comparing(CardSearchDeck::name).thenComparing(CardSearchDeck::id))
+                .sorted(Comparator.comparing((CardSearchDeck deck) -> deck.name())
+                        .thenComparing(deck -> deck.id()))
                 .toList();
     }
 
@@ -201,36 +202,39 @@ public class TcgQueryService {
     }
 
     private static boolean matchesPrice(CardSearchResult card, CardSearchFilter filter) {
-        if (filter.getPriceMin() == null && filter.getPriceMax() == null) return true;
-        BigDecimal price = filter.getPriceType() == CardPriceType.TREND ? card.priceTrend() : card.priceFrom();
+        if (filter.priceMin() == null && filter.priceMax() == null) return true;
+        BigDecimal price = filter.priceType() == CardPriceType.TREND ? card.priceTrend() : card.priceFrom();
         return price != null
-                && (filter.getPriceMin() == null || price.compareTo(filter.getPriceMin()) >= 0)
-                && (filter.getPriceMax() == null || price.compareTo(filter.getPriceMax()) <= 0);
+                && (filter.priceMin() == null || price.compareTo(filter.priceMin()) >= 0)
+                && (filter.priceMax() == null || price.compareTo(filter.priceMax()) <= 0);
     }
 
     private static Comparator<CardSearchResult> searchOrder(Sort sort) {
-        Sort.Order order = sort.stream().findFirst().orElse(Sort.Order.asc("name"));
+        var order = sort.stream().findFirst();
+        String property = order.map(value -> value.getProperty()).orElse("name");
+        boolean descending = order.map(value -> value.isDescending()).orElse(false);
         Comparator<CardSearchResult> comparator =
-                switch (order.getProperty()) {
+                switch (property) {
                     case "foilType" ->
-                        compareSearchValue(card -> card.foilType().name(), String.CASE_INSENSITIVE_ORDER, order);
-                    case "quantity" -> compareSearchValue(CardSearchResult::quantity, Comparator.naturalOrder(), order);
+                        compareSearchValue(card -> card.foilType().name(), String.CASE_INSENSITIVE_ORDER, descending);
+                    case "quantity" ->
+                        compareSearchValue(card -> card.quantity(), Comparator.<Long>naturalOrder(), descending);
                     case "priceFrom" ->
-                        compareSearchValue(CardSearchResult::priceFrom, Comparator.naturalOrder(), order);
+                        compareSearchValue(card -> card.priceFrom(), Comparator.<BigDecimal>naturalOrder(), descending);
                     case "priceTrend" ->
-                        compareSearchValue(CardSearchResult::priceTrend, Comparator.naturalOrder(), order);
+                        compareSearchValue(
+                                card -> card.priceTrend(), Comparator.<BigDecimal>naturalOrder(), descending);
                     case "decks" ->
                         compareSearchValue(
-                                card -> card.decks().getFirst().name(), String.CASE_INSENSITIVE_ORDER, order);
-                    default -> compareSearchValue(CardSearchResult::name, String.CASE_INSENSITIVE_ORDER, order);
+                                card -> card.decks().getFirst().name(), String.CASE_INSENSITIVE_ORDER, descending);
+                    default -> compareSearchValue(card -> card.name(), String.CASE_INSENSITIVE_ORDER, descending);
                 };
-        return comparator.thenComparing(CardSearchResult::id);
+        return comparator.thenComparing(card -> card.id());
     }
 
     private static <T> Comparator<CardSearchResult> compareSearchValue(
-            Function<CardSearchResult, T> value, Comparator<T> comparator, Sort.Order order) {
-        return Comparator.comparing(
-                value, Comparator.nullsLast(order.isDescending() ? comparator.reversed() : comparator));
+            Function<CardSearchResult, T> value, Comparator<T> comparator, boolean descending) {
+        return Comparator.comparing(value, Comparator.nullsLast(descending ? comparator.reversed() : comparator));
     }
 
     private Map<String, List<CardmarketDeckCard>> cardsByCurrentVersion(List<CardmarketDeck> decks) {
@@ -245,13 +249,13 @@ public class TcgQueryService {
     private static List<String> currentVersionIds(List<CardmarketDeck> decks) {
         return decks.stream()
                 .map(deck -> deck.getCurrentVersion())
-                .filter(Objects::nonNull)
+                .filter(value -> value != null)
                 .map(version -> version.getId())
                 .toList();
     }
 
     private static List<CardmarketDeckCard> flattenDeckCards(Map<String, List<CardmarketDeckCard>> cardsByVersion) {
-        return cardsByVersion.values().stream().flatMap(List::stream).toList();
+        return cardsByVersion.values().stream().flatMap(cards -> cards.stream()).toList();
     }
 
     private List<CardmarketDeckCardPriceSummary> cardPriceSummaries(List<CardmarketDeckCard> deckCards) {
@@ -259,7 +263,7 @@ public class TcgQueryService {
         Map<String, CardmarketCardPrice> latestPrices = latestPrices(deckCards);
         return deckCards.stream()
                 .map(deckCard -> summarizeCard(deckCard, cards, latestPrices))
-                .sorted(Comparator.comparing(CardmarketDeckCardPriceSummary::cardName))
+                .sorted(Comparator.comparing(card -> card.cardName()))
                 .toList();
     }
 
@@ -309,8 +313,8 @@ public class TcgQueryService {
 
     private Map<String, CardmarketCardPrice> latestPrices(List<CardmarketDeckCard> deckCards) {
         return distinctCardIds(deckCards).stream()
-                .map(this::latestPrice)
-                .filter(Objects::nonNull)
+                .map(cardId -> latestPrice(cardId))
+                .filter(value -> value != null)
                 .collect(Collectors.toMap(price -> price.getCard().getId(), Function.identity()));
     }
 

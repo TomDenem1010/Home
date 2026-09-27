@@ -34,7 +34,7 @@ class CardSearchPageTest {
                 "Test Card",
                 "https://www.cardmarket.com/en/Magic/Products/Singles/Test-Card?language=1&isFoil=Y",
                 CardFoilType.FOIL,
-                7,
+                7L,
                 new BigDecimal("2.50"),
                 new BigDecimal("3.75"),
                 List.of(new CardSearchDeck("deck-a", "Deck A", 3), new CardSearchDeck("deck-b", "Deck B", 4)));
@@ -73,6 +73,7 @@ class CardSearchPageTest {
         assertTrue(html.selectFirst(".card-search-pagination").text().contains("Page 2 / 3 (25 cards)"));
         assertEquals(2, html.select("input[name^=price]").size());
         assertEquals(2, html.select("select[name=priceType] option").size());
+        assertTrue(html.select("select[name=priceType] option[selected]").isEmpty());
         assertEquals(1, html.select(".card-search-toolbar select[name=size]").size());
         assertTrue(html.select("input[name=size]").isEmpty());
     }
