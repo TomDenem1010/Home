@@ -2,6 +2,7 @@ package trd.home.media.service.importing;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import trd.home.media.dto.ParsedVideoName;
@@ -17,6 +18,13 @@ public class MediaNameParser {
         int extension = fileName.lastIndexOf('.');
         String stem = extension > 0 ? fileName.substring(0, extension) : fileName;
         int separator = stem.indexOf(TITLE_SEPARATOR);
+        if (separator < 0) {
+            String name = stem.strip();
+            if (name.isEmpty() || name.length() > 255) {
+                throw invalidFileName(fileName);
+            }
+            return new ParsedVideoName(name, Set.of());
+        }
         if (separator < 1) {
             throw invalidFileName(fileName);
         }

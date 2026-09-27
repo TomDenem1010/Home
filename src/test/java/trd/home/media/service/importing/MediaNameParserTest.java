@@ -32,10 +32,23 @@ class MediaNameParserTest {
     }
 
     @Test
-    void rejectsMissingActorsAndTitles() {
-        for (String name : List.of("video.mp4", " - Title.mp4", "Actor - .mp4", "Actor &  - Title.mp4")) {
+    void rejectsMalformedActorSectionsAndEmptyTitles() {
+        for (String name : List.of(" - Title.mp4", "Actor - .mp4", "Actor &  - Title.mp4", "", "   .mp4")) {
             assertThrows(trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse(name), name);
         }
+    }
+
+    @Test
+    void acceptsTitlesWithoutActorsWithAndWithoutExtension() {
+        for (String fileName : List.of("Film.mp4", "  Film  .MP4", "Film")) {
+            var result = parser.parse(fileName);
+            assertEquals("Film", result.name());
+            assertTrue(result.actors().isEmpty());
+        }
+        assertEquals("Film&Part-2", parser.parse("Film&Part-2.mp4").name());
+        assertEquals("x".repeat(255), parser.parse("x".repeat(255) + ".mp4").name());
+        assertThrows(
+                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse("x".repeat(256) + ".mp4"));
     }
 
     @Test
