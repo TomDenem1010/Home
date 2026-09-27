@@ -131,11 +131,13 @@ public class TcgQueryService {
     }
 
     private static boolean matchesName(CardmarketCard card, CardSearchFilter filter) {
-        return filter.name() == null
-                || filter.name().isBlank()
-                || cardName(card.getLink())
-                        .toLowerCase(Locale.ROOT)
-                        .contains(filter.name().strip().toLowerCase(Locale.ROOT));
+        if (filter.name() == null || filter.name().isBlank()) return true;
+        String name = normalizeSearchName(cardName(card.getLink()));
+        return Stream.of(normalizeSearchName(filter.name()).split(" ")).allMatch(word -> name.contains(word));
+    }
+
+    private static String normalizeSearchName(String name) {
+        return name.toLowerCase(Locale.ROOT).replaceAll("[-\\s]+", " ").strip();
     }
 
     private static boolean matchesGameType(CardmarketCard card, CardSearchFilter filter) {

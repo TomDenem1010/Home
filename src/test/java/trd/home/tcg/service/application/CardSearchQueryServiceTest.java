@@ -132,6 +132,31 @@ class CardSearchQueryServiceTest {
         verifyNoInteractions(deckCards, cards, prices);
     }
 
+    @Test
+    void findsAllSearchWordsInAnyOrderAndStillSupportsSlugSearch() {
+        var deck = deck("a", "Alpha");
+        var match = card("urza", "Magic", "Urza-Lord-High-Artificer-V3", CardFoilType.NO);
+        var other = card("other", "Magic", "Urza-Lord-Protector", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        when(deckCards.findAllByDeckVersionIdIn(anyCollection()))
+                .thenReturn(List.of(holding(deck, match, 1), holding(deck, other, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(List.of("urza")))
+                .thenAnswer(ignored -> Stream.empty());
+
+        for (String name : List.of(
+                "Urza Lord High Artificer",
+                "  URZA  Lord\tHigh Artificer  ",
+                "Urza-Lord-High-Artificer",
+                "High lord")) {
+            var filter = new CardSearchFilter(null, name, null, null, null, null);
+            var results = service.searchCards(filter, PageRequest.of(0, 10));
+            assertEquals(1, results.getTotalElements());
+            assertEquals("urza", results.getContent().getFirst().id());
+        }
+        var filter = new CardSearchFilter(null, "High Protector", null, null, null, null);
+        assertTrue(service.searchCards(filter, PageRequest.of(0, 10)).isEmpty());
+    }
+
     private static CardmarketDeck deck(String id, String name) {
         var deck = new CardmarketDeck();
         deck.setId(id);
