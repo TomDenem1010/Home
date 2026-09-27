@@ -14,6 +14,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import trd.home.common.dao.ApplicationLog;
@@ -85,7 +87,7 @@ class LogMethodCallAspectTest {
 
         assertEquals("result", aspect.logMethodCall(joinPoint, annotation(method)));
 
-        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(repository, never()).save(ArgumentMatchers.any());
     }
 
     @Test
@@ -97,7 +99,7 @@ class LogMethodCallAspectTest {
 
         assertThrows(IllegalStateException.class, () -> aspect.logMethodCall(joinPoint, annotation(method)));
 
-        verify(repository, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(repository, never()).save(ArgumentMatchers.any());
     }
 
     @Test
@@ -158,7 +160,7 @@ class LogMethodCallAspectTest {
     @Test
     void calculatesElapsedMillisecondsFromNanosecondDifference() throws Exception {
         Method method = Example.class.getDeclaredMethod("find", List.class);
-        Class<?> contextType = java.util.Arrays.stream(LogMethodCallAspect.class.getDeclaredClasses())
+        Class<?> contextType = Arrays.stream(LogMethodCallAspect.class.getDeclaredClasses())
                 .filter(type -> type.getSimpleName().equals("MethodCallContext"))
                 .findFirst()
                 .orElseThrow();

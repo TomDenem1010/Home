@@ -4,23 +4,28 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import trd.home.common.constant.EventType;
+import trd.home.common.exception.UnableToSerializeNotificationException;
 
 class FrontendNotificationPublisherTest {
     @Test
     void preservesSerializationFailureWithoutEnqueueingNotification() {
-        var mapper = mock(tools.jackson.databind.ObjectMapper.class);
-        var cause = mock(tools.jackson.core.JacksonException.class);
-        org.mockito.Mockito.when(mapper.writeValueAsString(org.mockito.ArgumentMatchers.any()))
-                .thenThrow(cause);
+        var mapper = mock(ObjectMapper.class);
+        var cause = mock(JacksonException.class);
+        Mockito.when(mapper.writeValueAsString(ArgumentMatchers.any())).thenThrow(cause);
         var failingPublisher = new FrontendNotificationPublisher(eventQueue, mapper, Optional::empty);
-        var exception = org.junit.jupiter.api.Assertions.assertThrows(
-                trd.home.common.exception.UnableToSerializeNotificationException.class,
+        var exception = Assertions.assertThrows(
+                UnableToSerializeNotificationException.class,
                 () -> failingPublisher.publish(FrontendNotificationType.ERROR, "error"));
-        org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
-        org.mockito.Mockito.verifyNoInteractions(eventQueue);
+        Assertions.assertSame(cause, exception.getCause());
+        Mockito.verifyNoInteractions(eventQueue);
     }
 
     private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);

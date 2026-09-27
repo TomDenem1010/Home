@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
@@ -33,7 +34,7 @@ class ApplicationEventProcessorTest {
         ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
         @SuppressWarnings("unchecked")
         Supplier<String> operation = mock(Supplier.class);
-        org.mockito.Mockito.when(operation.get()).thenReturn("Completed");
+        Mockito.when(operation.get()).thenReturn("Completed");
         List<EventStatus> savedStatuses = new ArrayList<>();
         doAnswer(invocation -> {
                     savedStatuses.add(event.getStatus());

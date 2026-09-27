@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import com.microsoft.playwright.Browser;
 import java.math.BigDecimal;
 import org.jsoup.Jsoup;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,7 +24,7 @@ class CardmarketCardPriceGathererTest {
         var exception =
                 assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
                         .getCardmarketCardPrice("https://example.test/card", browser));
-        org.junit.jupiter.api.Assertions.assertInstanceOf(NumberFormatException.class, exception.getCause());
+        Assertions.assertInstanceOf(NumberFormatException.class, exception.getCause());
         assertEquals("Unable to parse Cardmarket 'From' price for: https://example.test/card", exception.getMessage());
     }
 

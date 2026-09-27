@@ -2,34 +2,39 @@ package trd.home.common.browser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import trd.home.common.exception.ChromeLaunchException;
 
 class ChromeProcessStarterTest {
     @Test
     void startsConfiguredProcessWithoutLaunchingARealBrowser() throws Exception {
         var starter = new ChromeProcessStarter("chrome", "profile", 9333, List.of());
-        try (var construction = org.mockito.Mockito.mockConstruction(ProcessBuilder.class, (builder, context) -> {
+        try (var construction = Mockito.mockConstruction(ProcessBuilder.class, (builder, context) -> {
             assertEquals(List.of(starter.command()), context.arguments());
-            org.mockito.Mockito.when(builder.inheritIO()).thenReturn(builder);
+            Mockito.when(builder.inheritIO()).thenReturn(builder);
         })) {
             starter.start();
             assertEquals(1, construction.constructed().size());
-            org.mockito.Mockito.verify(construction.constructed().getFirst()).start();
+            Mockito.verify(construction.constructed().getFirst()).start();
         }
     }
 
     @Test
     void wrapsProcessStartFailureAndPreservesCause() {
-        var cause = new java.io.IOException("cannot start");
-        try (var construction = org.mockito.Mockito.mockConstruction(ProcessBuilder.class, (builder, context) -> {
-            org.mockito.Mockito.when(builder.inheritIO()).thenReturn(builder);
-            org.mockito.Mockito.when(builder.start()).thenThrow(cause);
+        var cause = new IOException("cannot start");
+        try (var construction = Mockito.mockConstruction(ProcessBuilder.class, (builder, context) -> {
+            Mockito.when(builder.inheritIO()).thenReturn(builder);
+            Mockito.when(builder.start()).thenThrow(cause);
         })) {
-            var exception = org.junit.jupiter.api.Assertions.assertThrows(
-                    trd.home.common.exception.ChromeLaunchException.class,
+            var exception = Assertions.assertThrows(
+                    ChromeLaunchException.class,
                     () -> new ChromeProcessStarter("chrome", "profile", 9333, List.of()).start());
-            org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
+            Assertions.assertSame(cause, exception.getCause());
+            assertEquals(1, construction.constructed().size());
         }
     }
 

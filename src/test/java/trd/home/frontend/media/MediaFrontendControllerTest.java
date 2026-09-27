@@ -8,10 +8,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import trd.home.common.event.FrontendNotificationPublisher;
+import trd.home.common.exception.HomeExceptionHandler;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.media.constant.MediaStatus;
 import trd.home.media.dto.ActorDto;
@@ -22,10 +26,9 @@ import trd.home.media.service.MediaService;
 
 class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
-    private final org.springframework.test.web.servlet.MockMvc mvc = MockMvcBuilders.standaloneSetup(
+    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
                     new MediaFrontendController(service, new FrontendPageRenderer()))
-            .setControllerAdvice(new trd.home.common.exception.HomeExceptionHandler(
-                    mock(trd.home.common.event.FrontendNotificationPublisher.class)))
+            .setControllerAdvice(new HomeExceptionHandler(mock(FrontendNotificationPublisher.class)))
             .build();
 
     @TempDir
@@ -78,7 +81,7 @@ class MediaFrontendControllerTest {
     void rendersActorAndFolderBrowsersWithAndWithoutSelection() throws Exception {
         ActorDto actor = new ActorDto("actor-1", "Alice", MediaStatus.ACTIVE);
         FolderDto folder = new FolderDto("folder-1", "media", "Movies", MediaStatus.ACTIVE);
-        VideoDto video = new VideoDto("video-1", "Film", folder, java.util.Set.of(actor), MediaStatus.ACTIVE);
+        VideoDto video = new VideoDto("video-1", "Film", folder, Set.of(actor), MediaStatus.ACTIVE);
         when(service.activeActors()).thenReturn(List.of(actor));
         when(service.activeFolders()).thenReturn(List.of(folder));
         when(service.videosByActor("actor-1")).thenReturn(List.of(video));

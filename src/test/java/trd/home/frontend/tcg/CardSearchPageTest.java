@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -18,6 +19,8 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.constant.CardFoilType;
+import trd.home.tcg.constant.CardGameType;
+import trd.home.tcg.constant.CardPriceType;
 import trd.home.tcg.dto.CardSearchDeck;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.service.TcgService;
@@ -27,8 +30,8 @@ class CardSearchPageTest {
     void rendersBothUnitPricesDeckQuantitiesAndServerPagination() throws Exception {
         var service = mock(TcgService.class);
         when(service.getCardFoilTypes()).thenReturn(CardFoilType.values());
-        when(service.getCardGameTypes()).thenReturn(trd.home.tcg.constant.CardGameType.values());
-        when(service.getCardPriceTypes()).thenReturn(trd.home.tcg.constant.CardPriceType.values());
+        when(service.getCardGameTypes()).thenReturn(CardGameType.values());
+        when(service.getCardPriceTypes()).thenReturn(CardPriceType.values());
         var card = new CardSearchResult(
                 "card",
                 "Test Card",
@@ -40,10 +43,10 @@ class CardSearchPageTest {
                 List.of(new CardSearchDeck("deck-a", "Deck A", 3), new CardSearchDeck("deck-b", "Deck B", 4)));
         when(service.searchCards(
                         any(),
-                        org.mockito.ArgumentMatchers.anyInt(),
-                        org.mockito.ArgumentMatchers.anyInt(),
-                        org.mockito.ArgumentMatchers.anyString(),
-                        org.mockito.ArgumentMatchers.anyString()))
+                        ArgumentMatchers.anyInt(),
+                        ArgumentMatchers.anyInt(),
+                        ArgumentMatchers.anyString(),
+                        ArgumentMatchers.anyString()))
                 .thenReturn(new PageImpl<>(List.of(card), PageRequest.of(1, 10), 25));
         var templates = new ClassLoaderTemplateResolver();
         templates.setPrefix("templates/");

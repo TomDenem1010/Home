@@ -8,12 +8,15 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.ui.ConcurrentModel;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
+import trd.home.tcg.constant.CardPriceType;
 import trd.home.tcg.dto.CardSearchFilter;
+import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.TcgService;
@@ -29,7 +32,7 @@ class TcgFrontendControllerTest {
         var filter = new CardSearchFilter(null, null, null, null, null, null);
         when(tcgService.getCardFoilTypes()).thenReturn(CardFoilType.values());
         when(tcgService.getCardGameTypes()).thenReturn(CardGameType.values());
-        when(tcgService.getCardPriceTypes()).thenReturn(trd.home.tcg.constant.CardPriceType.values());
+        when(tcgService.getCardPriceTypes()).thenReturn(CardPriceType.values());
         assertEquals("index", controller.searchCard(filter, 0, 50, "name", "asc", model));
         assertEquals("tcg/search-card", model.getAttribute("contentTemplate"));
         assertEquals(50, model.getAttribute("size"));
@@ -41,14 +44,14 @@ class TcgFrontendControllerTest {
         verify(tcgService).getCardGameTypes();
         verify(tcgService).getCardPriceTypes();
         verify(tcgService).searchCards(filter, 0, 50, "name", "asc");
-        org.mockito.Mockito.verifyNoMoreInteractions(tcgService);
+        Mockito.verifyNoMoreInteractions(tcgService);
     }
 
     @Test
     void searchPassesFiltersAndPagingParametersThroughTcgService() {
         var filter = new CardSearchFilter(null, null, null, null, null, null);
         var model = new ConcurrentModel();
-        var results = new PageImpl<trd.home.tcg.dto.CardSearchResult>(List.of());
+        var results = new PageImpl<CardSearchResult>(List.of());
         when(tcgService.searchCards(filter, 2, 25, "quantity", "desc")).thenReturn(results);
         controller.searchCard(filter, 2, 25, "quantity", "desc", model);
         assertEquals(results, model.getAttribute("searchResults"));

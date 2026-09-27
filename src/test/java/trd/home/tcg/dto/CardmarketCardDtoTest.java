@@ -3,18 +3,43 @@ package trd.home.tcg.dto;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.LoggerFactory;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
 
 class CardmarketCardDtoTest {
-    @org.junit.jupiter.api.Test
+    @Test
+    void doesNotParseUnrelatedQueryParametersAsLanguageOrLogErrors() {
+        var logger = (Logger) LoggerFactory.getLogger(CardmarketCardDto.class);
+        var appender = new ListAppender<ILoggingEvent>();
+        appender.start();
+        logger.addAppender(appender);
+        try {
+            assertEquals(
+                    CardLanguage.ENGLISH,
+                    CardmarketCardDto.from(cardWithLink(
+                                    "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?sort=price"))
+                            .cardLanguage());
+            assertTrue(appender.list.isEmpty());
+        } finally {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
+    }
+
+    @Test
     void ignoresValuelessLanguageBeforeAValidLanguageParameter() {
         assertEquals(
                 CardLanguage.ENGLISH,

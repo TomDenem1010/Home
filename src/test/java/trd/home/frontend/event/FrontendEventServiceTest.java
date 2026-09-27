@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -133,7 +134,7 @@ class FrontendEventServiceTest {
         ApplicationEvent event = new ApplicationEvent(
                 EventType.FRONTEND_NOTIFICATION,
                 "{\"username\":\"alice\",\"type\":\"WARNING\",\"message\":\"Started\"}");
-        when(eventQueue.findById("event-1")).thenReturn(java.util.Optional.of(event));
+        when(eventQueue.findById("event-1")).thenReturn(Optional.of(event));
 
         assertFalse(service.acknowledge("event-1", "bob"));
         assertTrue(service.acknowledge("event-1", "alice"));
@@ -143,11 +144,10 @@ class FrontendEventServiceTest {
 
     @Test
     void rejectsMissingWrongTypeAndMalformedEvents() {
-        when(eventQueue.findById("missing")).thenReturn(java.util.Optional.empty());
-        when(eventQueue.findById("wrong"))
-                .thenReturn(java.util.Optional.of(new ApplicationEvent(EventType.IMPORT_MEDIA)));
+        when(eventQueue.findById("missing")).thenReturn(Optional.empty());
+        when(eventQueue.findById("wrong")).thenReturn(Optional.of(new ApplicationEvent(EventType.IMPORT_MEDIA)));
         when(eventQueue.findById("malformed"))
-                .thenReturn(java.util.Optional.of(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, "invalid")));
+                .thenReturn(Optional.of(new ApplicationEvent(EventType.FRONTEND_NOTIFICATION, "invalid")));
 
         assertFalse(service.acknowledge("missing", "alice"));
         assertFalse(service.acknowledge("wrong", "alice"));

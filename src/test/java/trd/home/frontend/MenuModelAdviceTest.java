@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,8 +17,8 @@ class MenuModelAdviceTest {
     void keepsHistoryScopeStableWithinOneApplicationInstance() {
         String scope = advice.frontendEventHistoryScope();
         assertEquals(scope, advice.frontendEventHistoryScope());
-        assertEquals(scope, java.util.UUID.fromString(scope).toString());
-        org.junit.jupiter.api.Assertions.assertNotEquals(scope, new MenuModelAdvice().frontendEventHistoryScope());
+        assertEquals(scope, UUID.fromString(scope).toString());
+        Assertions.assertNotEquals(scope, new MenuModelAdvice().frontendEventHistoryScope());
     }
 
     private final MenuModelAdvice advice = new MenuModelAdvice();

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.io.InputStream;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
 import trd.home.common.exception.ResourceReadException;
@@ -26,7 +27,7 @@ class ResourceDeckCardValidatorTest {
                 WrongCardLineException.class,
                 () -> validator.validateResource(resource("1,https://www.cardmarket.com/card,FOIL\n\ninvalid")));
 
-        org.junit.jupiter.api.Assertions.assertTrue(exception.getMessage().contains("line 3"));
+        Assertions.assertTrue(exception.getMessage().contains("line 3"));
     }
 
     @Test

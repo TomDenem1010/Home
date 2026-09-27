@@ -1,22 +1,26 @@
 package trd.home.media.service.importing;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import trd.home.media.dto.ParsedVideoName;
 import trd.home.media.exception.*;
 
 class MediaFileReaderTest {
-    @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.CsvSource({"1001, 10, 10", "10, 1001, 10", "10, 10, 256", "10, 10, -1"})
+    @ParameterizedTest
+    @CsvSource({"1001, 10, 10", "10, 1001, 10", "10, 10, 256", "10, 10, -1"})
     void rejectsUnsupportedPathComponentsBeforeParsing(int parentLength, int fileLength, int folderLength)
             throws Exception {
         var parser = Mockito.mock(MediaNameParser.class);
@@ -36,8 +40,7 @@ class MediaFileReaderTest {
         try (var files = Mockito.mockStatic(Files.class)) {
             files.when(() -> Files.isDirectory(root)).thenReturn(true);
             files.when(() -> Files.walk(root)).thenReturn(Stream.of(video));
-            files.when(() -> Files.isRegularFile(video, java.nio.file.LinkOption.NOFOLLOW_LINKS))
-                    .thenReturn(true);
+            files.when(() -> Files.isRegularFile(video, NOFOLLOW_LINKS)).thenReturn(true);
             assertThrows(InvalidMediaPathException.class, () -> mockedReader.read(root));
             Mockito.verifyNoInteractions(parser);
         }
@@ -117,7 +120,7 @@ class MediaFileReaderTest {
         Path parentName = Mockito.mock(Path.class);
         Path fileName = Mockito.mock(Path.class);
         String videoName = "A".repeat(996) + ".mp4";
-        ParsedVideoName parsed = new ParsedVideoName("Film", java.util.Set.of("Actor"));
+        ParsedVideoName parsed = new ParsedVideoName("Film", Set.of("Actor"));
 
         Mockito.when(root.toRealPath()).thenReturn(resolvedRoot);
         Mockito.when(video.getFileName()).thenReturn(fileName);
@@ -131,8 +134,7 @@ class MediaFileReaderTest {
         try (MockedStatic<Files> files = Mockito.mockStatic(Files.class)) {
             files.when(() -> Files.isDirectory(resolvedRoot)).thenReturn(true);
             files.when(() -> Files.walk(resolvedRoot)).thenReturn(Stream.of(video));
-            files.when(() -> Files.isRegularFile(video, java.nio.file.LinkOption.NOFOLLOW_LINKS))
-                    .thenReturn(true);
+            files.when(() -> Files.isRegularFile(video, NOFOLLOW_LINKS)).thenReturn(true);
 
             var result = mockedReader.read(root);
 

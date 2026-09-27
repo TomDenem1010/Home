@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
+import trd.home.tcg.constant.CardPriceType;
 import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
@@ -38,7 +40,7 @@ class TcgServiceTest {
     void providesEnumValuesForSearchForm() {
         assertArrayEquals(CardFoilType.values(), service.getCardFoilTypes());
         assertArrayEquals(CardGameType.values(), service.getCardGameTypes());
-        assertArrayEquals(trd.home.tcg.constant.CardPriceType.values(), service.getCardPriceTypes());
+        assertArrayEquals(CardPriceType.values(), service.getCardPriceTypes());
     }
 
     @Test
@@ -56,7 +58,7 @@ class TcgServiceTest {
     @Test
     void invalidFilterPreventsQuery() {
         var validatingService = new TcgService(commands, queries, List.of(new CardSearchPriceValidator()));
-        var filter = new CardSearchFilter(null, null, null, new java.math.BigDecimal("-1"), null, null);
+        var filter = new CardSearchFilter(null, null, null, new BigDecimal("-1"), null, null);
         assertThrows(
                 InvalidCardSearchFilterException.class,
                 () -> validatingService.searchCards(filter, 0, 50, "name", "asc"));

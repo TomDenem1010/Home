@@ -11,7 +11,9 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.lang.reflect.Modifier;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import trd.home.tcg.constant.CardFoilType;
@@ -25,9 +27,9 @@ class CardSearchSpecificationTest {
     @Test
     void utilityClassHasOnlyAPrivateConstructor() throws Exception {
         var constructor = CardSearchSpecification.class.getDeclaredConstructor();
-        org.junit.jupiter.api.Assertions.assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+        Assertions.assertTrue(Modifier.isPrivate(constructor.getModifiers()));
         constructor.setAccessible(true);
-        org.junit.jupiter.api.Assertions.assertNotNull(constructor.newInstance());
+        Assertions.assertNotNull(constructor.newInstance());
     }
 
     @Test

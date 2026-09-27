@@ -63,7 +63,7 @@ class PlaywrightBrowserSessionTest {
         IllegalStateException closeFailure = new IllegalStateException("close failed");
         when(playwright.chromium()).thenReturn(chromium);
         when(chromium.connectOverCDP("invalid-endpoint")).thenThrow(connectionFailure);
-        org.mockito.Mockito.doThrow(closeFailure).when(playwright).close();
+        Mockito.doThrow(closeFailure).when(playwright).close();
 
         try (MockedStatic<Playwright> factory = mockStatic(Playwright.class)) {
             factory.when(Playwright::create).thenReturn(playwright);

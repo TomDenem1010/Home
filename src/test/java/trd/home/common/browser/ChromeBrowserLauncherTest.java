@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.common.exception.ChromeLaunchException;
@@ -31,7 +32,7 @@ class ChromeBrowserLauncherTest {
     @Test
     void publishesErrorNotificationWhenChromeCannotStart() {
         ChromeLaunchException failure = new ChromeLaunchException("Process unavailable", null);
-        org.mockito.Mockito.doThrow(failure).when(processStarter).start();
+        Mockito.doThrow(failure).when(processStarter).start();
 
         assertThrows(ChromeLaunchException.class, () -> launcher.start());
 

@@ -8,10 +8,12 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dao.User;
+import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 
 class DatabaseUserDetailsServiceTest {
@@ -22,8 +24,7 @@ class DatabaseUserDetailsServiceTest {
         roles.add(null);
         user.setRoles(roles);
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        var exception = assertThrows(
-                trd.home.auth.exception.InvalidCredentialException.class, () -> service.loadUserByUsername("alice"));
+        var exception = assertThrows(InvalidCredentialException.class, () -> service.loadUserByUsername("alice"));
         assertEquals("User role must not be null", exception.getMessage());
     }
 
@@ -46,7 +47,7 @@ class DatabaseUserDetailsServiceTest {
                 Set.of("ROLE_ADMIN", "ROLE_TCG"),
                 details.getAuthorities().stream()
                         .map(authority -> authority.getAuthority())
-                        .collect(java.util.stream.Collectors.toSet()));
+                        .collect(Collectors.toSet()));
     }
 
     @Test

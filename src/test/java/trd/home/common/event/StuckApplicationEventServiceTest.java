@@ -15,6 +15,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import tools.jackson.databind.json.JsonMapper;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
@@ -81,7 +82,7 @@ class StuckApplicationEventServiceTest {
                 .publish(
                         eq("alice"),
                         eq(FrontendNotificationType.ERROR),
-                        org.mockito.ArgumentMatchers.argThat(message -> !message.contains("more")));
+                        ArgumentMatchers.argThat(message -> !message.contains("more")));
     }
 
     private void givenStuckEvents(List<ApplicationEvent> events) {

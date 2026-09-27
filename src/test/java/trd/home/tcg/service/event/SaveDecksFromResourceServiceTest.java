@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
+import org.mockito.Mockito;
 import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
@@ -28,7 +30,7 @@ class SaveDecksFromResourceServiceTest {
     void reportsWrappedDeckSaveFailure() {
         var deck = new CardmarketDeck();
         when(deckFileReader.read()).thenReturn(List.of(deck));
-        org.mockito.Mockito.doThrow(new IllegalStateException("save failed"))
+        Mockito.doThrow(new IllegalStateException("save failed"))
                 .when(deckSaver)
                 .save(deck);
         var event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
@@ -106,7 +108,7 @@ class SaveDecksFromResourceServiceTest {
                         null,
                         FrontendNotificationType.ERROR,
                         "Failed to save decks: No resource file found for deck: Selected");
-        verify(deckSaver, never()).save(org.mockito.ArgumentMatchers.any());
+        verify(deckSaver, never()).save(ArgumentMatchers.any());
     }
 
     private static CardmarketDeck deck(String name) {

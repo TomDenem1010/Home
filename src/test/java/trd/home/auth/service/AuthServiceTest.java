@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static trd.home.auth.constant.UserRole.ADMIN;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +27,7 @@ class AuthServiceTest {
     void delegatesUserOperationsAndReturnsTheirResults() {
         var operations = mock(AuthOperationsService.class);
         var service = new AuthService(operations, mock(ApplicationLogSearchService.class), List.of());
-        var roles = Set.of(trd.home.auth.constant.UserRole.ADMIN);
+        var roles = Set.of(ADMIN);
         var user = new UserDto("id", "alice", roles);
         var users = List.of(user);
         when(operations.getAvailableRoles()).thenReturn(roles);

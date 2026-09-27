@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import trd.home.media.dto.ParsedVideoName;
+import trd.home.media.exception.InvalidVideoNameException;
 
 class MediaNameParserTest {
     private final MediaNameParser parser = new MediaNameParser();
@@ -34,7 +35,7 @@ class MediaNameParserTest {
     @Test
     void rejectsMalformedActorSectionsAndEmptyTitles() {
         for (String name : List.of(" - Title.mp4", "Actor - .mp4", "Actor &  - Title.mp4", "", "   .mp4")) {
-            assertThrows(trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse(name), name);
+            assertThrows(InvalidVideoNameException.class, () -> parser.parse(name), name);
         }
     }
 
@@ -47,8 +48,7 @@ class MediaNameParserTest {
         }
         assertEquals("Film&Part-2", parser.parse("Film&Part-2.mp4").name());
         assertEquals("x".repeat(255), parser.parse("x".repeat(255) + ".mp4").name());
-        assertThrows(
-                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse("x".repeat(256) + ".mp4"));
+        assertThrows(InvalidVideoNameException.class, () -> parser.parse("x".repeat(256) + ".mp4"));
     }
 
     @Test
@@ -73,10 +73,8 @@ class MediaNameParserTest {
     void rejectsOverlongTitleAndActor() {
         String overlong = "x".repeat(256);
 
-        assertThrows(
-                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse("Alice - " + overlong));
-        assertThrows(
-                trd.home.media.exception.InvalidVideoNameException.class, () -> parser.parse(overlong + " - Film"));
+        assertThrows(InvalidVideoNameException.class, () -> parser.parse("Alice - " + overlong));
+        assertThrows(InvalidVideoNameException.class, () -> parser.parse(overlong + " - Film"));
     }
 
     @Test

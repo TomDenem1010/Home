@@ -1,15 +1,28 @@
 package trd.home.auth.service;
 
+import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaPredicate;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import trd.home.auth.constant.ApplicationLogSort;
@@ -20,48 +33,42 @@ import trd.home.common.repository.ApplicationLogRepository;
 
 class ApplicationLogSearchServiceTest {
     @ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(booleans = {true, false})
+    @ValueSource(booleans = {true, false})
     @SuppressWarnings("unchecked")
     void buildsAllCriteriaWithEscapedWordsUtcBoundsAndErrorSelection(boolean error) {
-        var start = java.time.LocalDateTime.parse("2026-09-27T10:00:00");
+        var start = LocalDateTime.parse("2026-09-27T10:00:00");
         var end = start.plusHours(1);
         var filter = new ApplicationLogSearchFilter("  SAVE  10%_\\  ", " alice ", start, end, error);
-        when(repository.findAll(
-                        org.mockito.ArgumentMatchers.<Specification<ApplicationLog>>any(),
-                        any(org.springframework.data.domain.Pageable.class)))
+        when(repository.findAll(ArgumentMatchers.<Specification<ApplicationLog>>any(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of()));
         service.search(filter, 0, 10, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT);
-        var specification = org.mockito.ArgumentCaptor.forClass(Specification.class);
-        verify(repository).findAll(specification.capture(), any(org.springframework.data.domain.Pageable.class));
+        var specification = ArgumentCaptor.forClass(Specification.class);
+        verify(repository).findAll(specification.capture(), any(Pageable.class));
         assertNotNull(specification.getValue());
-        jakarta.persistence.criteria.Root<ApplicationLog> root = mock(jakarta.persistence.criteria.Root.class);
-        var builder = mock(org.hibernate.query.criteria.HibernateCriteriaBuilder.class);
-        jakarta.persistence.criteria.Path<String> method = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Path<String> input = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Path<String> output = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Path<String> creator = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Path<String> failure = mock(jakarta.persistence.criteria.Path.class);
-        jakarta.persistence.criteria.Path<Instant> time = mock(jakarta.persistence.criteria.Path.class);
+        Root<ApplicationLog> root = mock(Root.class);
+        var builder = mock(HibernateCriteriaBuilder.class);
+        Path<String> method = mock(Path.class);
+        Path<String> input = mock(Path.class);
+        Path<String> output = mock(Path.class);
+        Path<String> creator = mock(Path.class);
+        Path<String> failure = mock(Path.class);
+        Path<Instant> time = mock(Path.class);
         when(root.<String>get("method")).thenReturn(method);
         when(root.<String>get("input")).thenReturn(input);
         when(root.<String>get("output")).thenReturn(output);
         when(root.<String>get("createdBy")).thenReturn(creator);
         when(root.<String>get("error")).thenReturn(failure);
         when(root.<Instant>get("createdAt")).thenReturn(time);
-        var predicate = mock(org.hibernate.query.criteria.JpaPredicate.class);
-        when(builder.and(any(jakarta.persistence.criteria.Predicate[].class))).thenReturn(predicate);
-        assertSame(
-                predicate,
-                specification
-                        .getValue()
-                        .toPredicate(root, mock(jakarta.persistence.criteria.CriteriaQuery.class), builder));
+        var predicate = mock(JpaPredicate.class);
+        when(builder.and(any(Predicate[].class))).thenReturn(predicate);
+        assertSame(predicate, specification.getValue().toPredicate(root, mock(CriteriaQuery.class), builder));
         for (var field : List.of(method, input, output)) {
             verify(builder).ilike(field, "%save%", '\\');
             verify(builder).ilike(field, "%10\\%\\_\\\\%", '\\');
         }
         verify(builder).equal(creator, "alice");
-        verify(builder).greaterThanOrEqualTo(time, start.toInstant(java.time.ZoneOffset.UTC));
-        verify(builder).lessThanOrEqualTo(time, end.toInstant(java.time.ZoneOffset.UTC));
+        verify(builder).greaterThanOrEqualTo(time, start.toInstant(UTC));
+        verify(builder).lessThanOrEqualTo(time, end.toInstant(UTC));
         if (error) {
             verify(builder).isNotNull(failure);
             verify(builder, never()).isNull(any());
@@ -69,19 +76,17 @@ class ApplicationLogSearchServiceTest {
             verify(builder).isNull(failure);
             verify(builder, never()).isNotNull(any());
         }
-        var predicates = org.mockito.ArgumentCaptor.forClass(jakarta.persistence.criteria.Predicate[].class);
+        var predicates = ArgumentCaptor.forClass(Predicate[].class);
         verify(builder).and(predicates.capture());
         assertEquals(6, predicates.getValue().length);
     }
 
     @ParameterizedTest
-    @org.junit.jupiter.params.provider.NullAndEmptySource
-    @org.junit.jupiter.params.provider.ValueSource(strings = {"  "})
+    @NullAndEmptySource
+    @ValueSource(strings = {"  "})
     @SuppressWarnings("unchecked")
     void emptyFiltersProduceNoRestrictions(String empty) {
-        when(repository.findAll(
-                        org.mockito.ArgumentMatchers.<Specification<ApplicationLog>>any(),
-                        any(org.springframework.data.domain.Pageable.class)))
+        when(repository.findAll(ArgumentMatchers.<Specification<ApplicationLog>>any(), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of()));
         service.search(
                 new ApplicationLogSearchFilter(empty, empty, null, null, null),
@@ -89,20 +94,14 @@ class ApplicationLogSearchServiceTest {
                 10,
                 Sort.Direction.DESC,
                 ApplicationLogSort.CREATED_AT);
-        var specification = org.mockito.ArgumentCaptor.forClass(Specification.class);
-        verify(repository).findAll(specification.capture(), any(org.springframework.data.domain.Pageable.class));
-        var builder = mock(org.hibernate.query.criteria.HibernateCriteriaBuilder.class);
-        var predicate = mock(org.hibernate.query.criteria.JpaPredicate.class);
-        when(builder.and(any(jakarta.persistence.criteria.Predicate[].class))).thenReturn(predicate);
+        var specification = ArgumentCaptor.forClass(Specification.class);
+        verify(repository).findAll(specification.capture(), any(Pageable.class));
+        var builder = mock(HibernateCriteriaBuilder.class);
+        var predicate = mock(JpaPredicate.class);
+        when(builder.and(any(Predicate[].class))).thenReturn(predicate);
         assertSame(
-                predicate,
-                specification
-                        .getValue()
-                        .toPredicate(
-                                mock(jakarta.persistence.criteria.Root.class),
-                                mock(jakarta.persistence.criteria.CriteriaQuery.class),
-                                builder));
-        var predicates = org.mockito.ArgumentCaptor.forClass(jakarta.persistence.criteria.Predicate[].class);
+                predicate, specification.getValue().toPredicate(mock(Root.class), mock(CriteriaQuery.class), builder));
+        var predicates = ArgumentCaptor.forClass(Predicate[].class);
         verify(builder).and(predicates.capture());
         assertEquals(0, predicates.getValue().length);
         verifyNoMoreInteractions(builder);
@@ -126,7 +125,7 @@ class ApplicationLogSearchServiceTest {
         when(log.getDurationMs()).thenReturn(123L);
         var pageable = PageRequest.of(
                 1, 10, Sort.by(new Sort.Order(direction, sort.getProperty()), new Sort.Order(direction, "id")));
-        when(repository.findAll(org.mockito.ArgumentMatchers.<Specification<ApplicationLog>>any(), eq(pageable)))
+        when(repository.findAll(ArgumentMatchers.<Specification<ApplicationLog>>any(), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(log), pageable, 25));
         var results =
                 service.search(new ApplicationLogSearchFilter(null, null, null, null, null), 1, 10, direction, sort);
@@ -136,6 +135,6 @@ class ApplicationLogSearchServiceTest {
         assertEquals(
                 new ApplicationLogSearchResult("saveCard", "input", "output", "failure", timestamp, "alice", 123L),
                 results.getContent().getFirst());
-        verify(repository).findAll(org.mockito.ArgumentMatchers.<Specification<ApplicationLog>>any(), eq(pageable));
+        verify(repository).findAll(ArgumentMatchers.<Specification<ApplicationLog>>any(), eq(pageable));
     }
 }

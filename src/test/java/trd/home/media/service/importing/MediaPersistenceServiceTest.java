@@ -4,15 +4,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import trd.home.media.constant.MediaStatus;
 import trd.home.media.dao.*;
 import trd.home.media.dto.*;
 import trd.home.media.exception.DuplicateVideoException;
+import trd.home.media.exception.UnableToGenerateActorKeyException;
 import trd.home.media.repository.*;
 
 class MediaPersistenceServiceTest {
@@ -59,7 +65,7 @@ class MediaPersistenceServiceTest {
         assertEquals(MediaPersistenceService.actorKey(Set.of("Alice", "Bob")), video.getActorKey());
         assertEquals(
                 Set.of("Alice", "Bob"),
-                video.getActors().stream().map(actor -> actor.getName()).collect(java.util.stream.Collectors.toSet()));
+                video.getActors().stream().map(actor -> actor.getName()).collect(Collectors.toSet()));
         ArgumentCaptor<Folder> folderCaptor = ArgumentCaptor.forClass(Folder.class);
         verify(folders).save(folderCaptor.capture());
         assertEquals(
@@ -71,7 +77,7 @@ class MediaPersistenceServiceTest {
                 Set.of("Alice", "Bob"),
                 actorCaptor.getAllValues().stream()
                         .map(actor -> actor.getName())
-                        .collect(java.util.stream.Collectors.toSet()));
+                        .collect(Collectors.toSet()));
     }
 
     @Test
@@ -141,15 +147,12 @@ class MediaPersistenceServiceTest {
 
     @Test
     void preservesDigestInitializationFailure() {
-        var cause = new java.security.NoSuchAlgorithmException("SHA-256 unavailable");
-        try (var algorithms = org.mockito.Mockito.mockStatic(java.security.MessageDigest.class)) {
-            algorithms
-                    .when(() -> java.security.MessageDigest.getInstance("SHA-256"))
-                    .thenThrow(cause);
+        var cause = new NoSuchAlgorithmException("SHA-256 unavailable");
+        try (var algorithms = Mockito.mockStatic(MessageDigest.class)) {
+            algorithms.when(() -> MessageDigest.getInstance("SHA-256")).thenThrow(cause);
             var exception = assertThrows(
-                    trd.home.media.exception.UnableToGenerateActorKeyException.class,
-                    () -> MediaPersistenceService.actorKey(Set.of("Alice")));
-            org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
+                    UnableToGenerateActorKeyException.class, () -> MediaPersistenceService.actorKey(Set.of("Alice")));
+            Assertions.assertSame(cause, exception.getCause());
         }
     }
 

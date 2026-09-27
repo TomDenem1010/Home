@@ -6,24 +6,27 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.microsoft.playwright.Browser;
+import org.jsoup.Jsoup;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import trd.home.common.exception.BrowserNavigationException;
 import trd.home.common.playwright.BrowserPage;
 import trd.home.common.playwright.PlaywrightPageReader;
 import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
+import trd.home.tcg.exception.HtmlParseException;
 
 class CardmarketCallerTest {
     @Test
     void preservesHtmlParsingFailureAndItsCause() {
         givenPage(200, "broken");
         var cause = new IllegalArgumentException("parse failed");
-        try (var jsoup = org.mockito.Mockito.mockStatic(org.jsoup.Jsoup.class)) {
-            jsoup.when(() -> org.jsoup.Jsoup.parse("broken")).thenThrow(cause);
+        try (var jsoup = Mockito.mockStatic(Jsoup.class)) {
+            jsoup.when(() -> Jsoup.parse("broken")).thenThrow(cause);
             var exception = assertThrows(
-                    trd.home.tcg.exception.HtmlParseException.class,
-                    () -> caller.callWithPlaywright("https://example.test/card", browser));
-            org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
+                    HtmlParseException.class, () -> caller.callWithPlaywright("https://example.test/card", browser));
+            Assertions.assertSame(cause, exception.getCause());
         }
     }
 

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class SchedulingConfigurationTest {
 
@@ -17,10 +18,7 @@ class SchedulingConfigurationTest {
 
             assertEquals(4, taskScheduler.getScheduledThreadPoolExecutor().getCorePoolSize());
             assertTrue(taskScheduler.getThreadNamePrefix().startsWith("scheduler-"));
-            assertEquals(
-                    true,
-                    org.springframework.test.util.ReflectionTestUtils.getField(
-                            taskScheduler, "waitForTasksToCompleteOnShutdown"));
+            assertEquals(true, ReflectionTestUtils.getField(taskScheduler, "waitForTasksToCompleteOnShutdown"));
         } finally {
             taskScheduler.shutdown();
         }

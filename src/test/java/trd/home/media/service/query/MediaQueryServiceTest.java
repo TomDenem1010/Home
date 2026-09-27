@@ -3,6 +3,7 @@ package trd.home.media.service.query;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -46,9 +47,7 @@ class MediaQueryServiceTest {
         video.setFileName("film.mp4");
         when(videos.findByIdAndStatus("video-1", MediaStatus.ACTIVE)).thenReturn(Optional.of(video));
 
-        assertEquals(
-                java.nio.file.Path.of("media").toAbsolutePath().normalize().resolve("film.mp4"),
-                service.videoPath("video-1"));
+        assertEquals(Path.of("media").toAbsolutePath().normalize().resolve("film.mp4"), service.videoPath("video-1"));
     }
 
     @Test
@@ -56,7 +55,7 @@ class MediaQueryServiceTest {
         assertThrows(MediaVideoNotFoundException.class, () -> service.videoPath("missing"));
         Folder folder = folder("folder-1", "media", "media");
         Video video = video("video-1", "Film", folder);
-        video.setFileName(java.nio.file.Path.of("..", "outside.mp4").toString());
+        video.setFileName(Path.of("..", "outside.mp4").toString());
         when(videos.findByIdAndStatus("video-1", MediaStatus.ACTIVE)).thenReturn(Optional.of(video));
 
         assertThrows(MediaVideoNotFoundException.class, () -> service.videoPath("video-1"));

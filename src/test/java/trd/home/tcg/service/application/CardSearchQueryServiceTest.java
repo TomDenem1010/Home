@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -204,7 +205,7 @@ class CardSearchQueryServiceTest {
         var card = card("a", "Magic", "Card", CardFoilType.NO);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck, new CardmarketDeck()));
         when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(deck, card, 1)));
-        var read = new java.util.concurrent.atomic.AtomicInteger();
+        var read = new AtomicInteger();
         when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
                 .thenAnswer(ignored -> Stream.of(
                                 new CardSearchPrice("a", BigDecimal.ONE, BigDecimal.ONE),
@@ -235,6 +236,29 @@ class CardSearchQueryServiceTest {
                 List.of("a", "b"),
                 result.getContent().getFirst().decks().stream()
                         .map(value -> value.id())
+                        .toList());
+    }
+
+    @Test
+    void sortsDecksByNameAndBreaksCardNameTiesById() {
+        var a = deck("a", "Zulu");
+        var b = deck("b", "Alpha");
+        var first = card("a", "Magic", "Card", CardFoilType.NO);
+        var second = card("b", "Magic", "Card", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(a, b));
+        when(deckCards.findAll(anySpecification()))
+                .thenReturn(List.of(holding(b, second, 1), holding(a, first, 1), holding(b, first, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(ignored -> Stream.empty());
+        var result =
+                service.searchCards(new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 10));
+        assertEquals(
+                List.of("a", "b"),
+                result.getContent().stream().map(card -> card.id()).toList());
+        assertEquals(
+                List.of("b", "a"),
+                result.getContent().getFirst().decks().stream()
+                        .map(deck -> deck.id())
                         .toList());
     }
 

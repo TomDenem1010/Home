@@ -1,12 +1,19 @@
 package trd.home.auth.configuration;
 
+import static jakarta.servlet.DispatcherType.ASYNC;
+import static jakarta.servlet.DispatcherType.ERROR;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -30,46 +37,31 @@ class AuthConfigurationTest {
         DefaultSecurityFilterChain chain = mock(DefaultSecurityFilterChain.class);
         when(http.build()).thenReturn(chain);
         var authorize = mock(
-                org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
-                        .AuthorizationManagerRequestMatcherRegistry.class,
+                AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry.class,
                 Answers.RETURNS_DEEP_STUBS);
-        var form = mock(
-                org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer.class,
-                Answers.RETURNS_SELF);
-        var logout = mock(
-                org.springframework.security.config.annotation.web.configurers.LogoutConfigurer.class,
-                Answers.RETURNS_SELF);
-        var session = mock(
-                org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.class,
-                Answers.RETURNS_DEEP_STUBS);
+        var form = mock(FormLoginConfigurer.class, Answers.RETURNS_SELF);
+        var logout = mock(LogoutConfigurer.class, Answers.RETURNS_SELF);
+        var session = mock(SessionManagementConfigurer.class, Answers.RETURNS_DEEP_STUBS);
         doAnswer(invocation -> {
-                    invocation
-                            .<org.springframework.security.config.Customizer>getArgument(0)
-                            .customize(authorize);
+                    invocation.<Customizer>getArgument(0).customize(authorize);
                     return http;
                 })
                 .when(http)
                 .authorizeHttpRequests(any());
         doAnswer(invocation -> {
-                    invocation
-                            .<org.springframework.security.config.Customizer>getArgument(0)
-                            .customize(form);
+                    invocation.<Customizer>getArgument(0).customize(form);
                     return http;
                 })
                 .when(http)
                 .formLogin(any());
         doAnswer(invocation -> {
-                    invocation
-                            .<org.springframework.security.config.Customizer>getArgument(0)
-                            .customize(logout);
+                    invocation.<Customizer>getArgument(0).customize(logout);
                     return http;
                 })
                 .when(http)
                 .logout(any());
         doAnswer(invocation -> {
-                    invocation
-                            .<org.springframework.security.config.Customizer>getArgument(0)
-                            .customize(session);
+                    invocation.<Customizer>getArgument(0).customize(session);
                     return http;
                 })
                 .when(http)
@@ -80,8 +72,7 @@ class AuthConfigurationTest {
         verify(http).formLogin(any());
         verify(http).logout(any());
         verify(http).sessionManagement(any());
-        verify(authorize)
-                .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC, jakarta.servlet.DispatcherType.ERROR);
+        verify(authorize).dispatcherTypeMatchers(ASYNC, ERROR);
         verify(form).defaultSuccessUrl("/", true);
         verify(form).permitAll();
         verify(logout).logoutSuccessUrl("/login");

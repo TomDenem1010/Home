@@ -148,6 +148,23 @@ class TcgApplicationServiceTest {
                 service().getDeckPriceHistorySummary("id").cards().getFirst().cardName());
     }
 
+    @Test
+    void sortsHistoryByCardNameRatherThanInputOrder() {
+        var deck = deck("id", "Deck", "v");
+        var zulu = card("a", "https://example.test/Zulu");
+        var alpha = card("b", "https://example.test/Alpha");
+        when(decks.findById("id")).thenReturn(Optional.of(deck));
+        when(deckCards.findAllByDeckVersionId("v"))
+                .thenReturn(List.of(
+                        deckCard(deck.getCurrentVersion(), zulu, 1), deckCard(deck.getCurrentVersion(), alpha, 1)));
+        when(cards.findAllById(List.of("a", "b"))).thenReturn(List.of(zulu, alpha));
+        assertEquals(
+                List.of("Alpha", "Zulu"),
+                service().getDeckPriceHistorySummary("id").cards().stream()
+                        .map(card -> card.cardName())
+                        .toList());
+    }
+
     private TcgQueryService service() {
         return new TcgQueryService(decks, deckCards, cards, prices);
     }
