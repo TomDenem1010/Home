@@ -8,12 +8,16 @@ import static org.mockito.Mockito.when;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.ConcurrentModel;
 import trd.home.auth.constant.UserRole;
+import trd.home.auth.dto.ApplicationLogSearchFilter;
+import trd.home.auth.dto.ApplicationLogSearchResult;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
 import trd.home.frontend.FrontendPageRenderer;
@@ -23,6 +27,30 @@ class AuthFrontendControllerTest {
     private final AuthService authService = mock(AuthService.class);
     private final AuthFrontendController controller =
             new AuthFrontendController(authService, new FrontendPageRenderer());
+
+    @Test
+    void searchesApplicationLogsAndAssemblesAuthPageModel() {
+        var filter = new ApplicationLogSearchFilter(
+                "save card",
+                "alice",
+                LocalDateTime.parse("2026-09-27T10:00:00"),
+                LocalDateTime.parse("2026-09-27T12:00:00"),
+                true);
+        var results = new PageImpl<ApplicationLogSearchResult>(List.of());
+        when(authService.searchApplicationLogs(filter, 2, 25)).thenReturn(results);
+        when(authService.getApplicationLogCreators()).thenReturn(List.of("alice", "system"));
+        var model = new ConcurrentModel();
+        assertEquals("index", controller.searchApplicationLogs(filter, 2, 25, model));
+        assertEquals(results, model.getAttribute("searchResults"));
+        assertEquals(List.of("alice", "system"), model.getAttribute("creators"));
+        assertEquals(25, model.getAttribute("size"));
+        assertEquals("/auth/application-logs", model.getAttribute("activePath"));
+        assertEquals("auth/application-logs", model.getAttribute("contentTemplate"));
+        assertEquals("/css/admin.css", model.getAttribute("featureStylesheet"));
+        assertEquals("/js/admin.js", model.getAttribute("featureScript"));
+        verify(authService).searchApplicationLogs(filter, 2, 25);
+        verify(authService).getApplicationLogCreators();
+    }
 
     @Test
     void authRedirectsToUserList() {

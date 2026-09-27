@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="admin-page application-log-search" th:fragment="content" aria-label="Application logs">
+    <form id="application-log-search-form" class="application-log-search-form" method="get" th:action="@{/auth/application-logs}" th:object="${filter}">
+        <input type="hidden" name="page" value="0">
+        <label>Text <input type="text" th:field="*{text}" placeholder="Method name, input or output"></label>
+        <label>Creator
+            <select th:field="*{createdBy}">
+                <option value="">All</option>
+                <option th:each="creator : ${creators}" th:value="${creator}" th:text="${creator}"></option>
+            </select>
+        </label>
+        <label>TimeStart (UTC) <input type="datetime-local" step="1" th:field="*{timeStart}"></label>
+        <label>TimeEnd (UTC) <input type="datetime-local" step="1" th:field="*{timeEnd}"></label>
+        <label>Error
+            <select th:field="*{error}">
+                <option value="">All</option>
+                <option value="true">With error</option>
+                <option value="false">Without error</option>
+            </select>
+        </label>
+        <button type="submit">Search</button>
+    </form>
+    <div class="application-log-toolbar">
+        <label>Logs per page
+            <select name="size" form="application-log-search-form" data-log-page-size>
+                <option th:each="option : ${ {10, 25, 50, 100, 200} }" th:value="${option}" th:text="${option}" th:selected="${size == option}"></option>
+                <option th:if="${size != 10 and size != 25 and size != 50 and size != 100 and size != 200}" th:value="${size}" th:text="${size}" selected></option>
+            </select>
+        </label>
+    </div>
+    <p th:if="${searchResults.empty}">No matching logs.</p>
+    <div class="table-container application-log-results" th:unless="${searchResults.empty}">
+        <table>
+            <thead><tr>
+                <th scope="col">MethodName</th><th scope="col">MethodInput</th><th scope="col">MethodOutput</th>
+                <th scope="col">Error</th><th scope="col">CreatedAt (UTC)</th><th scope="col">CreatedBy</th>
+            </tr></thead>
+            <tbody><tr th:each="entry : ${searchResults.content}">
+                <td class="log-method" th:text="${entry.methodName}"></td>
+                <td><details th:if="${entry.methodInput != null}"><summary th:text="${#strings.abbreviate(entry.methodInput, 100)}"></summary><pre th:text="${entry.methodInput}"></pre></details></td>
+                <td><details th:if="${entry.methodOutput != null}"><summary th:text="${#strings.abbreviate(entry.methodOutput, 100)}"></summary><pre th:text="${entry.methodOutput}"></pre></details></td>
+                <td class="log-error"><details th:if="${entry.error != null}"><summary th:text="${#strings.abbreviate(entry.error, 100)}"></summary><pre th:text="${entry.error}"></pre></details></td>
+                <td class="log-date" th:text="${entry.createdAt}"></td>
+                <td th:text="${entry.createdBy}"></td>
+            </tr></tbody>
+        </table>
+    </div>
+    <nav class="application-log-pagination" aria-label="Application log pages">
+        <button type="submit" form="application-log-search-form" th:disabled="${!searchResults.hasPrevious()}" th:attr="data-log-page=${searchResults.number - 1}">Previous</button>
+        <span th:text="${'Page ' + (searchResults.number + 1) + ' / ' + (searchResults.totalPages > 0 ? searchResults.totalPages : 1) + ' (' + searchResults.totalElements + ' logs)'}"></span>
+        <button type="submit" form="application-log-search-form" th:disabled="${!searchResults.hasNext()}" th:attr="data-log-page=${searchResults.number + 1}">Next</button>
+    </nav>
+</section>
+</body>
+</html>

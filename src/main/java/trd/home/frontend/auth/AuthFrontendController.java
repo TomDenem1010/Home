@@ -9,10 +9,12 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.auth.constant.UserRole;
+import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.UserDto;
 import trd.home.auth.service.AuthService;
 import trd.home.common.logging.LogMasked;
@@ -25,6 +27,23 @@ public class AuthFrontendController {
 
     private final AuthService authService;
     private final FrontendPageRenderer pageRenderer;
+
+    @GetMapping("/application-logs")
+    public String searchApplicationLogs(
+            @ModelAttribute("filter") ApplicationLogSearchFilter filter,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "50") int size,
+            Model model) {
+        model.addAttribute("size", size);
+        model.addAttribute("creators", authService.getApplicationLogCreators());
+        model.addAttribute("searchResults", authService.searchApplicationLogs(filter, page, size));
+        return renderPage(
+                model,
+                "/auth/application-logs",
+                "Application logs",
+                "Search application logs. Dates and times are in UTC; newest entries appear first.",
+                "auth/application-logs");
+    }
 
     @GetMapping
     public String auth() {

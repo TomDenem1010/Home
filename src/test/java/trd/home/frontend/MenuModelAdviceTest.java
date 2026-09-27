@@ -83,7 +83,12 @@ class MenuModelAdviceTest {
 
         assertEquals(4, menus.size());
         assertEquals(
-                List.of("/auth/users", "/auth/create-user", "/auth/update-roles", "/auth/update-password"),
+                List.of(
+                        "/auth/users",
+                        "/auth/create-user",
+                        "/auth/update-roles",
+                        "/auth/update-password",
+                        "/auth/application-logs"),
                 menu(menus, "AUTH").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());

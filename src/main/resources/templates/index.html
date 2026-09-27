@@ -10,7 +10,7 @@
     <script defer th:src="@{/js/frontend-events.js}" src="/js/frontend-events.js"></script>
     <script defer th:if="${featureScript != null}" th:src="@{${featureScript}}"></script>
 </head>
-<body>
+<body th:classappend="${contentTemplate == 'auth/application-logs'} ? 'application-log-page'">
 <aside class="sidebar">
     <a class="brand" th:href="@{/}">Home</a>
     <nav aria-label="Főmenü">
@@ -20,7 +20,7 @@
         <button type="submit">Logout</button>
     </form>
 </aside>
-<main th:classappend="${contentTemplate == 'tcg/search-card'} ? 'card-search-main'">
+<main th:classappend="${contentTemplate == 'tcg/search-card'} ? 'card-search-main' : (${contentTemplate == 'auth/application-logs'} ? 'application-log-main' : '')">
     <div class="page-content">
         <h1 th:text="${pageTitle}">Kezdőlap</h1>
         <p th:text="${pageContent}">Üdvözöllek az alkalmazásban!</p>

@@ -32,7 +32,9 @@ public class MenuModelAdvice {
                                 new SubmenuItem("Create user", "/auth/create-user", SubmenuItem.Type.PAGE, admin),
                                 new SubmenuItem("Update roles", "/auth/update-roles", SubmenuItem.Type.PAGE, admin),
                                 new SubmenuItem(
-                                        "Update password", "/auth/update-password", SubmenuItem.Type.PAGE, admin))),
+                                        "Update password", "/auth/update-password", SubmenuItem.Type.PAGE, admin),
+                                new SubmenuItem(
+                                        "Application logs", "/auth/application-logs", SubmenuItem.Type.PAGE, admin))),
                 new MenuItem(
                         "TCG",
                         tcg,
