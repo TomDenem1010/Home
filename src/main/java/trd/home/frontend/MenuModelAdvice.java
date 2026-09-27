@@ -28,42 +28,42 @@ public class MenuModelAdvice {
                         "AUTH",
                         admin,
                         List.of(
-                                new SubmenuItem("List users", "/auth/users", SubmenuItem.Type.PAGE, admin),
-                                new SubmenuItem("Create user", "/auth/create-user", SubmenuItem.Type.PAGE, admin),
-                                new SubmenuItem("Update roles", "/auth/update-roles", SubmenuItem.Type.PAGE, admin),
+                                new SubmenuItem("list users", "/auth/users", SubmenuItem.Type.PAGE, admin),
+                                new SubmenuItem("create user", "/auth/create-user", SubmenuItem.Type.PAGE, admin),
+                                new SubmenuItem("update roles", "/auth/update-roles", SubmenuItem.Type.PAGE, admin),
                                 new SubmenuItem(
-                                        "Update password", "/auth/update-password", SubmenuItem.Type.PAGE, admin),
+                                        "update password", "/auth/update-password", SubmenuItem.Type.PAGE, admin),
                                 new SubmenuItem(
-                                        "Application logs", "/auth/application-logs", SubmenuItem.Type.PAGE, admin))),
+                                        "application logs", "/auth/application-logs", SubmenuItem.Type.PAGE, admin))),
                 new MenuItem(
                         "TCG",
                         tcg,
                         List.of(
                                 new SubmenuItem(
-                                        "Save Deck From Resource",
+                                        "save deck from resource",
                                         "/tcg/save-decks-from-resource",
                                         SubmenuItem.Type.ACTION,
                                         tcg),
-                                new SubmenuItem("Statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
-                                new SubmenuItem("SearchCard", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
+                                new SubmenuItem("statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
+                                new SubmenuItem("search card", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
                         "MEDIA",
                         media,
                         List.of(
                                 new SubmenuItem(
-                                        "Server folder path",
+                                        "server folder path",
                                         "/media/server-folder-path",
                                         SubmenuItem.Type.PAGE,
                                         media),
-                                new SubmenuItem("ByActor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
-                                new SubmenuItem("ByFolder", "/media/by-folder", SubmenuItem.Type.PAGE, media))),
+                                new SubmenuItem("by actor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
+                                new SubmenuItem("by folder", "/media/by-folder", SubmenuItem.Type.PAGE, media))),
                 new MenuItem(
                         "HELPER",
                         helper,
                         List.of(
                                 new SubmenuItem(
-                                        "Start Chrome", "/helper/start-chrome", SubmenuItem.Type.ACTION, helper),
-                                new SubmenuItem("Open Chrome", "/helper/chrome", SubmenuItem.Type.PAGE, helper))));
+                                        "start chrome", "/helper/start-chrome", SubmenuItem.Type.ACTION, helper),
+                                new SubmenuItem("open chrome", "/helper/chrome", SubmenuItem.Type.PAGE, helper))));
     }
 
     private static boolean hasRole(Authentication authentication, String role) {
