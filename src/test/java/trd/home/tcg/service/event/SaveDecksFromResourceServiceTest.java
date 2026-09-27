@@ -24,6 +24,18 @@ import trd.home.tcg.service.deck.CardmarketDeckSaver;
 import trd.home.tcg.service.file.DeckFileReader;
 
 class SaveDecksFromResourceServiceTest {
+    @Test
+    void reportsWrappedDeckSaveFailure() {
+        var deck = new CardmarketDeck();
+        when(deckFileReader.read()).thenReturn(List.of(deck));
+        org.mockito.Mockito.doThrow(new IllegalStateException("save failed"))
+                .when(deckSaver)
+                .save(deck);
+        var event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        service.process(event);
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        assertEquals("Unable to save decks from resource", event.getErrorMessage());
+    }
 
     private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final CardmarketDeckSaver deckSaver = mock(CardmarketDeckSaver.class);

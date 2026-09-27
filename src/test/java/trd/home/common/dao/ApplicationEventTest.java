@@ -9,6 +9,15 @@ import trd.home.common.constant.EventStatus;
 import trd.home.common.constant.EventType;
 
 class ApplicationEventTest {
+    @Test
+    void fallsBackToExceptionTypeForMissingOrBlankMessage() {
+        var event = new ApplicationEvent();
+        for (String message : new String[] {null, "  "}) {
+            event.markFailed(new IllegalStateException(message));
+            assertEquals("IllegalStateException", event.getErrorMessage());
+            assertEquals(EventStatus.ERROR, event.getStatus());
+        }
+    }
 
     @Test
     void storesMessage() {

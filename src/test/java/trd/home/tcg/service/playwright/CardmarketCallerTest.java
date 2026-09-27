@@ -14,6 +14,18 @@ import trd.home.tcg.exception.CardmarketRateLimitException;
 import trd.home.tcg.exception.FailedToLaunchBrowser;
 
 class CardmarketCallerTest {
+    @Test
+    void preservesHtmlParsingFailureAndItsCause() {
+        givenPage(200, "broken");
+        var cause = new IllegalArgumentException("parse failed");
+        try (var jsoup = org.mockito.Mockito.mockStatic(org.jsoup.Jsoup.class)) {
+            jsoup.when(() -> org.jsoup.Jsoup.parse("broken")).thenThrow(cause);
+            var exception = assertThrows(
+                    trd.home.tcg.exception.HtmlParseException.class,
+                    () -> caller.callWithPlaywright("https://example.test/card", browser));
+            org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
+        }
+    }
 
     private final PlaywrightPageReader pageReader = mock(PlaywrightPageReader.class);
     private final CardmarketCaller caller = new CardmarketCaller(pageReader);

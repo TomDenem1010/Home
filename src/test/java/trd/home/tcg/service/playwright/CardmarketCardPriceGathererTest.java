@@ -16,6 +16,16 @@ import trd.home.tcg.exception.CardmarketPriceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CardmarketCardPriceGathererTest {
+    @Test
+    void preservesCauseForNonNumericPrice() {
+        when(caller.callWithPlaywright("https://example.test/card", browser))
+                .thenReturn(Jsoup.parse("<dl><dt>From</dt><dd>unknown</dd></dl>"));
+        var exception =
+                assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
+                        .getCardmarketCardPrice("https://example.test/card", browser));
+        org.junit.jupiter.api.Assertions.assertInstanceOf(NumberFormatException.class, exception.getCause());
+        assertEquals("Unable to parse Cardmarket 'From' price for: https://example.test/card", exception.getMessage());
+    }
 
     @Mock
     private CardmarketCaller caller;

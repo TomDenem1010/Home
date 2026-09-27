@@ -14,6 +14,14 @@ import trd.home.tcg.constant.CardLanguage;
 import trd.home.tcg.dao.CardmarketCard;
 
 class CardmarketCardDtoTest {
+    @org.junit.jupiter.api.Test
+    void ignoresValuelessLanguageBeforeAValidLanguageParameter() {
+        assertEquals(
+                CardLanguage.ENGLISH,
+                CardmarketCardDto.from(cardWithLink(
+                                "https://www.cardmarket.com/en/Magic/Products/Singles/Set/Card?language&language=1"))
+                        .cardLanguage());
+    }
 
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("cardmarketLinks")

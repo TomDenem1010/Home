@@ -173,6 +173,71 @@ class CardSearchQueryServiceTest {
         assertTrue(service.searchCards(filter, PageRequest.of(0, 10)).isEmpty());
     }
 
+    @Test
+    void sortsEverySearchColumnInBothDirections() {
+        var aDeck = deck("a", "Zulu");
+        var bDeck = deck("b", "Alpha");
+        var a = card("a", "Magic", "Zulu", CardFoilType.NO);
+        var b = card("b", "Magic", "Alpha", CardFoilType.FOIL);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(aDeck, bDeck));
+        when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(aDeck, a, 3), holding(bDeck, b, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(ignored -> Stream.of(
+                        new CardSearchPrice("a", new BigDecimal("3"), new BigDecimal("3")),
+                        new CardSearchPrice("b", BigDecimal.ONE, BigDecimal.ONE)));
+        for (String column : List.of("name", "foilType", "quantity", "priceFrom", "priceTrend", "decks")) {
+            for (Sort.Direction direction : Sort.Direction.values()) {
+                var result = service.searchCards(
+                        new CardSearchFilter(null, null, null, null, null, null),
+                        PageRequest.of(0, 10, Sort.by(new Sort.Order(direction, column))));
+                assertEquals(
+                        direction == Sort.Direction.ASC ? List.of("b", "a") : List.of("a", "b"),
+                        result.getContent().stream().map(value -> value.id()).toList(),
+                        column + direction);
+            }
+        }
+    }
+
+    @Test
+    void ignoresDecksWithoutVersionAndStopsReadingPricesWhenEveryCardHasAPrice() {
+        var deck = deck("a", "Alpha");
+        var card = card("a", "Magic", "Card", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck, new CardmarketDeck()));
+        when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(deck, card, 1)));
+        var read = new java.util.concurrent.atomic.AtomicInteger();
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(ignored -> Stream.of(
+                                new CardSearchPrice("a", BigDecimal.ONE, BigDecimal.ONE),
+                                new CardSearchPrice("a", BigDecimal.TEN, BigDecimal.TEN),
+                                new CardSearchPrice("a", BigDecimal.TEN, BigDecimal.TEN))
+                        .peek(price -> read.incrementAndGet()));
+        assertEquals(
+                BigDecimal.ONE,
+                service.searchCards(new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 10))
+                        .getContent()
+                        .getFirst()
+                        .priceFrom());
+        assertEquals(2, read.get());
+    }
+
+    @Test
+    void breaksDeckNameTiesById() {
+        var a = deck("a", "Deck");
+        var b = deck("b", "Deck");
+        var card = card("c", "Magic", "Card", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(b, a));
+        when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(b, card, 1), holding(a, card, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(ignored -> Stream.empty());
+        var result =
+                service.searchCards(new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 10));
+        assertEquals(
+                List.of("a", "b"),
+                result.getContent().getFirst().decks().stream()
+                        .map(value -> value.id())
+                        .toList());
+    }
+
     private static Specification<CardmarketDeckCard> anySpecification() {
         return any();
     }

@@ -139,6 +139,20 @@ class MediaPersistenceServiceTest {
                 MediaPersistenceService.actorKey(Set.of("Alice", "Bob")));
     }
 
+    @Test
+    void preservesDigestInitializationFailure() {
+        var cause = new java.security.NoSuchAlgorithmException("SHA-256 unavailable");
+        try (var algorithms = org.mockito.Mockito.mockStatic(java.security.MessageDigest.class)) {
+            algorithms
+                    .when(() -> java.security.MessageDigest.getInstance("SHA-256"))
+                    .thenThrow(cause);
+            var exception = assertThrows(
+                    trd.home.media.exception.UnableToGenerateActorKeyException.class,
+                    () -> MediaPersistenceService.actorKey(Set.of("Alice")));
+            org.junit.jupiter.api.Assertions.assertSame(cause, exception.getCause());
+        }
+    }
+
     private Video verifyAndReturnSavedVideo() {
         ArgumentCaptor<Video> captor = ArgumentCaptor.forClass(Video.class);
         verify(videos).save(captor.capture());

@@ -97,12 +97,55 @@ class TcgApplicationServiceTest {
 
         assertEquals("deck-id", result.deckId());
         assertEquals(2, result.cards().size());
+        assertEquals("Card", result.cards().getFirst().cardName());
+        assertEquals("https://example.test/Card", result.cards().getFirst().cardLink());
+        assertEquals("Unpriced", result.cards().getLast().cardName());
         assertEquals(createdAt, result.cards().getFirst().latestPriceCreatedAt());
         assertNull(result.cards().getLast().latestPriceCreatedAt());
         assertNull(result.cards().getLast().latestFromInEuro());
         assertNull(result.cards().getLast().latestTrendInEuro());
         assertEquals(new BigDecimal("6.00"), result.sumLatestFromInEuro());
         assertEquals(new BigDecimal("8.00"), result.sumLatestTrendInEuro());
+    }
+
+    @Test
+    void returnsEmptyHistoryForMissingDeckOrMissingVersion() {
+        assertEquals(
+                new CardmarketDeckPriceHistorySummary("missing", List.of(), BigDecimal.ZERO, BigDecimal.ZERO),
+                service().getDeckPriceHistorySummary("missing"));
+        when(decks.findById("empty")).thenReturn(Optional.of(new CardmarketDeck()));
+        assertEquals(
+                new CardmarketDeckPriceHistorySummary("empty", List.of(), BigDecimal.ZERO, BigDecimal.ZERO),
+                service().getDeckPriceHistorySummary("empty"));
+        assertEquals("", service().getDeckPriceHistorySummary(null).deckId());
+    }
+
+    @Test
+    void summarizesDeckWithoutVersionAndMissingCardDetails() {
+        var empty = new CardmarketDeck();
+        empty.setId("empty");
+        empty.setName("Empty");
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(empty));
+        assertEquals(BigDecimal.ZERO, service().getDeckPriceSummary().getFirst().sumFromInEuro());
+        var deck = deck("id", "Deck", "v");
+        var card = card("c", "Card");
+        when(decks.findById("id")).thenReturn(Optional.of(deck));
+        when(deckCards.findAllByDeckVersionId("v")).thenReturn(List.of(deckCard(deck.getCurrentVersion(), card, 1)));
+        var result = service().getDeckPriceHistorySummary("id").cards().getFirst();
+        assertEquals("", result.cardName());
+        assertEquals("", result.cardLink());
+        when(cards.findAllById(List.of("c"))).thenReturn(List.of(card));
+        assertEquals(
+                "Card",
+                service().getDeckPriceHistorySummary("id").cards().getFirst().cardName());
+        card.setLink("/Card");
+        assertEquals(
+                "Card",
+                service().getDeckPriceHistorySummary("id").cards().getFirst().cardName());
+        card.setLink(" ");
+        assertEquals(
+                "",
+                service().getDeckPriceHistorySummary("id").cards().getFirst().cardName());
     }
 
     private TcgQueryService service() {

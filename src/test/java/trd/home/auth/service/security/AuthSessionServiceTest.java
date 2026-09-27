@@ -24,7 +24,7 @@ class AuthSessionServiceTest {
         var firstAliceSession = new SessionInformation(alice, "alice-1", new Date());
         var secondAliceSession = new SessionInformation(alice, "alice-2", new Date());
         var bobSession = new SessionInformation(bob, "bob-1", new Date());
-        when(sessionRegistry.getAllPrincipals()).thenReturn(List.of(alice, bob));
+        when(sessionRegistry.getAllPrincipals()).thenReturn(List.of(alice, bob, "anonymous"));
         when(sessionRegistry.getAllSessions(alice, false)).thenReturn(List.of(firstAliceSession, secondAliceSession));
         when(sessionRegistry.getAllSessions(bob, false)).thenReturn(List.of(bobSession));
 

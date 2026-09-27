@@ -15,6 +15,17 @@ import trd.home.auth.dao.User;
 import trd.home.auth.repository.UserRepository;
 
 class DatabaseUserDetailsServiceTest {
+    @Test
+    void rejectsNullRoleInStoredUser() {
+        var user = new User();
+        var roles = new HashSet<UserRole>();
+        roles.add(null);
+        user.setRoles(roles);
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+        var exception = assertThrows(
+                trd.home.auth.exception.InvalidCredentialException.class, () -> service.loadUserByUsername("alice"));
+        assertEquals("User role must not be null", exception.getMessage());
+    }
 
     private final UserRepository userRepository = mock(UserRepository.class);
     private final DatabaseUserDetailsService service = new DatabaseUserDetailsService(userRepository);

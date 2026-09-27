@@ -23,6 +23,25 @@ import trd.home.auth.validator.ApplicationLogSearchTimeValidator;
 
 class AuthServiceTest {
     @Test
+    void delegatesUserOperationsAndReturnsTheirResults() {
+        var operations = mock(AuthOperationsService.class);
+        var service = new AuthService(operations, mock(ApplicationLogSearchService.class), List.of());
+        var roles = Set.of(trd.home.auth.constant.UserRole.ADMIN);
+        var user = new UserDto("id", "alice", roles);
+        var users = List.of(user);
+        when(operations.getAvailableRoles()).thenReturn(roles);
+        when(operations.getAllUsers()).thenReturn(users);
+        when(operations.save("alice", "password", roles)).thenReturn(user);
+        when(operations.updateRoles("id", roles)).thenReturn(user);
+        when(operations.updatePassword("id", "new-password")).thenReturn(user);
+        assertSame(roles, service.getAvailableRoles());
+        assertSame(users, service.getAllUsers());
+        assertSame(user, service.save("alice", "password", roles));
+        assertSame(user, service.updateRoles("id", roles));
+        assertSame(user, service.updatePassword("id", "new-password"));
+    }
+
+    @Test
     void listsExistingCreatorsAndIncludesSystemOnce() {
         var operations = mock(AuthOperationsService.class);
         var service = new AuthService(operations, mock(ApplicationLogSearchService.class), List.of());

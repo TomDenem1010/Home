@@ -177,6 +177,26 @@ class LogMethodCallAspectTest {
         when(joinPoint.proceed()).thenReturn(output);
     }
 
+    @Test
+    void retainsDatabaseAuditWhenDebugLoggingIsDisabled() throws Throwable {
+        logger.setLevel(Level.INFO);
+        Method method = Example.class.getDeclaredMethod("find", List.class);
+        prepare(method, new Object[] {List.of("input")}, "result");
+        assertEquals("result", aspect.logMethodCall(joinPoint, annotation(method)));
+        assertTrue(appender.list.isEmpty());
+        assertEquals("result", savedLog().getOutput());
+    }
+
+    @Test
+    void logsDurationWithoutOutput() throws Throwable {
+        Method method = Example.class.getDeclaredMethod("durationOnly");
+        prepare(method, new Object[0], "result");
+        assertEquals("result", aspect.logMethodCall(joinPoint, annotation(method)));
+        assertEquals(1, appender.list.size());
+        assertTrue(message(0).matches("Completed .+ in \\d+ ms"));
+        assertEquals("result", savedLog().getOutput());
+    }
+
     private void prepareSignature(Method method, Object[] arguments) {
         when(joinPoint.getSignature()).thenReturn(signature);
         when(signature.toLongString()).thenReturn(method.toGenericString());
@@ -199,6 +219,11 @@ class LogMethodCallAspectTest {
     }
 
     private static class Example {
+
+        @LogMethodCall(in = false, out = false)
+        String durationOnly() {
+            return "result";
+        }
 
         @LogMethodCall
         List<String> find(List<String> values) {

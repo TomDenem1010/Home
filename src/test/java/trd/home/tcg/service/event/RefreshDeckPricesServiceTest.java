@@ -32,6 +32,29 @@ import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.playwright.CardmarketCardPriceSaver;
 
 class RefreshDeckPricesServiceTest {
+    @Test
+    void refreshesDeckWithoutCurrentVersion() {
+        var deck = new CardmarketDeck();
+        deck.setId("id");
+        when(deckRepository.findById("id")).thenReturn(Optional.of(deck));
+        var event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES, "id");
+        service.process(event);
+        assertEquals(EventStatus.DONE, event.getStatus());
+        verifyNoInteractions(deckCardRepository);
+        verify(cardPriceSaver).updateCardPrice(List.of());
+    }
+
+    @Test
+    void reportsWrappedPriceRefreshFailure() {
+        when(deckRepository.findById("id")).thenReturn(Optional.of(deck("id", "v")));
+        when(deckCardRepository.findAllByDeckVersionId("v"))
+                .thenThrow(new IllegalStateException("database unavailable"));
+        var event = new ApplicationEvent(EventType.REFRESH_DECK_PRICES, "id");
+        service.process(event);
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        assertEquals("Unable to refresh prices for deck: id", event.getErrorMessage());
+        verifyNoInteractions(cardPriceSaver);
+    }
 
     private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
     private final CardmarketCardPriceSaver cardPriceSaver = mock(CardmarketCardPriceSaver.class);
@@ -90,6 +113,7 @@ class RefreshDeckPricesServiceTest {
         service.process(event);
 
         assertEquals(EventStatus.ERROR, event.getStatus());
+        assertEquals("Deck not found: missing-deck", event.getErrorMessage());
         verifyNoInteractions(cardPriceSaver);
     }
 

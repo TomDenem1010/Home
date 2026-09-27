@@ -41,6 +41,7 @@ class CardSearchFilterValidatorTest {
         for (CardSearchFilter filter : List.of(
                 filter(null, null, null),
                 filter("0", null, CardPriceType.FROM),
+                filter(null, "0", CardPriceType.FROM),
                 filter(null, "5", CardPriceType.TREND),
                 filter("5.0", "5.00", CardPriceType.FROM))) {
             assertDoesNotThrow(() -> prices.validate(filter, 0, 50));

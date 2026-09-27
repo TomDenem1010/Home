@@ -23,16 +23,70 @@ class AuthConfigurationTest {
     }
 
     @Test
+    @SuppressWarnings({"rawtypes", "unchecked"})
     void buildsConfiguredSecurityFilterChain() throws Exception {
         HttpSecurity http = mock(HttpSecurity.class, Answers.RETURNS_SELF);
         SessionRegistry sessions = mock(SessionRegistry.class);
         DefaultSecurityFilterChain chain = mock(DefaultSecurityFilterChain.class);
         when(http.build()).thenReturn(chain);
+        var authorize = mock(
+                org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
+                        .AuthorizationManagerRequestMatcherRegistry.class,
+                Answers.RETURNS_DEEP_STUBS);
+        var form = mock(
+                org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer.class,
+                Answers.RETURNS_SELF);
+        var logout = mock(
+                org.springframework.security.config.annotation.web.configurers.LogoutConfigurer.class,
+                Answers.RETURNS_SELF);
+        var session = mock(
+                org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.class,
+                Answers.RETURNS_DEEP_STUBS);
+        doAnswer(invocation -> {
+                    invocation
+                            .<org.springframework.security.config.Customizer>getArgument(0)
+                            .customize(authorize);
+                    return http;
+                })
+                .when(http)
+                .authorizeHttpRequests(any());
+        doAnswer(invocation -> {
+                    invocation
+                            .<org.springframework.security.config.Customizer>getArgument(0)
+                            .customize(form);
+                    return http;
+                })
+                .when(http)
+                .formLogin(any());
+        doAnswer(invocation -> {
+                    invocation
+                            .<org.springframework.security.config.Customizer>getArgument(0)
+                            .customize(logout);
+                    return http;
+                })
+                .when(http)
+                .logout(any());
+        doAnswer(invocation -> {
+                    invocation
+                            .<org.springframework.security.config.Customizer>getArgument(0)
+                            .customize(session);
+                    return http;
+                })
+                .when(http)
+                .sessionManagement(any());
 
         assertSame(chain, configuration.securityFilterChain(http, sessions));
         verify(http).authorizeHttpRequests(any());
         verify(http).formLogin(any());
         verify(http).logout(any());
         verify(http).sessionManagement(any());
+        verify(authorize)
+                .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC, jakarta.servlet.DispatcherType.ERROR);
+        verify(form).defaultSuccessUrl("/", true);
+        verify(form).permitAll();
+        verify(logout).logoutSuccessUrl("/login");
+        verify(logout).permitAll();
+        verify(session.maximumSessions(-1)).sessionRegistry(sessions);
+        verify(session.maximumSessions(-1).sessionRegistry(sessions)).expiredUrl("/login?expired");
     }
 }

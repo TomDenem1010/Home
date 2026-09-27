@@ -17,6 +17,23 @@ import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.repository.ApplicationEventRepository;
 
 class ApplicationEventQueueTest {
+    @Test
+    void returnsRepositoryResultsForQueueOperations() {
+        var event = new ApplicationEvent(EventType.IMPORT_MEDIA, "path");
+        var events = List.of(event);
+        var threshold = java.time.Instant.parse("2026-01-01T00:00:00Z");
+        when(repository.save(org.mockito.ArgumentMatchers.any())).thenReturn(event);
+        when(repository.findById("id")).thenReturn(Optional.of(event));
+        when(repository.findAllByStatusAndLastModifiedAtBeforeOrderByLastModifiedAtAsc(
+                        EventStatus.PROCESSING, threshold))
+                .thenReturn(events);
+        when(repository.saveAll(events)).thenReturn(events);
+        org.junit.jupiter.api.Assertions.assertSame(event, queue.enqueue(EventType.IMPORT_MEDIA, "path"));
+        assertEquals(Optional.of(event), queue.findById("id"));
+        org.junit.jupiter.api.Assertions.assertSame(events, queue.findStuckBefore(threshold));
+        org.junit.jupiter.api.Assertions.assertSame(event, queue.save(event));
+        org.junit.jupiter.api.Assertions.assertSame(events, queue.saveAll(events));
+    }
 
     private final ApplicationEventRepository repository = mock(ApplicationEventRepository.class);
     private final ApplicationEventQueue queue = new ApplicationEventQueue(repository);

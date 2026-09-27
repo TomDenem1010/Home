@@ -10,6 +10,8 @@ class TcgConfigurationTest {
 
     @Test
     void createsTcgBeans() {
+        assertNotNull(configuration.cardSearchPagingValidator());
+        assertNotNull(configuration.cardSearchPriceValidator());
         var encodingValidator = configuration.resourceDeckEncodingValidator();
         var nameValidator = configuration.resourceDeckNameValidator();
         var cardValidator = configuration.resourceDeckCardValidator();

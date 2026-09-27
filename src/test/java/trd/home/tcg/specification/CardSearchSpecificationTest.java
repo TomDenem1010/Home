@@ -23,6 +23,14 @@ import trd.home.tcg.dto.CardSearchFilter;
 
 class CardSearchSpecificationTest {
     @Test
+    void utilityClassHasOnlyAPrivateConstructor() throws Exception {
+        var constructor = CardSearchSpecification.class.getDeclaredConstructor();
+        org.junit.jupiter.api.Assertions.assertTrue(java.lang.reflect.Modifier.isPrivate(constructor.getModifiers()));
+        constructor.setAccessible(true);
+        org.junit.jupiter.api.Assertions.assertNotNull(constructor.newInstance());
+    }
+
+    @Test
     @SuppressWarnings("unchecked")
     void combinesVersionFoilGameAndEveryWordWithLiteralWildcardEscaping() {
         Root<CardmarketDeckCard> root = mock(Root.class);
