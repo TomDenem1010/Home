@@ -112,7 +112,7 @@ class CardSearchQueryServiceTest {
                 .thenAnswer(ignored -> Stream.of(
                         new CardSearchPrice("a", new BigDecimal("1"), new BigDecimal("2")),
                         new CardSearchPrice("b", new BigDecimal("10"), new BigDecimal("20"))));
-        var sort = Sort.by(Sort.Direction.DESC, "priceFrom");
+        var sort = Sort.by(new Sort.Order(Sort.Direction.DESC, "priceFrom"));
         var first = service.searchCards(
                 new CardSearchFilter(null, null, null, null, null, null), PageRequest.of(0, 1, sort));
         var last = service.searchCards(

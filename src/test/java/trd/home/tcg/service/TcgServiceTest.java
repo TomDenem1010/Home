@@ -37,7 +37,7 @@ class TcgServiceTest {
     void passesSearchAndPagingToQueryServiceWithoutValidatingPriceRange() {
         var filter = new CardSearchFilter(
                 null, null, null, new java.math.BigDecimal("10"), new java.math.BigDecimal("-5"), null);
-        var pageable = PageRequest.of(2, 25, Sort.by(Sort.Direction.DESC, "quantity"));
+        var pageable = PageRequest.of(2, 25, Sort.by(new Sort.Order(Sort.Direction.DESC, "quantity")));
         var results = new PageImpl<CardSearchResult>(List.of());
         when(queries.searchCards(filter, pageable)).thenReturn(results);
         assertSame(results, service.searchCards(filter, 2, 25, "quantity", "desc"));
