@@ -27,6 +27,12 @@ public class CardmarketCardPricePersister {
                     return price;
                 })
                 .toList();
+        if (!prices.isEmpty()) {
+            priceRepository.deleteAllByCardIdIn(prices.stream()
+                    .map(price -> price.getCard().getId())
+                    .distinct()
+                    .toList());
+        }
         priceRepository.saveAll(prices);
     }
 

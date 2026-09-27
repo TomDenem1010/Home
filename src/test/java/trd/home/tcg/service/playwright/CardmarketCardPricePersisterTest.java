@@ -2,6 +2,8 @@ package trd.home.tcg.service.playwright;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,7 @@ class CardmarketCardPricePersisterTest {
     @Test
     void associatesCardsAndSavesAllPrices() {
         CardmarketCard card = new CardmarketCard();
+        card.setId("card-id");
         CardmarketCardPrice price = new CardmarketCardPrice();
         price.setFromInEuro(BigDecimal.ONE);
         when(cardRepository.getReferenceById("card-id")).thenReturn(card);
@@ -32,7 +35,9 @@ class CardmarketCardPricePersisterTest {
         persister.saveAll(List.of(new GatheredCardmarketPrice("card-id", price)));
 
         assertSame(card, price.getCard());
-        verify(priceRepository).saveAll(List.of(price));
+        var order = inOrder(priceRepository);
+        order.verify(priceRepository).deleteAllByCardIdIn(List.of("card-id"));
+        order.verify(priceRepository).saveAll(List.of(price));
     }
 
     @Test
@@ -47,11 +52,13 @@ class CardmarketCardPricePersisterTest {
         assertNull(price.getTrendInEuro());
         verify(cardRepository, never()).getReferenceById("card-id");
         verify(priceRepository).saveAll(List.of());
+        verify(priceRepository, never()).deleteAllByCardIdIn(anyCollection());
     }
 
     @Test
     void storesKnownPriceWithoutAZeroPlaceholder() {
         CardmarketCard card = new CardmarketCard();
+        card.setId("card-id");
         CardmarketCardPrice price = new CardmarketCardPrice();
         price.setFromInEuro(BigDecimal.ZERO);
         price.setTrendInEuro(new BigDecimal("2.50"));
@@ -61,6 +68,7 @@ class CardmarketCardPricePersisterTest {
 
         assertNull(price.getFromInEuro());
         assertSame(card, price.getCard());
+        verify(priceRepository).deleteAllByCardIdIn(List.of("card-id"));
         verify(priceRepository).saveAll(List.of(price));
     }
 }
