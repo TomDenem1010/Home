@@ -16,6 +16,7 @@ import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
+import trd.home.tcg.validator.CardSearchFilterValidator;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class TcgService {
 
     private final TcgCommandService commands;
     private final TcgQueryService queries;
+    private final List<CardSearchFilterValidator> cardSearchFilterValidators;
 
     public CardFoilType[] getCardFoilTypes() {
         return CardFoilType.values();
@@ -39,6 +41,7 @@ public class TcgService {
     @LogMethodCall
     public Page<CardSearchResult> searchCards(
             CardSearchFilter filter, int page, int size, String sort, String direction) {
+        cardSearchFilterValidators.forEach(validator -> validator.validate(filter));
         return queries.searchCards(
                 filter, PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort)));
     }

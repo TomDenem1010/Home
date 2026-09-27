@@ -24,7 +24,8 @@ class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
     private final org.springframework.test.web.servlet.MockMvc mvc = MockMvcBuilders.standaloneSetup(
                     new MediaFrontendController(service, new FrontendPageRenderer()))
-            .setControllerAdvice(new trd.home.common.exception.HomeExceptionHandler())
+            .setControllerAdvice(new trd.home.common.exception.HomeExceptionHandler(
+                    mock(trd.home.common.event.FrontendNotificationPublisher.class)))
             .build();
 
     @TempDir
@@ -55,8 +56,8 @@ class MediaFrontendControllerTest {
         when(service.videoResource("missing")).thenThrow(new MediaVideoNotFoundException("Video is unavailable."));
 
         mvc.perform(get("/media/videos/missing/stream"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Video is unavailable."));
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
     }
 
     @Test

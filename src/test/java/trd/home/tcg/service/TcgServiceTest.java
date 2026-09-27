@@ -2,8 +2,11 @@ package trd.home.tcg.service;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,14 +20,18 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.exception.InvalidCardSearchFilterException;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
+import trd.home.tcg.validator.CardSearchFilterValidator;
+import trd.home.tcg.validator.CardSearchPriceValidator;
 
 class TcgServiceTest {
 
     private final TcgCommandService commands = mock(TcgCommandService.class);
     private final TcgQueryService queries = mock(TcgQueryService.class);
-    private final TcgService service = new TcgService(commands, queries);
+    private final CardSearchFilterValidator validator = mock(CardSearchFilterValidator.class);
+    private final TcgService service = new TcgService(commands, queries, List.of(validator));
 
     @Test
     void providesEnumValuesForSearchForm() {
@@ -34,14 +41,25 @@ class TcgServiceTest {
     }
 
     @Test
-    void passesSearchAndPagingToQueryServiceWithoutValidatingPriceRange() {
-        var filter = new CardSearchFilter(
-                null, null, null, new java.math.BigDecimal("10"), new java.math.BigDecimal("-5"), null);
+    void validatesFilterBeforePassingSearchAndPagingToQueryService() {
+        var filter = new CardSearchFilter(null, null, null, null, null, null);
         var pageable = PageRequest.of(2, 25, Sort.by(new Sort.Order(Sort.Direction.DESC, "quantity")));
         var results = new PageImpl<CardSearchResult>(List.of());
         when(queries.searchCards(filter, pageable)).thenReturn(results);
         assertSame(results, service.searchCards(filter, 2, 25, "quantity", "desc"));
-        verify(queries).searchCards(filter, pageable);
+        var order = inOrder(validator, queries);
+        order.verify(validator).validate(filter);
+        order.verify(queries).searchCards(filter, pageable);
+    }
+
+    @Test
+    void invalidFilterPreventsQuery() {
+        var validatingService = new TcgService(commands, queries, List.of(new CardSearchPriceValidator()));
+        var filter = new CardSearchFilter(null, null, null, new java.math.BigDecimal("-1"), null, null);
+        assertThrows(
+                InvalidCardSearchFilterException.class,
+                () -> validatingService.searchCards(filter, 0, 50, "name", "asc"));
+        verifyNoInteractions(queries);
     }
 
     @Test

@@ -2,16 +2,22 @@ package trd.home.common.exception;
 
 import java.util.Collections;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import trd.home.common.event.FrontendNotificationPublisher;
+import trd.home.common.event.FrontendNotificationType;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class HomeExceptionHandler {
 
     private static final String UNEXPECTED_ERROR_MESSAGE = "An unexpected error occurred";
+    private final FrontendNotificationPublisher notificationPublisher;
 
     @ExceptionHandler(AsyncRequestNotUsableException.class)
     public void handleDisconnectedClient() {
@@ -19,9 +25,9 @@ public class HomeExceptionHandler {
     }
 
     @ExceptionHandler(HomeException.class)
-    public ResponseEntity<Map<String, String>> handle(HomeException exception) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap("message", exception.getMessage()));
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void handle(HomeException exception) {
+        notificationPublisher.publish(FrontendNotificationType.ERROR, exception.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
