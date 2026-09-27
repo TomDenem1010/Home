@@ -54,6 +54,6 @@ public class MediaFileReader {
     private boolean isVideo(Path path) {
         String name = path.getFileName().toString();
         int dot = name.lastIndexOf('.');
-        return dot >= 0 && EXTENSIONS.contains(name.substring(dot + 1).toLowerCase(Locale.ROOT));
+        return dot > 0 && EXTENSIONS.contains(name.substring(dot + 1).toLowerCase(Locale.ROOT));
     }
 }

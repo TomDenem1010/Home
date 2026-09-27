@@ -34,7 +34,7 @@ class MediaFileReaderTest {
 
     @Test
     void preservesInvalidVideoNameFailure() throws IOException {
-        Files.createFile(directory.resolve("invalid.mp4"));
+        Files.createFile(directory.resolve("Actor - .mp4"));
         assertThrows(InvalidVideoNameException.class, () -> reader.read(directory));
     }
 
@@ -59,7 +59,16 @@ class MediaFileReaderTest {
         Files.createDirectory(directory.resolve("Actor - Directory.mp4"));
         Files.createFile(directory.resolve(".mp4"));
 
-        assertThrows(InvalidVideoNameException.class, () -> reader.read(directory));
+        assertTrue(reader.read(directory).isEmpty());
+    }
+
+    @Test
+    void readsVideoWithoutActors() throws IOException {
+        Files.createFile(directory.resolve("Film.mp4"));
+        var files = reader.read(directory);
+        assertEquals(1, files.size());
+        assertEquals("Film", files.getFirst().video().name());
+        assertTrue(files.getFirst().video().actors().isEmpty());
     }
 
     @Test
