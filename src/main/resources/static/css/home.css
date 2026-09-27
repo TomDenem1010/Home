@@ -39,6 +39,9 @@ body {
     text-decoration: none;
 }
 
+.sidebar nav { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.sidebar .brand, .sidebar .logout-form { flex-shrink: 0; }
+
 .event-history { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .event-history h2 { margin: 0 0 .75rem; padding-inline: .25rem; color: #aebbd0; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
 .event-history__list { display: grid; flex: 1; gap: .5rem; min-height: 0; margin: 0; padding: 0 .25rem 0 0; overflow-y: auto; overscroll-behavior: contain; list-style: none; scrollbar-gutter: stable; }
@@ -133,9 +136,25 @@ main {
 .page-content table { margin-inline: auto; }
 h1 { margin-top: 0; }
 
-@media (max-width: 640px) {
+@media (max-height: 800px) {
+    .sidebar, .event-sidebar { padding-block: 1rem; }
+    .brand { margin-bottom: 1rem; }
+    .logout-form { padding-top: 1rem; }
+}
+
+@media (max-width: 1440px) {
+    :root { --sidebar-width: 210px; }
+    body { grid-template-columns: var(--sidebar-width) minmax(0, 1fr); }
+    main { padding: 1.5rem; }
+    .event-sidebar { grid-column: 2; position: static; width: 100%; height: auto; max-height: 18rem; }
+    .event-history__list { flex: auto; }
+}
+
+@media (max-width: 900px) {
     body { display: block; }
-    .sidebar, .event-sidebar { position: static; width: 100%; height: auto; max-height: 50dvh; }
-    .event-sidebar { height: 50dvh; }
-    main { padding: 2rem; }
+    .sidebar { position: static; width: 100%; height: auto; max-height: 40dvh; padding: 1rem; }
+    .sidebar .brand { margin-bottom: .5rem; }
+    .sidebar .logout-form { padding-top: .5rem; }
+    .event-sidebar { max-height: 15rem; }
+    main { padding: 1rem; }
 }

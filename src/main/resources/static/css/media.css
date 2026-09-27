@@ -16,4 +16,4 @@
 .media-player video { display: block; width: 100%; max-height: 60vh; border-radius: .8rem; background: #000; }
 .media-import { margin-bottom: 1.5rem; }
 .media-import input { width: min(100%, 30rem); }
-@media (max-width: 600px) { .media-browser { grid-template-columns: 1fr; } .media-scroll { height: 18rem; } }
+@media (max-width: 1100px) { .media-browser { grid-template-columns: 1fr; } .media-scroll { height: 18rem; } }
