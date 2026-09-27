@@ -14,6 +14,17 @@ class CardSearchFilterValidatorTest {
     private final CardSearchPriceValidator prices = new CardSearchPriceValidator();
 
     @Test
+    void validatesPagingBoundaries() {
+        var paging = new CardSearchPagingValidator();
+        var filter = filter(null, null, null);
+        assertDoesNotThrow(() -> paging.validate(filter, 0, 1));
+        assertDoesNotThrow(() -> paging.validate(filter, Integer.MAX_VALUE, 200));
+        assertThrows(InvalidCardSearchFilterException.class, () -> paging.validate(filter, -1, 50));
+        assertThrows(InvalidCardSearchFilterException.class, () -> paging.validate(filter, 0, 0));
+        assertThrows(InvalidCardSearchFilterException.class, () -> paging.validate(filter, 0, 201));
+    }
+
+    @Test
     void rejectsNegativePricesReversedRangesAndMissingPriceType() {
         for (CardSearchFilter filter : List.of(
                 filter("-1", null, CardPriceType.FROM),
@@ -21,7 +32,7 @@ class CardSearchFilterValidatorTest {
                 filter("10", "5", CardPriceType.FROM),
                 filter("0", null, null),
                 filter(null, "5", null))) {
-            assertThrows(InvalidCardSearchFilterException.class, () -> prices.validate(filter));
+            assertThrows(InvalidCardSearchFilterException.class, () -> prices.validate(filter, 0, 50));
         }
     }
 
@@ -32,7 +43,7 @@ class CardSearchFilterValidatorTest {
                 filter("0", null, CardPriceType.FROM),
                 filter(null, "5", CardPriceType.TREND),
                 filter("5.0", "5.00", CardPriceType.FROM))) {
-            assertDoesNotThrow(() -> prices.validate(filter));
+            assertDoesNotThrow(() -> prices.validate(filter, 0, 50));
         }
     }
 

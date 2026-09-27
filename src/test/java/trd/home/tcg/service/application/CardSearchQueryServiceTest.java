@@ -1,6 +1,7 @@
 package trd.home.tcg.service.application;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.*;
 
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.constant.CardGameType;
 import trd.home.tcg.constant.CardPriceType;
@@ -42,7 +44,7 @@ class CardSearchQueryServiceTest {
         var wrongGame = card("wrong-game", "FleshAndBlood", "Fire-Card", CardFoilType.FOIL);
         var wrongName = card("wrong-name", "Magic", "Water-Card", CardFoilType.FOIL);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(a, b));
-        when(deckCards.findAllByDeckVersionIdIn(anyCollection()))
+        when(deckCards.findAll(anySpecification()))
                 .thenReturn(List.of(
                         holding(a, match, 2),
                         holding(b, match, 3),
@@ -79,9 +81,7 @@ class CardSearchQueryServiceTest {
                 List.of(2, 3),
                 result.decks().stream().map(deck -> deck.quantity()).toList());
         assertTrue(closed.get());
-        verify(deckCards)
-                .findAllByDeckVersionIdIn(
-                        argThat(ids -> ids.size() == 2 && ids.containsAll(List.of("version-a", "version-b"))));
+        verify(deckCards).findAll(anySpecification());
         verifyNoInteractions(cards);
     }
 
@@ -90,7 +90,7 @@ class CardSearchQueryServiceTest {
         var deck = deck("a", "Alpha");
         var card = card("c", "Magic", "Card", CardFoilType.NO);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
-        when(deckCards.findAllByDeckVersionIdIn(anyCollection())).thenReturn(List.of(holding(deck, card, 1)));
+        when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(deck, card, 1)));
         when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
                 .thenReturn(Stream.of(
                         new CardSearchPrice("c", new BigDecimal("20"), new BigDecimal("30")),
@@ -106,7 +106,7 @@ class CardSearchQueryServiceTest {
         var b = card("b", "Magic", "Beta", CardFoilType.NO);
         var c = card("c", "Magic", "Unknown", CardFoilType.NO);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
-        when(deckCards.findAllByDeckVersionIdIn(anyCollection()))
+        when(deckCards.findAll(anySpecification()))
                 .thenReturn(List.of(holding(deck, a, 1), holding(deck, b, 2), holding(deck, c, 3)));
         when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
                 .thenAnswer(ignored -> Stream.of(
@@ -133,12 +133,28 @@ class CardSearchQueryServiceTest {
     }
 
     @Test
+    void preservesDecodedNamesAndExcludesMatchesOutsideTheName() {
+        var deck = deck("a", "High Lord");
+        var match = card("urza", "Magic", "Urza-%48igh-Lord", CardFoilType.NO);
+        var other = card("other", "Magic", "Protector?search=High-Lord", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        when(deckCards.findAll(anySpecification()))
+                .thenReturn(List.of(holding(deck, match, 2), holding(deck, other, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(List.of("urza")))
+                .thenAnswer(ignored -> Stream.empty());
+        var result = service.searchCards(
+                new CardSearchFilter(null, "lord high", null, null, null, null), PageRequest.of(0, 10));
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Urza-High-Lord", result.getContent().getFirst().name());
+    }
+
+    @Test
     void findsAllSearchWordsInAnyOrderAndStillSupportsSlugSearch() {
         var deck = deck("a", "Alpha");
         var match = card("urza", "Magic", "Urza-Lord-High-Artificer-V3", CardFoilType.NO);
         var other = card("other", "Magic", "Urza-Lord-Protector", CardFoilType.NO);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
-        when(deckCards.findAllByDeckVersionIdIn(anyCollection()))
+        when(deckCards.findAll(anySpecification()))
                 .thenReturn(List.of(holding(deck, match, 1), holding(deck, other, 1)));
         when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(List.of("urza")))
                 .thenAnswer(ignored -> Stream.empty());
@@ -155,6 +171,10 @@ class CardSearchQueryServiceTest {
         }
         var filter = new CardSearchFilter(null, "High Protector", null, null, null, null);
         assertTrue(service.searchCards(filter, PageRequest.of(0, 10)).isEmpty());
+    }
+
+    private static Specification<CardmarketDeckCard> anySpecification() {
+        return any();
     }
 
     private static CardmarketDeck deck(String id, String name) {

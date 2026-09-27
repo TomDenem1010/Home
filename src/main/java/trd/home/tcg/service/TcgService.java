@@ -41,9 +41,10 @@ public class TcgService {
     @LogMethodCall
     public Page<CardSearchResult> searchCards(
             CardSearchFilter filter, int page, int size, String sort, String direction) {
-        cardSearchFilterValidators.forEach(validator -> validator.validate(filter));
+        cardSearchFilterValidators.forEach(validator -> validator.validate(filter, page, size));
         return queries.searchCards(
-                filter, PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(direction), sort)));
+                filter,
+                PageRequest.of(page, size, Sort.by(new Sort.Order(Sort.Direction.fromString(direction), sort))));
     }
 
     @LogMethodCall

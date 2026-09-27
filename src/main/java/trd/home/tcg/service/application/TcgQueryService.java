@@ -37,6 +37,7 @@ import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckCardRepository;
 import trd.home.tcg.repository.CardmarketDeckRepository;
+import trd.home.tcg.specification.CardSearchSpecification;
 
 @Service
 @RequiredArgsConstructor
@@ -91,7 +92,10 @@ public class TcgQueryService {
         Map<String, List<CardmarketDeckCard>> cardsById = new HashMap<>();
         for (int offset = 0; offset < versionIds.size(); offset += SEARCH_BATCH_SIZE) {
             groupMatchingCards(
-                    deckCardRepository.findAllByDeckVersionIdIn(searchBatch(versionIds, offset)), filter, cardsById);
+                    deckCardRepository.findAll(
+                            CardSearchSpecification.matching(searchBatch(versionIds, offset), filter)),
+                    filter,
+                    cardsById);
         }
         return cardsById;
     }

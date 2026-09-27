@@ -24,6 +24,7 @@ import trd.home.tcg.exception.InvalidCardSearchFilterException;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
 import trd.home.tcg.validator.CardSearchFilterValidator;
+import trd.home.tcg.validator.CardSearchPagingValidator;
 import trd.home.tcg.validator.CardSearchPriceValidator;
 
 class TcgServiceTest {
@@ -48,7 +49,7 @@ class TcgServiceTest {
         when(queries.searchCards(filter, pageable)).thenReturn(results);
         assertSame(results, service.searchCards(filter, 2, 25, "quantity", "desc"));
         var order = inOrder(validator, queries);
-        order.verify(validator).validate(filter);
+        order.verify(validator).validate(filter, 2, 25);
         order.verify(queries).searchCards(filter, pageable);
     }
 
@@ -59,6 +60,19 @@ class TcgServiceTest {
         assertThrows(
                 InvalidCardSearchFilterException.class,
                 () -> validatingService.searchCards(filter, 0, 50, "name", "asc"));
+        verifyNoInteractions(queries);
+    }
+
+    @Test
+    void invalidPagingPreventsQuery() {
+        var validatingService = new TcgService(
+                commands, queries, List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()));
+        var filter = new CardSearchFilter(null, null, null, null, null, null);
+        for (int[] paging : List.of(new int[] {-1, 50}, new int[] {0, 0}, new int[] {0, 201})) {
+            assertThrows(
+                    InvalidCardSearchFilterException.class,
+                    () -> validatingService.searchCards(filter, paging[0], paging[1], "name", "asc"));
+        }
         verifyNoInteractions(queries);
     }
 

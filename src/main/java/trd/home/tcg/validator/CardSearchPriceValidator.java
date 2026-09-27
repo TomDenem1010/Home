@@ -5,7 +5,7 @@ import trd.home.tcg.exception.InvalidCardSearchFilterException;
 
 public class CardSearchPriceValidator extends CardSearchFilterValidator {
     @Override
-    public void validate(CardSearchFilter filter) {
+    public void validate(CardSearchFilter filter, int page, int size) {
         if (filter.priceMin() != null && filter.priceMin().signum() < 0) {
             throw new InvalidCardSearchFilterException("Minimum price must not be negative.");
         }
