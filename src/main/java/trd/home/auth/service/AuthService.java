@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import trd.home.auth.constant.ApplicationLogSort;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.ApplicationLogSearchResult;
@@ -31,9 +33,9 @@ public class AuthService {
     }
 
     public Page<ApplicationLogSearchResult> searchApplicationLogs(
-            ApplicationLogSearchFilter filter, int page, int size) {
+            ApplicationLogSearchFilter filter, int page, int size, Sort.Direction direction, ApplicationLogSort sort) {
         applicationLogSearchFilterValidators.forEach(validator -> validator.validate(filter, page, size));
-        return applicationLogSearchService.search(filter, page, size);
+        return applicationLogSearchService.search(filter, page, size, direction, sort);
     }
 
     @LogMethodCall

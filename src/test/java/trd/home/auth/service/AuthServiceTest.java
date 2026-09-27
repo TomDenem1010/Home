@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
+import trd.home.auth.constant.ApplicationLogSort;
 import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.ApplicationLogSearchResult;
 import trd.home.auth.dto.UserDto;
@@ -43,13 +45,16 @@ class AuthServiceTest {
         var service = new AuthService(operations, searchService, List.of(first, second));
         var filter = new ApplicationLogSearchFilter("save", "alice", null, null, true);
         var results = new PageImpl<ApplicationLogSearchResult>(List.of());
-        when(searchService.search(filter, 2, 25)).thenReturn(results);
+        when(searchService.search(filter, 2, 25, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT))
+                .thenReturn(results);
 
-        assertSame(results, service.searchApplicationLogs(filter, 2, 25));
+        assertSame(
+                results,
+                service.searchApplicationLogs(filter, 2, 25, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT));
         var order = inOrder(first, second, searchService);
         order.verify(first).validate(filter, 2, 25);
         order.verify(second).validate(filter, 2, 25);
-        order.verify(searchService).search(filter, 2, 25);
+        order.verify(searchService).search(filter, 2, 25, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT);
         verifyNoInteractions(operations);
     }
 
@@ -59,9 +64,17 @@ class AuthServiceTest {
         var service = new AuthService(
                 mock(AuthOperationsService.class), searchService, List.of(new ApplicationLogSearchPagingValidator()));
         var filter = new ApplicationLogSearchFilter(null, null, null, null, null);
-        assertThrows(InvalidApplicationLogSearchException.class, () -> service.searchApplicationLogs(filter, -1, 50));
-        assertThrows(InvalidApplicationLogSearchException.class, () -> service.searchApplicationLogs(filter, 0, 0));
-        assertThrows(InvalidApplicationLogSearchException.class, () -> service.searchApplicationLogs(filter, 0, 201));
+        assertThrows(
+                InvalidApplicationLogSearchException.class,
+                () -> service.searchApplicationLogs(
+                        filter, -1, 50, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT));
+        assertThrows(
+                InvalidApplicationLogSearchException.class,
+                () -> service.searchApplicationLogs(filter, 0, 0, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT));
+        assertThrows(
+                InvalidApplicationLogSearchException.class,
+                () -> service.searchApplicationLogs(
+                        filter, 0, 201, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT));
         verifyNoInteractions(searchService);
     }
 
@@ -76,7 +89,9 @@ class AuthServiceTest {
                 LocalDateTime.parse("2026-09-27T11:00:00"),
                 LocalDateTime.parse("2026-09-27T10:00:00"),
                 null);
-        assertThrows(InvalidApplicationLogSearchException.class, () -> service.searchApplicationLogs(filter, 0, 50));
+        assertThrows(
+                InvalidApplicationLogSearchException.class,
+                () -> service.searchApplicationLogs(filter, 0, 50, Sort.Direction.DESC, ApplicationLogSort.CREATED_AT));
         verifyNoInteractions(searchService);
     }
 }

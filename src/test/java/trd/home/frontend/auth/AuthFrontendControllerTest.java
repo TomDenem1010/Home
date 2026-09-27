@@ -12,9 +12,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.ConcurrentModel;
+import trd.home.auth.constant.ApplicationLogSort;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.ApplicationLogSearchResult;
@@ -28,8 +32,9 @@ class AuthFrontendControllerTest {
     private final AuthFrontendController controller =
             new AuthFrontendController(authService, new FrontendPageRenderer());
 
-    @Test
-    void searchesApplicationLogsAndAssemblesAuthPageModel() {
+    @ParameterizedTest
+    @CsvSource({"ASC, CREATED_AT", "DESC, CREATED_AT", "ASC, DURATION_MS", "DESC, DURATION_MS"})
+    void searchesApplicationLogsAndAssemblesAuthPageModel(Sort.Direction direction, ApplicationLogSort sort) {
         var filter = new ApplicationLogSearchFilter(
                 "save card",
                 "alice",
@@ -37,18 +42,19 @@ class AuthFrontendControllerTest {
                 LocalDateTime.parse("2026-09-27T12:00:00"),
                 true);
         var results = new PageImpl<ApplicationLogSearchResult>(List.of());
-        when(authService.searchApplicationLogs(filter, 2, 25)).thenReturn(results);
+        when(authService.searchApplicationLogs(filter, 2, 25, direction, sort)).thenReturn(results);
         when(authService.getApplicationLogCreators()).thenReturn(List.of("alice", "system"));
         var model = new ConcurrentModel();
-        assertEquals("index", controller.searchApplicationLogs(filter, 2, 25, model));
+        assertEquals("index", controller.searchApplicationLogs(filter, 2, 25, direction, sort, model));
         assertEquals(results, model.getAttribute("searchResults"));
         assertEquals(List.of("alice", "system"), model.getAttribute("creators"));
         assertEquals(25, model.getAttribute("size"));
+        assertEquals(direction.name(), model.getAttribute("direction"));
         assertEquals("/auth/application-logs", model.getAttribute("activePath"));
         assertEquals("auth/application-logs", model.getAttribute("contentTemplate"));
         assertEquals("/css/admin.css", model.getAttribute("featureStylesheet"));
         assertEquals("/js/admin.js", model.getAttribute("featureScript"));
-        verify(authService).searchApplicationLogs(filter, 2, 25);
+        verify(authService).searchApplicationLogs(filter, 2, 25, direction, sort);
         verify(authService).getApplicationLogCreators();
     }
 

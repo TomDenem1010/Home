@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import trd.home.auth.constant.ApplicationLogSort;
 import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.ApplicationLogSearchResult;
 import trd.home.common.dao.ApplicationLog;
@@ -24,11 +25,10 @@ public class ApplicationLogSearchService {
     private final ApplicationLogRepository repository;
 
     @Transactional(readOnly = true)
-    public Page<ApplicationLogSearchResult> search(ApplicationLogSearchFilter filter, int page, int size) {
+    public Page<ApplicationLogSearchResult> search(
+            ApplicationLogSearchFilter filter, int page, int size, Sort.Direction direction, ApplicationLogSort sort) {
         var pageable = PageRequest.of(
-                page,
-                size,
-                Sort.by(new Sort.Order(Sort.Direction.DESC, "createdAt"), new Sort.Order(Sort.Direction.DESC, "id")));
+                page, size, Sort.by(new Sort.Order(direction, sort.getProperty()), new Sort.Order(direction, "id")));
         return repository
                 .findAll(matching(filter), pageable)
                 .map(log -> new ApplicationLogSearchResult(
@@ -37,7 +37,8 @@ public class ApplicationLogSearchService {
                         log.getOutput(),
                         log.getError(),
                         log.getCreatedAt(),
-                        log.getCreatedBy()));
+                        log.getCreatedBy(),
+                        log.getDurationMs()));
     }
 
     private static Specification<ApplicationLog> matching(ApplicationLogSearchFilter filter) {

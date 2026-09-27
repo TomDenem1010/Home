@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import trd.home.auth.constant.ApplicationLogSort;
 import trd.home.auth.constant.UserRole;
 import trd.home.auth.dto.ApplicationLogSearchFilter;
 import trd.home.auth.dto.UserDto;
@@ -33,15 +35,19 @@ public class AuthFrontendController {
             @ModelAttribute("filter") ApplicationLogSearchFilter filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") int size,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(defaultValue = "CREATED_AT") ApplicationLogSort sort,
             Model model) {
         model.addAttribute("size", size);
+        model.addAttribute("direction", direction.name());
+        model.addAttribute("sort", sort.name());
         model.addAttribute("creators", authService.getApplicationLogCreators());
-        model.addAttribute("searchResults", authService.searchApplicationLogs(filter, page, size));
+        model.addAttribute("searchResults", authService.searchApplicationLogs(filter, page, size, direction, sort));
         return renderPage(
                 model,
                 "/auth/application-logs",
                 "Application logs",
-                "Search application logs. Dates and times are in UTC; newest entries appear first.",
+                "Search application logs. Dates and times are in UTC.",
                 "auth/application-logs");
     }
 

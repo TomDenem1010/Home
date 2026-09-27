@@ -4,6 +4,8 @@
 <section class="admin-page application-log-search" th:fragment="content" aria-label="Application logs">
     <form id="application-log-search-form" class="application-log-search-form" method="get" th:action="@{/auth/application-logs}" th:object="${filter}">
         <input type="hidden" name="page" value="0">
+        <input type="hidden" name="direction" th:value="${direction}">
+        <input type="hidden" name="sort" th:value="${sort}">
         <label>Text <input type="text" th:field="*{text}" placeholder="Method name, input or output"></label>
         <label>Creator
             <select th:field="*{createdBy}">
@@ -35,15 +37,27 @@
         <table>
             <thead><tr>
                 <th scope="col">MethodName</th><th scope="col">MethodInput</th><th scope="col">MethodOutput</th>
-                <th scope="col">Error</th><th scope="col">CreatedAt (UTC)</th><th scope="col">CreatedBy</th>
+                <th scope="col">Error</th>
+                <th scope="col" th:attr="aria-sort=${sort == 'CREATED_AT' ? (direction == 'ASC' ? 'ascending' : 'descending') : 'none'}">
+                    <button class="log-sort-button" type="submit" form="application-log-search-form" data-log-sort="CREATED_AT">CreatedAt (UTC)
+                        <span aria-hidden="true" th:text="${sort == 'CREATED_AT' ? (direction == 'ASC' ? '↑' : '↓') : '↕'}"></span>
+                    </button>
+                </th>
+                <th scope="col">CreatedBy</th>
+                <th scope="col" class="log-duration" th:attr="aria-sort=${sort == 'DURATION_MS' ? (direction == 'ASC' ? 'ascending' : 'descending') : 'none'}">
+                    <button class="log-sort-button" type="submit" form="application-log-search-form" data-log-sort="DURATION_MS">DurationMs
+                        <span aria-hidden="true" th:text="${sort == 'DURATION_MS' ? (direction == 'ASC' ? '↑' : '↓') : '↕'}"></span>
+                    </button>
+                </th>
             </tr></thead>
             <tbody><tr th:each="entry : ${searchResults.content}">
                 <td class="log-method" th:text="${entry.methodName}"></td>
                 <td><details th:if="${entry.methodInput != null}"><summary th:text="${#strings.abbreviate(entry.methodInput, 100)}"></summary><pre th:text="${entry.methodInput}"></pre></details></td>
                 <td><details th:if="${entry.methodOutput != null}"><summary th:text="${#strings.abbreviate(entry.methodOutput, 100)}"></summary><pre th:text="${entry.methodOutput}"></pre></details></td>
                 <td class="log-error"><details th:if="${entry.error != null}"><summary th:text="${#strings.abbreviate(entry.error, 100)}"></summary><pre th:text="${entry.error}"></pre></details></td>
-                <td class="log-date" th:text="${entry.createdAt}"></td>
+                <td class="log-date" th:text="${#temporals.format(entry.createdAt, 'yyyy-MM-dd HH:mm:ss', 'UTC')}"></td>
                 <td th:text="${entry.createdBy}"></td>
+                <td class="log-duration" th:text="${entry.durationMs}"></td>
             </tr></tbody>
         </table>
     </div>

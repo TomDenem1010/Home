@@ -8,4 +8,5 @@ public record ApplicationLogSearchResult(
         String methodOutput,
         String error,
         Instant createdAt,
-        String createdBy) {}
+        String createdBy,
+        long durationMs) {}

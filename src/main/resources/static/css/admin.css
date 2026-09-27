@@ -11,13 +11,16 @@
 .application-log-toolbar { display: flex; flex-shrink: 0; justify-content: flex-end; margin-bottom: .75rem; }
 .application-log-toolbar select { padding: .45rem; border: 1px solid #b8c2d1; border-radius: .45rem; font: inherit; }
 .application-log-results { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-.admin-page .application-log-results table { max-width: none; }
+.admin-page .application-log-results table { max-width: none; table-layout: fixed; }
 .application-log-results th { position: sticky; top: 0; z-index: 1; }
-.application-log-results td { vertical-align: top; overflow-wrap: anywhere; min-width: 10rem; }
-.application-log-results .log-method { min-width: 15rem; }
-.application-log-results .log-date { white-space: nowrap; }
+.log-sort-button { display: inline-flex; align-items: center; gap: .45rem; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; font-weight: 700; cursor: pointer; }
+.log-sort-button:hover, .log-sort-button:focus-visible { color: #d9e7ff; }
+.application-log-results th, .application-log-results td { min-width: 0; overflow-wrap: anywhere; }
+.application-log-results td { vertical-align: top; }
+.application-log-results .log-date { white-space: normal; }
+.application-log-results .log-duration { text-align: right; font-variant-numeric: tabular-nums; }
 .application-log-results summary { cursor: pointer; }
-.application-log-results pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 32rem; margin: .75rem 0 0; }
+.application-log-results pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; margin: .75rem 0 0; }
 .application-log-results .log-error { color: #b42318; }
 .application-log-pagination { display: flex; flex-shrink: 0; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
 .application-log-pagination button { padding: .5rem .8rem; cursor: pointer; }
