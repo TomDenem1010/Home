@@ -21,8 +21,9 @@ class CardmarketCardPriceGathererTest {
     void preservesCauseForNonNumericPrice() {
         when(caller.callWithPlaywright("https://example.test/card", browser))
                 .thenReturn(Jsoup.parse("<dl><dt>From</dt><dd>unknown</dd></dl>"));
-        var exception =
-                assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
+        var exception = assertThrows(
+                CardmarketPriceNotFoundException.class,
+                () -> new CardmarketCardPriceGatherer(caller)
                         .getCardmarketCardPrice("https://example.test/card", browser));
         Assertions.assertInstanceOf(NumberFormatException.class, exception.getCause());
         assertEquals("Unable to parse Cardmarket 'From' price for: https://example.test/card", exception.getMessage());
@@ -54,8 +55,10 @@ class CardmarketCardPriceGathererTest {
     void throwsSpecificExceptionForMissingPrices() {
         when(caller.callWithPlaywright("https://example.test/card", browser)).thenReturn(Jsoup.parse("<dl />"));
 
-        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
-                .getCardmarketCardPrice("https://example.test/card", browser));
+        assertThrows(
+                CardmarketPriceNotFoundException.class,
+                () -> new CardmarketCardPriceGatherer(caller)
+                        .getCardmarketCardPrice("https://example.test/card", browser));
     }
 
     @Test
@@ -63,8 +66,10 @@ class CardmarketCardPriceGathererTest {
         when(caller.callWithPlaywright("https://example.test/card", browser))
                 .thenReturn(Jsoup.parse("<dl><dt>Price Trend</dt><dd>2,50</dd><dt>From</dt></dl>"));
 
-        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
-                .getCardmarketCardPrice("https://example.test/card", browser));
+        assertThrows(
+                CardmarketPriceNotFoundException.class,
+                () -> new CardmarketCardPriceGatherer(caller)
+                        .getCardmarketCardPrice("https://example.test/card", browser));
     }
 
     @Test
@@ -76,7 +81,9 @@ class CardmarketCardPriceGathererTest {
                         </dl>
                         """));
 
-        assertThrows(CardmarketPriceNotFoundException.class, () -> new CardmarketCardPriceGatherer(caller)
-                .getCardmarketCardPrice("https://example.test/card", browser));
+        assertThrows(
+                CardmarketPriceNotFoundException.class,
+                () -> new CardmarketCardPriceGatherer(caller)
+                        .getCardmarketCardPrice("https://example.test/card", browser));
     }
 }

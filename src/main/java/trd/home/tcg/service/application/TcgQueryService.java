@@ -102,9 +102,11 @@ public class TcgQueryService {
 
     private static void groupMatchingCards(
             List<CardmarketDeckCard> cards, CardSearchFilter filter, Map<String, List<CardmarketDeckCard>> cardsById) {
-        cards.stream().filter(card -> matchesCard(card.getCard(), filter)).forEach(card -> cardsById
-                .computeIfAbsent(card.getCard().getId(), ignored -> new ArrayList<>())
-                .add(card));
+        cards.stream()
+                .filter(card -> matchesCard(card.getCard(), filter))
+                .forEach(card -> cardsById
+                        .computeIfAbsent(card.getCard().getId(), ignored -> new ArrayList<>())
+                        .add(card));
     }
 
     private static List<CardSearchResult> searchResults(

@@ -116,8 +116,9 @@ class FrontendEventServiceTest {
 
     @Test
     void removesConnectionWhenInitialHandshakeCannotBeSent() throws Exception {
-        try (MockedConstruction<SseEmitter> emitters =
-                mockConstruction(SseEmitter.class, (emitter, context) -> doThrow(new IOException("disconnected"))
+        try (MockedConstruction<SseEmitter> emitters = mockConstruction(
+                SseEmitter.class,
+                (emitter, context) -> doThrow(new IOException("disconnected"))
                         .when(emitter)
                         .send(any(SseEmitter.SseEventBuilder.class)))) {
             SseEmitter emitter = service.subscribe("alice", "session-1");
