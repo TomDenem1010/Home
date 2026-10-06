@@ -85,6 +85,12 @@ class TcgServiceTest {
     }
 
     @Test
+    void createsClearDecksEvent() {
+        service.clearDecks();
+        verify(commands).clearDecks();
+    }
+
+    @Test
     void createsSaveDeckEventForSelectedDeck() {
         service.saveDeckFromResource("deck-id");
 

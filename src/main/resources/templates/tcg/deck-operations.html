@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="tcg-page deck-operations" th:fragment="content" aria-label="Deck operations">
+    <article>
+        <h2>Refresh decks</h2>
+        <p>Read deck resource files again in the background.</p>
+        <form th:action="@{/tcg/deck-operations/refresh}" method="post">
+            <button type="submit">Refresh</button>
+        </form>
+    </article>
+    <article>
+        <h2>Clear decks</h2>
+        <p>Permanently delete all saved decks, their versions and deck card entries in the background. Cards and their prices are kept.</p>
+        <form th:action="@{/tcg/deck-operations/clear}" method="post">
+            <button type="submit">Clear</button>
+        </form>
+    </article>
+</section>
+</body>
+</html>

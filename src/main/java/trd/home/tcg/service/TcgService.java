@@ -65,6 +65,11 @@ public class TcgService {
     }
 
     @LogMethodCall
+    public void clearDecks() {
+        commands.clearDecks();
+    }
+
+    @LogMethodCall
     public void saveDeckFromResource(String deckId) {
         commands.saveDecksFromResource(deckId);
     }

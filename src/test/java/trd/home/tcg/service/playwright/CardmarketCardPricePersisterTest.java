@@ -37,6 +37,7 @@ class CardmarketCardPricePersisterTest {
         assertSame(card, price.getCard());
         var order = inOrder(priceRepository);
         order.verify(priceRepository).deleteAllByCardIdIn(List.of("card-id"));
+        order.verify(priceRepository).flush();
         order.verify(priceRepository).saveAll(List.of(price));
     }
 

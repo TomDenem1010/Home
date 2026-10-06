@@ -97,9 +97,19 @@ class TcgFrontendControllerTest {
 
     @Test
     void saveDecksFromResourceCallsTcgService() {
-        assertEquals("redirect:/tcg", controller.saveDecksFromResource());
+        assertEquals("redirect:/tcg/deck-operations", controller.saveDecksFromResource());
 
         verify(tcgService).saveDecksFromResource();
+    }
+
+    @Test
+    void deckOperationsPageAndClearAction() {
+        var model = new ConcurrentModel();
+        assertEquals("index", controller.deckOperations(model));
+        assertEquals("tcg/deck-operations", model.getAttribute("contentTemplate"));
+        assertEquals("/tcg/deck-operations", model.getAttribute("activePath"));
+        assertEquals("redirect:/tcg/deck-operations", controller.clearDecks());
+        verify(tcgService).clearDecks();
     }
 
     @Test

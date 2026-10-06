@@ -22,6 +22,10 @@ public class TcgCommandService {
         createEvent(EventType.REFRESH_DECK_PRICES, deckId, "Deck price refresh has started.");
     }
 
+    public void clearDecks() {
+        createEvent(EventType.CLEAR_DECKS, null, "Deck clearing has started.");
+    }
+
     private void createEvent(EventType eventType, String deckId, String notificationMessage) {
         eventQueue.enqueue(eventType, deckId);
         notificationPublisher.publish(FrontendNotificationType.WARNING, notificationMessage);

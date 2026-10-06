@@ -32,6 +32,7 @@ public class CardmarketCardPricePersister {
                     .map(price -> price.getCard().getId())
                     .distinct()
                     .toList());
+            priceRepository.flush();
         }
         priceRepository.saveAll(prices);
     }

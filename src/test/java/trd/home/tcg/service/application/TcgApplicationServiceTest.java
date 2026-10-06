@@ -57,6 +57,14 @@ class TcgApplicationServiceTest {
     }
 
     @Test
+    void createsClearDecksEvent() {
+        new TcgCommandService(events, notifications).clearDecks();
+        InOrder order = inOrder(events, notifications);
+        order.verify(events).enqueue(EventType.CLEAR_DECKS, null);
+        order.verify(notifications).publish(FrontendNotificationType.WARNING, "Deck clearing has started.");
+    }
+
+    @Test
     void calculatesActiveDeckPriceSummariesFromEntities() {
         CardmarketCard card = card("card-id", "https://example.test/Card");
         CardmarketDeck deck = deck("deck-id", "Deck", "version-id");

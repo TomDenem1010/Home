@@ -49,10 +49,22 @@ public class TcgFrontendController {
         return renderPage(model, "/tcg", "TCG", "A TCG funkciók itt érhetők el.");
     }
 
-    @PostMapping("/save-decks-from-resource")
+    @GetMapping("/deck-operations")
+    public String deckOperations(Model model) {
+        model.addAttribute("contentTemplate", "tcg/deck-operations");
+        return renderPage(model, "/tcg/deck-operations", "Deck operations", "Manage saved decks.");
+    }
+
+    @PostMapping({"/save-decks-from-resource", "/deck-operations/refresh"})
     public String saveDecksFromResource() {
         tcgService.saveDecksFromResource();
-        return "redirect:/tcg";
+        return "redirect:/tcg/deck-operations";
+    }
+
+    @PostMapping("/deck-operations/clear")
+    public String clearDecks() {
+        tcgService.clearDecks();
+        return "redirect:/tcg/deck-operations";
     }
 
     @PostMapping("/decks/{deckId}/reload")

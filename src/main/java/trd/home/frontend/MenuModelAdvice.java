@@ -39,11 +39,7 @@ public class MenuModelAdvice {
                         "TCG",
                         tcg,
                         List.of(
-                                new SubmenuItem(
-                                        "save deck from resource",
-                                        "/tcg/save-decks-from-resource",
-                                        SubmenuItem.Type.ACTION,
-                                        tcg),
+                                new SubmenuItem("deck operations", "/tcg/deck-operations", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("versions", "/tcg/version", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("search card", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
