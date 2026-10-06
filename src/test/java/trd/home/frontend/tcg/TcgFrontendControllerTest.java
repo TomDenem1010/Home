@@ -27,6 +27,23 @@ class TcgFrontendControllerTest {
     private final TcgFrontendController controller = new TcgFrontendController(tcgService, new FrontendPageRenderer());
 
     @Test
+    void versionPagesAssembleDeckListAndHistory() {
+        var model = new ConcurrentModel();
+        var decks = List.of(new trd.home.tcg.dto.DeckVersionListItem("deck-id", "Test deck"));
+        when(tcgService.getVersionDecks()).thenReturn(decks);
+        assertEquals("index", controller.versions(model));
+        assertEquals(decks, model.getAttribute("decks"));
+        assertEquals("/tcg/version", model.getAttribute("activePath"));
+        assertEquals("tcg/versions", model.getAttribute("contentTemplate"));
+        var history = new trd.home.tcg.dto.DeckVersionHistory("Test deck", List.of());
+        when(tcgService.getDeckVersionHistory("deck-id")).thenReturn(history);
+        assertEquals("index", controller.deckVersions("deck-id", model));
+        assertEquals(history, model.getAttribute("history"));
+        assertEquals("tcg/version-history", model.getAttribute("contentTemplate"));
+        assertEquals("/tcg/version", model.getAttribute("activePath"));
+    }
+
+    @Test
     void searchPageGetsEnumsThroughTcgServiceAndAssemblesModel() {
         var model = new ConcurrentModel();
         var filter = new CardSearchFilter(null, null, null, null, null, null);

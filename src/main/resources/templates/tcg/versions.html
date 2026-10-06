@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="tcg-page" th:fragment="content" aria-label="Deck versions">
+    <div class="table-container" th:if="${!decks.empty}">
+        <table data-sortable-table>
+            <thead><tr><th scope="col" data-sort-type="text"><button class="sort-button" type="button">Deck name</button></th></tr></thead>
+            <tbody><tr th:each="deck : ${decks}">
+                <td th:attr="data-sort-value=${deck.name}"><a th:href="@{/tcg/version/{deckId}(deckId=${deck.id})}" th:text="${deck.name}">Deck</a></td>
+            </tr></tbody>
+        </table>
+    </div>
+    <p th:if="${decks.empty}">There are no active decks to display.</p>
+</section>
+</body>
+</html>

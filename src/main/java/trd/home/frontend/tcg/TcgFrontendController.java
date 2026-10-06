@@ -74,6 +74,25 @@ public class TcgFrontendController {
         return renderPage(model, "/tcg/statistics", "Statistics", "Current total value of active decks.");
     }
 
+    @GetMapping("/version")
+    public String versions(Model model) {
+        model.addAttribute("decks", tcgService.getVersionDecks());
+        model.addAttribute("contentTemplate", "tcg/versions");
+        return renderPage(model, "/tcg/version", "Versions", "Version history of active decks.");
+    }
+
+    @GetMapping("/version/{deckId}")
+    public String deckVersions(@PathVariable String deckId, Model model) {
+        var history = tcgService.getDeckVersionHistory(deckId);
+        model.addAttribute("history", history);
+        model.addAttribute("contentTemplate", "tcg/version-history");
+        return renderPage(
+                model,
+                "/tcg/version",
+                "Versions: " + history.deckName(),
+                "Card changes compared with the previous saved version.");
+    }
+
     @GetMapping("/statistic/{deckId}")
     public String deckPriceHistory(@PathVariable String deckId, Model model) {
         model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));

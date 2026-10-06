@@ -1,6 +1,7 @@
 package trd.home.tcg.service.application;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -26,6 +27,7 @@ import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketCardPrice;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckCard;
+import trd.home.tcg.dao.CardmarketDeckVersion;
 import trd.home.tcg.dto.CardSearchDeck;
 import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchPrice;
@@ -33,6 +35,9 @@ import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckCardPriceSummary;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckVersionHistory;
+import trd.home.tcg.dto.DeckVersionListItem;
+import trd.home.tcg.dto.DeckVersionSummary;
 import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckCardRepository;
@@ -49,6 +54,48 @@ public class TcgQueryService {
     private final CardmarketDeckCardRepository deckCardRepository;
     private final CardmarketCardRepository cardRepository;
     private final CardmarketCardPriceRepository priceRepository;
+
+    @Transactional(readOnly = true)
+    public List<DeckVersionListItem> getVersionDecks() {
+        return deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE).stream()
+                .map(deck -> new DeckVersionListItem(deck.getId(), deck.getName()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public DeckVersionHistory getDeckVersionHistory(String deckId) {
+        CardmarketDeck deck = deckRepository.findById(deckId).orElse(null);
+        if (deck == null) return new DeckVersionHistory("", List.of());
+        List<CardmarketDeckVersion> versions = deck.getVersions().stream()
+                .sorted(Comparator.comparing(
+                        version -> new BigInteger(version.getVersion().replaceFirst("^[vV]", ""))))
+                .toList();
+        List<String> versionIds =
+                versions.stream().map(version -> version.getId()).toList();
+        Map<String, List<CardmarketDeckCard>> cardsByVersion = versionIds.isEmpty()
+                ? Map.of()
+                : deckCardRepository.findAllByDeckVersionIdIn(versionIds).stream()
+                        .collect(Collectors.groupingBy(
+                                card -> card.getDeckVersion().getId()));
+        List<DeckVersionSummary> summaries = new ArrayList<>();
+        Map<String, DeckVersionSummary.CardChange> previous = Map.of();
+        for (CardmarketDeckVersion version : versions) {
+            Map<String, DeckVersionSummary.CardChange> current =
+                    cardsByVersion.getOrDefault(version.getId(), List.of()).stream()
+                            .collect(Collectors.toMap(
+                                    card -> card.getCard().getId(),
+                                    TcgQueryService::versionCard,
+                                    (left, right) -> new DeckVersionSummary.CardChange(
+                                            left.name(),
+                                            left.link(),
+                                            left.foilType(),
+                                            left.quantity() + right.quantity())));
+            summaries.add(new DeckVersionSummary(
+                    version.getVersion(), cardChanges(current, previous), cardChanges(previous, current)));
+            previous = current;
+        }
+        return new DeckVersionHistory(deck.getName(), summaries);
+    }
 
     @Transactional(readOnly = true)
     public Page<CardSearchResult> searchCards(CardSearchFilter filter, Pageable pageable) {
@@ -80,6 +127,32 @@ public class TcgQueryService {
         List<CardmarketDeckCard> deckCards = deckCardRepository.findAllByDeckVersionId(
                 deck.getCurrentVersion().getId());
         return summarizeHistory(deckId, cardPriceSummaries(deckCards));
+    }
+
+    private static List<DeckVersionSummary.CardChange> cardChanges(
+            Map<String, DeckVersionSummary.CardChange> source, Map<String, DeckVersionSummary.CardChange> baseline) {
+        return source.entrySet().stream()
+                .filter(entry -> entry.getValue().quantity()
+                        > (baseline.containsKey(entry.getKey())
+                                ? baseline.get(entry.getKey()).quantity()
+                                : 0))
+                .map(entry -> {
+                    var card = entry.getValue();
+                    int quantity = card.quantity()
+                            - (baseline.containsKey(entry.getKey())
+                                    ? baseline.get(entry.getKey()).quantity()
+                                    : 0);
+                    return new DeckVersionSummary.CardChange(card.name(), card.link(), card.foilType(), quantity);
+                })
+                .sorted(Comparator.comparing((DeckVersionSummary.CardChange change) -> change.name())
+                        .thenComparing(change -> change.foilType().name()))
+                .toList();
+    }
+
+    private static DeckVersionSummary.CardChange versionCard(CardmarketDeckCard deckCard) {
+        var card = deckCard.getCard();
+        return new DeckVersionSummary.CardChange(
+                cardName(card.getLink()), card.getLink(), card.getFoilType(), deckCard.getQuantity());
     }
 
     private Map<String, CardmarketDeck> activeDecksByCurrentVersion() {

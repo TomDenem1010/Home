@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="tcg-page deck-versions" th:fragment="content" aria-label="Deck version history">
+    <a class="back-link" th:href="@{/tcg/version}">Back to decks</a>
+    <p th:if="${history.versions.empty}">There are no saved versions to display.</p>
+    <details class="version-entry" th:each="version, status : ${history.versions}">
+        <summary th:text="${version.version}">v1</summary>
+        <p th:if="${status.first}">Initial version: all cards are shown as additions.</p>
+        <div class="table-container">
+            <table class="version-changes">
+                <thead><tr><th scope="col" aria-label="Added cards">+</th><th scope="col" aria-label="Removed cards">−</th></tr></thead>
+                <tbody><tr>
+                    <td>
+                        <p th:if="${version.added.empty}">No additions.</p>
+                        <ul class="version-card-list"><li th:each="card : ${version.added}">
+                            <strong th:text="${card.quantity} + ' × '">1 × </strong><a class="card-link" th:href="${card.link}" th:text="${card.name}" target="_blank" rel="noopener noreferrer">Card</a>
+                            <span th:text="' (' + ${card.foilType} + ')'">(NO)</span>
+                        </li></ul>
+                    </td>
+                    <td>
+                        <p th:if="${version.removed.empty}">No removals.</p>
+                        <ul class="version-card-list"><li th:each="card : ${version.removed}">
+                            <strong th:text="${card.quantity} + ' × '">1 × </strong><a class="card-link" th:href="${card.link}" th:text="${card.name}" target="_blank" rel="noopener noreferrer">Card</a>
+                            <span th:text="' (' + ${card.foilType} + ')'">(NO)</span>
+                        </li></ul>
+                    </td>
+                </tr></tbody>
+            </table>
+        </div>
+    </details>
+</section>
+</body>
+</html>

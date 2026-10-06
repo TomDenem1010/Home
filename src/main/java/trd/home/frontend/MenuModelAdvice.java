@@ -45,6 +45,7 @@ public class MenuModelAdvice {
                                         SubmenuItem.Type.ACTION,
                                         tcg),
                                 new SubmenuItem("statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
+                                new SubmenuItem("versions", "/tcg/version", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("search card", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
                         "MEDIA",

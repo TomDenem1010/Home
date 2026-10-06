@@ -1,4 +1,15 @@
 .tcg-page .table-container { overflow-x: auto; }
+.version-entry { margin-top: 1.5rem; }
+.version-entry > summary { padding: .85rem 1rem; border: 1px solid #dce3ed; border-radius: .45rem; background: white; font-size: 1.15rem; font-weight: 700; cursor: pointer; }
+.version-entry > summary:hover { background: #f3f6fb; }
+.version-entry > summary:focus-visible { outline: 2px solid #2d6cdf; outline-offset: 2px; }
+.version-entry[open] > summary { margin-bottom: 1rem; }
+.tcg-page .version-changes { table-layout: fixed; max-width: 1200px; }
+.tcg-page .version-changes td, .tcg-page .version-changes th { width: 50%; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.tcg-page .version-changes th:first-child { background: #246444; }
+.tcg-page .version-changes th:last-child { background: #973b3b; }
+.version-card-list { margin: 0; padding: 0; list-style: none; }
+.version-card-list li { margin-bottom: .65rem; }
 .card-search-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); align-items: end; gap: 1rem; margin-bottom: 2rem; }
 .card-search-form label { display: grid; min-width: 0; gap: .45rem; }
 .card-search-form input, .card-search-form select, .card-search-form button { min-width: 0; padding: .7rem; border: 1px solid #b8c2d1; border-radius: .45rem; font: inherit; }
