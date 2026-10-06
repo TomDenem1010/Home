@@ -2,6 +2,7 @@ package trd.home.tcg.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -38,14 +39,20 @@ public class TcgService {
         return queries.getDeckVersionHistory(deckId);
     }
 
+    @LogMethodCall
+    @Cacheable(cacheNames = "tcg.card-foil-types")
     public CardFoilType[] getCardFoilTypes() {
         return CardFoilType.values();
     }
 
+    @LogMethodCall
+    @Cacheable(cacheNames = "tcg.card-game-types")
     public CardGameType[] getCardGameTypes() {
         return CardGameType.values();
     }
 
+    @LogMethodCall
+    @Cacheable(cacheNames = "tcg.card-price-types")
     public CardPriceType[] getCardPriceTypes() {
         return CardPriceType.values();
     }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class AuthService {
     }
 
     @LogMethodCall
+    @Cacheable(cacheNames = "auth.available-roles")
     public Set<UserRole> getAvailableRoles() {
         return operations.getAvailableRoles();
     }
