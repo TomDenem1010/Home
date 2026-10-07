@@ -15,7 +15,8 @@ import trd.home.media.constant.MediaStatus;
         uniqueConstraints =
                 @UniqueConstraint(
                         name = "uq_media_video_identity",
-                        columnNames = {"folder_id", "name", "actor_key"}))
+                        columnNames = {"folder_id", "name", "actor_key"}),
+        check = @CheckConstraint(name = "ck_media_video_status", constraint = "status IN ('ACTIVE', 'INACTIVE')"))
 @Getter
 @Setter
 public class Video extends AuditedEntity {
@@ -36,8 +37,12 @@ public class Video extends AuditedEntity {
     @ManyToMany
     @JoinTable(
             name = "media_video_actor",
-            joinColumns = @JoinColumn(name = "video_id"),
-            inverseJoinColumns = @JoinColumn(name = "actor_id"))
+            joinColumns = @JoinColumn(name = "video_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "actor_id", nullable = false),
+            uniqueConstraints =
+                    @UniqueConstraint(
+                            name = "pk_media_video_actor",
+                            columnNames = {"video_id", "actor_id"}))
     @NonNull
     private Set<Actor> actors = new HashSet<>();
 

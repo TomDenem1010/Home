@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -31,14 +32,22 @@ public class User extends AuditedEntity {
     @NonNull
     private String id;
 
+    @Column(nullable = false, unique = true)
     @NonNull
     private String username;
 
+    @Column(nullable = false)
     @NonNull
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "APPLICATION_USER_ROLE", joinColumns = @JoinColumn(name = "USER_ID"))
+    @CollectionTable(
+            name = "APPLICATION_USER_ROLE",
+            joinColumns = @JoinColumn(name = "USER_ID", nullable = false),
+            uniqueConstraints =
+                    @UniqueConstraint(
+                            name = "pk_application_user_role",
+                            columnNames = {"USER_ID", "ROLE"}))
     @Enumerated(EnumType.STRING)
     @Column(name = "ROLE", nullable = false, length = 32)
     @NonNull

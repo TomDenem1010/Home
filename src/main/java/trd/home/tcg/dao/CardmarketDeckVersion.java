@@ -1,6 +1,7 @@
 package trd.home.tcg.dao;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -18,7 +20,12 @@ import trd.home.common.dao.AuditedEntity;
 import trd.home.tcg.exception.WrongCardQuantityException;
 
 @Entity
-@Table(name = "cardmarket_deck_version")
+@Table(
+        name = "cardmarket_deck_version",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uq_deck_version",
+                        columnNames = {"deck_id", "version"}))
 @Getter
 @Setter
 public class CardmarketDeckVersion extends AuditedEntity {
@@ -33,6 +40,7 @@ public class CardmarketDeckVersion extends AuditedEntity {
     @NonNull
     private CardmarketDeck deck;
 
+    @Column(nullable = false)
     @NonNull
     private String version;
 

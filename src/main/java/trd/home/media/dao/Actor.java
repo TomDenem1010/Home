@@ -8,7 +8,9 @@ import trd.home.common.dao.AuditedEntity;
 import trd.home.media.constant.MediaStatus;
 
 @Entity
-@Table(name = "media_actor")
+@Table(
+        name = "media_actor",
+        check = @CheckConstraint(name = "ck_media_actor_status", constraint = "status IN ('ACTIVE', 'INACTIVE')"))
 @Getter
 @Setter
 public class Actor extends AuditedEntity {

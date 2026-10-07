@@ -8,7 +8,9 @@ import trd.home.common.dao.AuditedEntity;
 import trd.home.media.constant.MediaStatus;
 
 @Entity
-@Table(name = "media_folder")
+@Table(
+        name = "media_folder",
+        check = @CheckConstraint(name = "ck_media_folder_status", constraint = "status IN ('ACTIVE', 'INACTIVE')"))
 @Getter
 @Setter
 public class Folder extends AuditedEntity {

@@ -1,5 +1,6 @@
 package trd.home.tcg.dao;
 
+import jakarta.persistence.CheckConstraint;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,13 +10,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import trd.home.common.dao.AuditedEntity;
 
 @Entity
-@Table(name = "cardmarket_deck_version_card")
+@Table(
+        name = "cardmarket_deck_version_card",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uq_deck_version_card",
+                        columnNames = {"deck_version_id", "card_id"}),
+        check = @CheckConstraint(name = "ck_deck_version_card_quantity", constraint = "quantity > 0"))
 @Getter
 @Setter
 public class CardmarketDeckCard extends AuditedEntity {
