@@ -35,6 +35,7 @@ import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckCardPriceSummary;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.dto.DeckVersionSummary;
@@ -127,6 +128,40 @@ public class TcgQueryService {
         List<CardmarketDeckCard> deckCards = deckCardRepository.findAllByDeckVersionId(
                 deck.getCurrentVersion().getId());
         return summarizeHistory(deckId, cardPriceSummaries(deckCards));
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeckExcelData> getDeckExcelData() {
+        List<CardmarketDeck> decks = deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE);
+        Map<String, List<CardmarketDeckCard>> cardsByVersion = cardsByCurrentVersion(decks);
+        Map<String, CardSearchPrice> prices = latestSearchPrices(distinctCardIds(flattenDeckCards(cardsByVersion)));
+        return decks.stream()
+                .map(deck -> {
+                    var version = deck.getCurrentVersion();
+                    List<CardmarketDeckCard> cards =
+                            version == null ? List.of() : cardsByVersion.getOrDefault(version.getId(), List.of());
+                    return new DeckExcelData(
+                            deck.getName(),
+                            version == null ? "" : version.getVersion(),
+                            cards.stream()
+                                    .map(card -> excelCard(
+                                            card, prices.get(card.getCard().getId())))
+                                    .sorted(Comparator.comparing((DeckExcelData.Card card) -> card.link())
+                                            .thenComparing(
+                                                    card -> card.foilType().name()))
+                                    .toList());
+                })
+                .toList();
+    }
+
+    private static DeckExcelData.Card excelCard(CardmarketDeckCard deckCard, CardSearchPrice price) {
+        var card = deckCard.getCard();
+        return new DeckExcelData.Card(
+                deckCard.getQuantity(),
+                card.getLink(),
+                card.getFoilType(),
+                price == null ? null : price.fromInEuro(),
+                price == null ? null : price.trendInEuro());
     }
 
     private static List<DeckVersionSummary.CardChange> cardChanges(

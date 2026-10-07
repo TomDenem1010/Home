@@ -9,11 +9,18 @@
             <button type="submit">Refresh</button>
         </form>
     </article>
-    <article>
+    <article class="clear-decks">
         <h2>Clear decks</h2>
         <p>Permanently delete all saved decks, their versions and deck card entries in the background. Cards and their prices are kept.</p>
         <form th:action="@{/tcg/deck-operations/clear}" method="post">
             <button type="submit">Clear</button>
+        </form>
+    </article>
+    <article>
+        <h2>Export active decks</h2>
+        <p>Download an Excel workbook with current card prices, deck totals and a summary sheet.</p>
+        <form th:action="@{/tcg/deck-operations/export}" method="get">
+            <button type="submit">Download Excel</button>
         </form>
     </article>
 </section>

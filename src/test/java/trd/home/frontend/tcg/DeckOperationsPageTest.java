@@ -34,6 +34,11 @@ class DeckOperationsPageTest {
                 .getResponse()
                 .getContentAsString());
         assertEquals(2, html.select(".deck-operations form[method=post]").size());
+        assertEquals(3, html.select(".deck-operations button").size());
+        assertEquals(
+                "Download Excel",
+                html.selectFirst("form[action='/tcg/deck-operations/export'][method=get] button")
+                        .text());
         assertEquals(
                 "Refresh",
                 html.selectFirst("form[action='/tcg/deck-operations/refresh'] button")
@@ -51,6 +56,18 @@ class DeckOperationsPageTest {
                 .andExpect(redirectedUrl("/tcg/deck-operations"));
         verify(service).clearDecks();
         mvc.perform(get("/tcg/deck-operations/clear")).andExpect(status().isMethodNotAllowed());
+        byte[] workbook = {80, 75, 3, 4};
+        when(service.exportActiveDecks()).thenReturn(workbook);
+        mvc.perform(get("/tcg/deck-operations/export"))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                                "Content-Disposition",
+                                org.hamcrest.Matchers.matchesPattern(
+                                        "attachment; filename=\"active-decks_[0-9]{14}\\.xlsx\"")))
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(content().contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .andExpect(content().bytes(workbook));
+        verify(service).exportActiveDecks();
         verifyNoMoreInteractions(service);
     }
 }

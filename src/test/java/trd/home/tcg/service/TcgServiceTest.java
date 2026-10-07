@@ -22,9 +22,11 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.exception.InvalidCardSearchFilterException;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
+import trd.home.tcg.service.excel.DeckExcelExportService;
 import trd.home.tcg.validator.CardSearchFilterValidator;
 import trd.home.tcg.validator.CardSearchPagingValidator;
 import trd.home.tcg.validator.CardSearchPriceValidator;
@@ -34,7 +36,20 @@ class TcgServiceTest {
     private final TcgCommandService commands = mock(TcgCommandService.class);
     private final TcgQueryService queries = mock(TcgQueryService.class);
     private final CardSearchFilterValidator validator = mock(CardSearchFilterValidator.class);
-    private final TcgService service = new TcgService(commands, queries, List.of(validator));
+    private final DeckExcelExportService exporter = mock(DeckExcelExportService.class);
+    private final TcgService service = new TcgService(commands, queries, List.of(validator), exporter);
+
+    @Test
+    void exportsActiveDeckDataThroughExcelService() {
+        var decks = List.of(new DeckExcelData("Deck", "v1", List.of()));
+        byte[] content = {1, 2, 3};
+        when(queries.getDeckExcelData()).thenReturn(decks);
+        when(exporter.export(decks)).thenReturn(content);
+        assertSame(content, service.exportActiveDecks());
+        var order = inOrder(queries, exporter);
+        order.verify(queries).getDeckExcelData();
+        order.verify(exporter).export(decks);
+    }
 
     @Test
     void providesEnumValuesForSearchForm() {
@@ -57,7 +72,7 @@ class TcgServiceTest {
 
     @Test
     void invalidFilterPreventsQuery() {
-        var validatingService = new TcgService(commands, queries, List.of(new CardSearchPriceValidator()));
+        var validatingService = new TcgService(commands, queries, List.of(new CardSearchPriceValidator()), exporter);
         var filter = new CardSearchFilter(null, null, null, new BigDecimal("-1"), null, null);
         assertThrows(
                 InvalidCardSearchFilterException.class,
@@ -68,7 +83,7 @@ class TcgServiceTest {
     @Test
     void invalidPagingPreventsQuery() {
         var validatingService = new TcgService(
-                commands, queries, List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()));
+                commands, queries, List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()), exporter);
         var filter = new CardSearchFilter(null, null, null, null, null, null);
         for (int[] paging : List.of(new int[] {-1, 50}, new int[] {0, 0}, new int[] {0, 201})) {
             assertThrows(
