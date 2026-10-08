@@ -40,6 +40,23 @@ class PlaywrightBrowserSessionTest {
     }
 
     @Test
+    void closesPlaywrightEvenWhenBrowserCloseFails() {
+        var playwright = Mockito.mock(Playwright.class);
+        var chromium = Mockito.mock(BrowserType.class);
+        var browser = Mockito.mock(Browser.class);
+        var failure = new IllegalStateException("Browser close failed");
+        when(playwright.chromium()).thenReturn(chromium);
+        when(chromium.connectOverCDP("endpoint")).thenReturn(browser);
+        Mockito.doThrow(failure).when(browser).close();
+        try (var factory = mockStatic(Playwright.class)) {
+            factory.when(Playwright::create).thenReturn(playwright);
+            var session = new PlaywrightBrowserSession("endpoint");
+            assertSame(failure, assertThrows(IllegalStateException.class, session::close));
+            verify(playwright).close();
+        }
+    }
+
+    @Test
     void closesPlaywrightWhenBrowserConnectionFails() {
         Playwright playwright = Mockito.mock(Playwright.class);
         BrowserType chromium = Mockito.mock(BrowserType.class);

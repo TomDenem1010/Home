@@ -40,6 +40,17 @@ class TcgServiceTest {
     private final TcgService service = new TcgService(commands, queries, List.of(validator), exporter);
 
     @Test
+    void returnsVersionDecksAndSelectedDeckHistory() {
+        var decks = List.of(new trd.home.tcg.dto.DeckVersionListItem("id", "Deck"));
+        var history = new trd.home.tcg.dto.DeckVersionHistory("Deck", List.of());
+        when(queries.getVersionDecks()).thenReturn(decks);
+        when(queries.getDeckVersionHistory("id")).thenReturn(history);
+        assertSame(decks, service.getVersionDecks());
+        assertSame(history, service.getDeckVersionHistory("id"));
+        verify(queries).getDeckVersionHistory("id");
+    }
+
+    @Test
     void exportsActiveDeckDataThroughExcelService() {
         var decks = List.of(new DeckExcelData("Deck", "v1", List.of()));
         byte[] content = {1, 2, 3};

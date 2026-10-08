@@ -247,6 +247,72 @@ class DeckExcelExportServiceTest {
         verifyNoInteractions(summarySheets);
     }
 
+    @Test
+    void appliesEuroStylesToBothSummaryPriceColumns() throws Exception {
+        try (var workbook = read(List.of(new DeckExcelData("Deck", "v1", List.of())))) {
+            for (int column : new int[] {1, 2}) {
+                assertEquals(
+                        "#,##0.00",
+                        workbook.getSheetAt(0)
+                                .getRow(1)
+                                .getCell(column)
+                                .getCellStyle()
+                                .getDataFormatString());
+            }
+        }
+    }
+
+    @Test
+    void incrementsSheetSuffixForRepeatedShortAndTruncatedNames() throws Exception {
+        var names = List.of("Deck", "Deck", "Deck", "x".repeat(40), "x".repeat(40), "x".repeat(40));
+        try (var workbook = read(
+                names.stream().map(n -> new DeckExcelData(n, "v1", List.of())).toList())) {
+            assertEquals("Deck (2)", workbook.getSheetName(2));
+            assertEquals("Deck (3)", workbook.getSheetName(3));
+            assertEquals("x".repeat(27) + " (2)", workbook.getSheetName(5));
+            assertEquals("x".repeat(27) + " (3)", workbook.getSheetName(6));
+        }
+    }
+
+    @Test
+    void activatesSummaryEvenWhenDeckPopulationChangesActiveSheet() throws Exception {
+        var deckSheets = spy(new DeckExcelSheetService(tables));
+        doAnswer(invocation -> {
+                    var summary = (DeckExcelSheetService.SheetSummary) invocation.callRealMethod();
+                    XSSFWorkbook workbook = invocation.getArgument(0);
+                    workbook.setActiveSheet(workbook.getNumberOfSheets() - 1);
+                    return summary;
+                })
+                .when(deckSheets)
+                .create(any(), any());
+        var service = new DeckExcelExportService(deckSheets, new DeckExcelSummarySheetService(tables), tables);
+        try (var workbook = new XSSFWorkbook(
+                new ByteArrayInputStream(service.export(List.of(new DeckExcelData("Deck", "v1", List.of())))))) {
+            assertEquals(0, workbook.getActiveSheetIndex());
+        }
+    }
+
+    @Test
+    void wrapsWorkbookWriteFailureAndPreservesCause() {
+        var failure = new java.io.IOException("Write failed");
+        try (var workbooks = mockConstruction(XSSFWorkbook.class, (workbook, context) -> {
+            when(workbook.createSheet("Summary")).thenReturn(mock(XSSFSheet.class));
+            when(workbook.getCreationHelper())
+                    .thenReturn(mock(org.apache.poi.xssf.usermodel.XSSFCreationHelper.class, RETURNS_DEEP_STUBS));
+            doThrow(failure).when(workbook).write(any(java.io.OutputStream.class));
+        })) {
+            var service = new DeckExcelExportService(
+                    mock(DeckExcelSheetService.class), mock(DeckExcelSummarySheetService.class), tables);
+            var exception = assertThrows(
+                    trd.home.tcg.exception.DeckExcelExportException.class, () -> service.export(List.of()));
+            assertSame(failure, exception.getCause());
+            assertEquals("Unable to export active decks to Excel", exception.getMessage());
+            verify(workbooks.constructed().getFirst()).close();
+        } catch (java.io.IOException exception) {
+            throw new AssertionError(exception);
+        }
+    }
+
     private XSSFWorkbook read(List<DeckExcelData> decks) throws Exception {
         return new XSSFWorkbook(new ByteArrayInputStream(exporter.export(decks)));
     }

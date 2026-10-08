@@ -109,6 +109,22 @@ class DeckExcelQueryTest {
         verifyNoInteractions(deckCards, cards, prices);
     }
 
+    @Test
+    void ordersEqualLinksByFoilType() {
+        var deck = deck("Deck", "version", "v1");
+        var normal = card(deck, "normal", "https://example.test/Card", 1, CardFoilType.NO);
+        var foil = card(deck, "foil", "https://example.test/Card", 2, CardFoilType.FOIL);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        when(deckCards.findAllByDeckVersionIdIn(List.of("version"))).thenReturn(List.of(normal, foil));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(i -> Stream.empty());
+        assertEquals(
+                List.of(CardFoilType.FOIL, CardFoilType.NO),
+                service.getDeckExcelData().getFirst().cards().stream()
+                        .map(c -> c.foilType())
+                        .toList());
+    }
+
     private static CardmarketDeck deck(String name, String versionId, String versionName) {
         var deck = new CardmarketDeck();
         deck.setName(name);

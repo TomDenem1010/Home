@@ -74,6 +74,47 @@ class DeckVersionQueryTest {
         assertTrue(queries.getDeckVersionHistory("empty").versions().isEmpty());
     }
 
+    @Test
+    void listsActiveDeckIdsAndNamesInRepositoryOrder() {
+        var first = new CardmarketDeck();
+        first.setId("a");
+        first.setName("Alpha");
+        var second = new CardmarketDeck();
+        second.setId("b");
+        second.setName("Beta");
+        when(decks.findAllByStatusOrderByName(trd.home.tcg.constant.DeckStatus.ACTIVE))
+                .thenReturn(List.of(first, second));
+        assertEquals(
+                List.of(
+                        new trd.home.tcg.dto.DeckVersionListItem("a", "Alpha"),
+                        new trd.home.tcg.dto.DeckVersionListItem("b", "Beta")),
+                queries.getVersionDecks());
+        assertEquals("Alpha", queries.getVersionDecks().getFirst().name());
+    }
+
+    @Test
+    void ordersChangesByNameThenFoilAndPreservesLinks() {
+        var deck = new CardmarketDeck();
+        deck.setId("deck");
+        var version = version(deck, "v1");
+        var normal = card("normal", "Alpha", CardFoilType.NO);
+        var foil = card("foil", "Alpha", CardFoilType.FOIL);
+        var beta = card("beta", "Beta", CardFoilType.FOIL);
+        version.addCard(beta, 1);
+        version.addCard(normal, 2);
+        version.addCard(foil, 3);
+        when(decks.findById("deck")).thenReturn(Optional.of(deck));
+        when(cards.findAllByDeckVersionIdIn(List.of("v1"))).thenReturn(List.copyOf(version.getCards()));
+        var added = queries.getDeckVersionHistory("deck").versions().getFirst().added();
+        assertEquals(
+                List.of("Alpha", "Alpha", "Beta"),
+                added.stream().map(c -> c.name()).toList());
+        assertEquals(
+                List.of(CardFoilType.FOIL, CardFoilType.NO, CardFoilType.FOIL),
+                added.stream().map(c -> c.foilType()).toList());
+        assertEquals(foil.getLink(), added.getFirst().link());
+    }
+
     private static CardmarketCard card(String id, String name, CardFoilType foilType) {
         var card = new CardmarketCard();
         card.setId(id);

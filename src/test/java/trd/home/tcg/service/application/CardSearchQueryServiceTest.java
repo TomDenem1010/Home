@@ -178,8 +178,8 @@ class CardSearchQueryServiceTest {
     void sortsEverySearchColumnInBothDirections() {
         var aDeck = deck("a", "Zulu");
         var bDeck = deck("b", "Alpha");
-        var a = card("a", "Magic", "Zulu", CardFoilType.NO);
-        var b = card("b", "Magic", "Alpha", CardFoilType.FOIL);
+        var a = card("a", "Magic", "Alpha", CardFoilType.NO);
+        var b = card("b", "Magic", "Zulu", CardFoilType.FOIL);
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(aDeck, bDeck));
         when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(aDeck, a, 3), holding(bDeck, b, 1)));
         when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
@@ -191,8 +191,9 @@ class CardSearchQueryServiceTest {
                 var result = service.searchCards(
                         new CardSearchFilter(null, null, null, null, null, null),
                         PageRequest.of(0, 10, Sort.by(new Sort.Order(direction, column))));
+                boolean aFirst = column.equals("name") == (direction == Sort.Direction.ASC);
                 assertEquals(
-                        direction == Sort.Direction.ASC ? List.of("b", "a") : List.of("a", "b"),
+                        aFirst ? List.of("a", "b") : List.of("b", "a"),
                         result.getContent().stream().map(value -> value.id()).toList(),
                         column + direction);
             }
@@ -260,6 +261,36 @@ class CardSearchQueryServiceTest {
                 result.getContent().getFirst().decks().stream()
                         .map(deck -> deck.id())
                         .toList());
+    }
+
+    @Test
+    void sortsWithoutExplicitOrderByNameAndResolvesEqualValuesByCardId() {
+        var deck = deck("deck", "Deck");
+        var z = card("a", "Magic", "Zulu", CardFoilType.NO);
+        var a = card("p", "Magic", "Alpha", CardFoilType.NO);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        when(deckCards.findAll(anySpecification())).thenReturn(List.of(holding(deck, z, 1), holding(deck, a, 1)));
+        when(prices.findAllByCardIdInOrderByCreatedAtDescIdDesc(anyCollection()))
+                .thenAnswer(i -> Stream.empty());
+        var filter = new CardSearchFilter(null, null, null, null, null, null);
+        assertEquals(
+                List.of("p", "a"),
+                service.searchCards(filter, PageRequest.of(0, 10)).getContent().stream()
+                        .map(c -> c.id())
+                        .toList());
+        for (String column : List.of("foilType", "quantity", "priceFrom", "priceTrend", "decks")) {
+            assertEquals(
+                    List.of("a", "p"),
+                    service
+                            .searchCards(
+                                    filter,
+                                    PageRequest.of(0, 10, Sort.by(column).descending()))
+                            .getContent()
+                            .stream()
+                            .map(c -> c.id())
+                            .toList(),
+                    column);
+        }
     }
 
     private static Specification<CardmarketDeckCard> anySpecification() {

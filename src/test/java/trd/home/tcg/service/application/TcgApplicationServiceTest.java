@@ -173,6 +173,18 @@ class TcgApplicationServiceTest {
                         .toList());
     }
 
+    @Test
+    void treatsCardsWithoutPricesAsZeroInDeckTotals() {
+        var deck = deck("id", "Deck", "v");
+        var card = card("unpriced", "https://example.test/Card");
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        when(deckCards.findAllByDeckVersionIdIn(List.of("v")))
+                .thenReturn(List.of(deckCard(deck.getCurrentVersion(), card, 4)));
+        var summary = service().getDeckPriceSummary().getFirst();
+        assertEquals(BigDecimal.ZERO, summary.sumFromInEuro());
+        assertEquals(BigDecimal.ZERO, summary.sumTrendInEuro());
+    }
+
     private TcgQueryService service() {
         return new TcgQueryService(decks, deckCards, cards, prices);
     }
