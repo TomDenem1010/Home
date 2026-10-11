@@ -33,20 +33,29 @@ class DeckOperationsPageTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString());
-        assertEquals(2, html.select(".deck-operations form[method=post]").size());
-        assertEquals(3, html.select(".deck-operations button").size());
+        assertEquals(3, html.select(".deck-operations form[method=post]").size());
+        assertEquals(4, html.select(".deck-operations button").size());
         assertEquals(
                 "Download Excel",
                 html.selectFirst("form[action='/tcg/deck-operations/export'][method=get] button")
                         .text());
         assertEquals(
-                "Refresh",
+                "Save CSV",
                 html.selectFirst("form[action='/tcg/deck-operations/refresh'] button")
                         .text());
         assertEquals(
                 "Clear",
                 html.selectFirst("form[action='/tcg/deck-operations/clear'] button")
                         .text());
+        assertEquals(
+                "Save XLSX",
+                html.selectFirst("form[action='/tcg/deck-operations/save-decks-from-xlsx'] button")
+                        .text());
+        assertTrue(html.select("input[type=file]").isEmpty());
+        mvc.perform(post("/tcg/deck-operations/save-decks-from-xlsx"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/tcg/deck-operations"));
+        verify(service).importDecksFromXlsx();
         mvc.perform(post("/tcg/deck-operations/refresh"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/tcg/deck-operations"));

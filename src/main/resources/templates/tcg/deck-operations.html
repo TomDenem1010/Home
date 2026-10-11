@@ -3,10 +3,17 @@
 <body>
 <section class="tcg-page deck-operations" th:fragment="content" aria-label="Deck operations">
     <article>
-        <h2>Refresh decks</h2>
-        <p>Read deck resource files again in the background.</p>
+        <h2>Save decks from CSV</h2>
+        <p>Read CSV deck files from the configured resource path in the background.</p>
         <form th:action="@{/tcg/deck-operations/refresh}" method="post">
-            <button type="submit">Refresh</button>
+            <button type="submit">Save CSV</button>
+        </form>
+    </article>
+    <article>
+        <h2>Save decks from XLSX</h2>
+        <p>Read XLSX deck files from the configured resource path in the background.</p>
+        <form th:action="@{/tcg/deck-operations/save-decks-from-xlsx}" method="post">
+            <button type="submit">Save XLSX</button>
         </form>
     </article>
     <article class="clear-decks">

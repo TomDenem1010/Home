@@ -82,6 +82,12 @@ public class TcgFrontendController {
         return "redirect:/tcg/deck-operations";
     }
 
+    @PostMapping("/deck-operations/save-decks-from-xlsx")
+    public String importDecksFromXlsx() {
+        tcgService.importDecksFromXlsx();
+        return "redirect:/tcg/deck-operations";
+    }
+
     @PostMapping("/deck-operations/clear")
     public String clearDecks() {
         tcgService.clearDecks();

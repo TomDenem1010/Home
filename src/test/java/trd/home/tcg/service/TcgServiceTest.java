@@ -24,6 +24,7 @@ import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.exception.InvalidCardSearchFilterException;
+import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
 import trd.home.tcg.service.excel.DeckExcelExportService;
@@ -37,7 +38,8 @@ class TcgServiceTest {
     private final TcgQueryService queries = mock(TcgQueryService.class);
     private final CardSearchFilterValidator validator = mock(CardSearchFilterValidator.class);
     private final DeckExcelExportService exporter = mock(DeckExcelExportService.class);
-    private final TcgService service = new TcgService(commands, queries, List.of(validator), exporter);
+    private final DeckExcelImportService xlsxSaves = mock(DeckExcelImportService.class);
+    private final TcgService service = new TcgService(commands, queries, List.of(validator), exporter, xlsxSaves);
 
     @Test
     void returnsVersionDecksAndSelectedDeckHistory() {
@@ -63,6 +65,12 @@ class TcgServiceTest {
     }
 
     @Test
+    void queuesXlsxImport() {
+        service.importDecksFromXlsx();
+        verify(xlsxSaves).importDecks();
+    }
+
+    @Test
     void providesEnumValuesForSearchForm() {
         assertArrayEquals(CardFoilType.values(), service.getCardFoilTypes());
         assertArrayEquals(CardGameType.values(), service.getCardGameTypes());
@@ -83,7 +91,8 @@ class TcgServiceTest {
 
     @Test
     void invalidFilterPreventsQuery() {
-        var validatingService = new TcgService(commands, queries, List.of(new CardSearchPriceValidator()), exporter);
+        var validatingService =
+                new TcgService(commands, queries, List.of(new CardSearchPriceValidator()), exporter, xlsxSaves);
         var filter = new CardSearchFilter(null, null, null, new BigDecimal("-1"), null, null);
         assertThrows(
                 InvalidCardSearchFilterException.class,
@@ -94,7 +103,11 @@ class TcgServiceTest {
     @Test
     void invalidPagingPreventsQuery() {
         var validatingService = new TcgService(
-                commands, queries, List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()), exporter);
+                commands,
+                queries,
+                List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()),
+                exporter,
+                xlsxSaves);
         var filter = new CardSearchFilter(null, null, null, null, null, null);
         for (int[] paging : List.of(new int[] {-1, 50}, new int[] {0, 0}, new int[] {0, 201})) {
             assertThrows(

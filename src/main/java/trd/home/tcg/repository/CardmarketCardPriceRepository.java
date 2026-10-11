@@ -13,6 +13,8 @@ import trd.home.tcg.dto.CardSearchPrice;
 
 public interface CardmarketCardPriceRepository extends JpaRepository<CardmarketCardPrice, String> {
 
+    Optional<CardmarketCardPrice> findByCardId(String cardId);
+
     void deleteAllByCardIdIn(Collection<String> cardIds);
 
     @QueryHints(@QueryHint(name = "org.hibernate.fetchSize", value = "500"))
