@@ -17,6 +17,7 @@ import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
+import trd.home.tcg.service.application.DeckCsvImportService;
 import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
@@ -32,6 +33,7 @@ public class TcgService {
     private final List<CardSearchFilterValidator> cardSearchFilterValidators;
     private final DeckExcelExportService deckExcelExportService;
     private final DeckExcelImportService deckExcelImportService;
+    private final DeckCsvImportService deckCsvImportService;
 
     @LogMethodCall
     public void importDecksFromXlsx() {
@@ -80,8 +82,8 @@ public class TcgService {
     }
 
     @LogMethodCall
-    public void saveDecksFromResource() {
-        commands.saveDecksFromResource(null);
+    public void importDecksFromCsv() {
+        deckCsvImportService.importDecks(null);
     }
 
     @LogMethodCall
@@ -90,8 +92,8 @@ public class TcgService {
     }
 
     @LogMethodCall
-    public void saveDeckFromResource(String deckId) {
-        commands.saveDecksFromResource(deckId);
+    public void importDeckFromCsv(String deckId) {
+        deckCsvImportService.importDecks(deckId);
     }
 
     @LogMethodCall

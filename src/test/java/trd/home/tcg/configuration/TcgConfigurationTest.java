@@ -12,14 +12,14 @@ class TcgConfigurationTest {
     void createsTcgBeans() {
         assertNotNull(configuration.cardSearchPagingValidator());
         assertNotNull(configuration.cardSearchPriceValidator());
-        var encodingValidator = configuration.resourceDeckEncodingValidator();
-        var nameValidator = configuration.resourceDeckNameValidator();
-        var cardValidator = configuration.resourceDeckCardValidator();
+        var encodingValidator = configuration.csvDeckEncodingValidator();
+        var nameValidator = configuration.csvDeckNameValidator();
+        var cardValidator = configuration.csvDeckCardValidator();
 
         assertNotNull(encodingValidator);
         assertNotNull(nameValidator);
         assertNotNull(cardValidator);
-        assertNotNull(configuration.deckFileReader(
+        assertNotNull(configuration.deckCsvFileReader(
                 encodingValidator, nameValidator, cardValidator, "classpath*:tcg/deck/*.csv"));
     }
 }

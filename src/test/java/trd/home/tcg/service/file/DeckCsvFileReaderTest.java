@@ -17,13 +17,13 @@ import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dao.CardmarketDeck;
 
-class DeckFileReaderTest {
+class DeckCsvFileReaderTest {
 
     @Test
     void validatesResourceAndIgnoresBlankLines() {
         ResourceValidator validator = mock(ResourceValidator.class);
         Resource resource = resource("1,https://www.cardmarket.com/card,FOIL\n\n");
-        DeckFileReader reader = new TestDeckFileReader(List.of(validator), resource);
+        DeckCsvFileReader reader = new TestDeckCsvFileReader(List.of(validator), resource);
 
         List<CardmarketDeck> decks = reader.read();
 
@@ -42,7 +42,7 @@ class DeckFileReaderTest {
     @Test
     void parsesFoilTypeCaseInsensitively() {
         Resource resource = resource("1,https://www.cardmarket.com/card,foil\n");
-        DeckFileReader reader = new TestDeckFileReader(List.of(), resource);
+        DeckCsvFileReader reader = new TestDeckCsvFileReader(List.of(), resource);
 
         CardmarketDeck deck = reader.read().getFirst();
 
@@ -63,7 +63,7 @@ class DeckFileReaderTest {
                 return "TestDeck_v1.csv";
             }
         };
-        DeckFileReader reader = new TestDeckFileReader(List.of(), resource);
+        DeckCsvFileReader reader = new TestDeckCsvFileReader(List.of(), resource);
 
         assertThrows(ResourceReadException.class, () -> reader.read());
     }
@@ -77,11 +77,11 @@ class DeckFileReaderTest {
         };
     }
 
-    private static class TestDeckFileReader extends DeckFileReader {
+    private static class TestDeckCsvFileReader extends DeckCsvFileReader {
 
         private final List<Resource> resources;
 
-        TestDeckFileReader(List<ResourceValidator> validators, Resource... resources) {
+        TestDeckCsvFileReader(List<ResourceValidator> validators, Resource... resources) {
             super("file:/mounted/decks/*.csv", validators);
             this.resources = List.of(resources);
         }

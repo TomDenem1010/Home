@@ -43,7 +43,7 @@ class ApplicationEventTest {
 
     @Test
     void marksFailedEventAsError() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
 
         event.markProcessing();
         event.markFailed(new IllegalStateException("Unable to process event"));

@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test;
 import trd.home.common.constant.EventType;
 import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.event.ApplicationEventQueue;
-import trd.home.tcg.service.event.SaveDecksFromResourceService;
+import trd.home.tcg.service.event.ImportDecksFromCsvService;
 
-class SaveDecksFromResourceSchedulerTest {
+class ImportDecksFromCsvSchedulerTest {
 
     private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
-    private final SaveDecksFromResourceService service = mock(SaveDecksFromResourceService.class);
-    private final SaveDecksFromResourceScheduler scheduler = new SaveDecksFromResourceScheduler(eventQueue, service);
+    private final ImportDecksFromCsvService service = mock(ImportDecksFromCsvService.class);
+    private final ImportDecksFromCsvScheduler scheduler = new ImportDecksFromCsvScheduler(eventQueue, service);
 
     @Test
     void delegatesOldestPendingEventToService() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
-        when(eventQueue.claimNext(EventType.SAVE_DECKS_FROM_RESOURCE)).thenReturn(Optional.of(event));
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
+        when(eventQueue.claimNext(EventType.IMPORT_DECKS_FROM_CSV)).thenReturn(Optional.of(event));
 
         scheduler.processNextEvent();
 

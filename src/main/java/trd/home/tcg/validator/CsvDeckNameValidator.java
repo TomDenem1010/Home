@@ -5,7 +5,7 @@ import org.springframework.core.io.Resource;
 import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.exception.WrongDeckNameException;
 
-public class ResourceDeckNameValidator implements ResourceValidator {
+public class CsvDeckNameValidator implements ResourceValidator {
 
     @Override
     public void validateResource(Resource resource) {

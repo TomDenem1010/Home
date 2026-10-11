@@ -76,13 +76,13 @@ public class TcgFrontendController {
                 .body(tcgService.exportActiveDecks());
     }
 
-    @PostMapping({"/save-decks-from-resource", "/deck-operations/refresh"})
-    public String saveDecksFromResource() {
-        tcgService.saveDecksFromResource();
+    @PostMapping("/deck-operations/import-decks-from-csv")
+    public String importDecksFromCsv() {
+        tcgService.importDecksFromCsv();
         return "redirect:/tcg/deck-operations";
     }
 
-    @PostMapping("/deck-operations/save-decks-from-xlsx")
+    @PostMapping("/deck-operations/import-decks-from-xlsx")
     public String importDecksFromXlsx() {
         tcgService.importDecksFromXlsx();
         return "redirect:/tcg/deck-operations";
@@ -94,9 +94,9 @@ public class TcgFrontendController {
         return "redirect:/tcg/deck-operations";
     }
 
-    @PostMapping("/decks/{deckId}/reload")
-    public String reloadDeck(@PathVariable String deckId) {
-        tcgService.saveDeckFromResource(deckId);
+    @PostMapping("/decks/{deckId}/import-csv")
+    public String importDeckFromCsv(@PathVariable String deckId) {
+        tcgService.importDeckFromCsv(deckId);
         return "redirect:/tcg/statistics";
     }
 

@@ -8,33 +8,33 @@ import trd.home.common.event.ApplicationEventProcessor;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.exception.DeckImportException;
 import trd.home.tcg.repository.CardmarketDeckRepository;
-import trd.home.tcg.service.deck.CardmarketDeckSaver;
-import trd.home.tcg.service.file.DeckFileReader;
+import trd.home.tcg.service.deck.DeckCsvSaver;
+import trd.home.tcg.service.file.DeckCsvFileReader;
 
 @Service
 @RequiredArgsConstructor
-public class SaveDecksFromResourceService {
+public class ImportDecksFromCsvService {
 
-    private static final String SUCCESS_MESSAGE = "Decks were saved successfully.";
-    private static final String FAILURE_MESSAGE_PREFIX = "Failed to save decks: ";
+    private static final String SUCCESS_MESSAGE = "CSV deck importing completed successfully.";
+    private static final String FAILURE_MESSAGE_PREFIX = "Failed to import CSV decks: ";
 
     private final ApplicationEventProcessor eventProcessor;
-    private final CardmarketDeckSaver deckSaver;
-    private final DeckFileReader deckFileReader;
+    private final DeckCsvSaver deckSaver;
+    private final DeckCsvFileReader deckCsvFileReader;
     private final CardmarketDeckRepository deckRepository;
 
     public void process(ApplicationEvent event) {
         eventProcessor.process(
                 event,
                 () -> {
-                    saveDecks(selectedDecks(event.getMessage()));
+                    importDecks(selectedDecks(event.getMessage()));
                     return SUCCESS_MESSAGE;
                 },
                 FAILURE_MESSAGE_PREFIX);
     }
 
     private List<CardmarketDeck> selectedDecks(String deckId) {
-        List<CardmarketDeck> decks = deckFileReader.read();
+        List<CardmarketDeck> decks = deckCsvFileReader.read();
         if (deckId == null || deckId.isBlank()) {
             return decks;
         }
@@ -46,18 +46,18 @@ public class SaveDecksFromResourceService {
         List<CardmarketDeck> selectedDecks =
                 decks.stream().filter(deck -> deck.getName().equals(deckName)).toList();
         if (selectedDecks.isEmpty()) {
-            throw new DeckImportException("No resource file found for deck: " + deckName);
+            throw new DeckImportException("No CSV file found for deck: " + deckName);
         }
         return selectedDecks;
     }
 
-    private void saveDecks(List<CardmarketDeck> decks) {
+    private void importDecks(List<CardmarketDeck> decks) {
         try {
             for (CardmarketDeck deck : decks) {
                 deckSaver.save(deck);
             }
         } catch (RuntimeException exception) {
-            throw new DeckImportException("Unable to save decks from resource", exception);
+            throw new DeckImportException("Unable to import decks from CSV", exception);
         }
     }
 }

@@ -14,9 +14,9 @@ import org.springframework.core.io.ByteArrayResource;
 import trd.home.common.exception.ResourceReadException;
 import trd.home.tcg.exception.WrongDeckEncodingException;
 
-class ResourceDeckEncodingValidatorTest {
+class CsvDeckEncodingValidatorTest {
 
-    private final ResourceDeckEncodingValidator validator = new ResourceDeckEncodingValidator();
+    private final CsvDeckEncodingValidator validator = new CsvDeckEncodingValidator();
 
     @Test
     void acceptsValidUtf8Content() {

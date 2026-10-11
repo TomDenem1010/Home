@@ -22,40 +22,40 @@ import trd.home.common.event.FrontendNotificationPublisher;
 import trd.home.common.event.FrontendNotificationType;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.repository.CardmarketDeckRepository;
-import trd.home.tcg.service.deck.CardmarketDeckSaver;
-import trd.home.tcg.service.file.DeckFileReader;
+import trd.home.tcg.service.deck.DeckCsvSaver;
+import trd.home.tcg.service.file.DeckCsvFileReader;
 
-class SaveDecksFromResourceServiceTest {
+class ImportDecksFromCsvServiceTest {
     @Test
     void reportsWrappedDeckSaveFailure() {
         var deck = new CardmarketDeck();
-        when(deckFileReader.read()).thenReturn(List.of(deck));
+        when(deckCsvFileReader.read()).thenReturn(List.of(deck));
         Mockito.doThrow(new IllegalStateException("save failed"))
                 .when(deckSaver)
                 .save(deck);
-        var event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        var event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
         service.process(event);
         assertEquals(EventStatus.ERROR, event.getStatus());
-        assertEquals("Unable to save decks from resource", event.getErrorMessage());
+        assertEquals("Unable to import decks from CSV", event.getErrorMessage());
     }
 
     private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
-    private final CardmarketDeckSaver deckSaver = mock(CardmarketDeckSaver.class);
-    private final DeckFileReader deckFileReader = mock(DeckFileReader.class);
+    private final DeckCsvSaver deckSaver = mock(DeckCsvSaver.class);
+    private final DeckCsvFileReader deckCsvFileReader = mock(DeckCsvFileReader.class);
     private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
     private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final SaveDecksFromResourceService service = new SaveDecksFromResourceService(
+    private final ImportDecksFromCsvService service = new ImportDecksFromCsvService(
             new ApplicationEventProcessor(eventQueue, notificationPublisher),
             deckSaver,
-            deckFileReader,
+            deckCsvFileReader,
             deckRepository);
 
     @Test
-    void readsAndSavesEveryResourceDeck() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+    void readsAndImportsEveryCsvDeck() {
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
         CardmarketDeck firstDeck = new CardmarketDeck();
         CardmarketDeck secondDeck = new CardmarketDeck();
-        when(deckFileReader.read()).thenReturn(List.of(firstDeck, secondDeck));
+        when(deckCsvFileReader.read()).thenReturn(List.of(firstDeck, secondDeck));
 
         service.process(event);
 
@@ -63,16 +63,17 @@ class SaveDecksFromResourceServiceTest {
         order.verify(deckSaver).save(firstDeck);
         order.verify(deckSaver).save(secondDeck);
         assertEquals(EventStatus.DONE, event.getStatus());
-        verify(notificationPublisher).publish(null, FrontendNotificationType.SUCCESS, "Decks were saved successfully.");
+        verify(notificationPublisher)
+                .publish(null, FrontendNotificationType.SUCCESS, "CSV deck importing completed successfully.");
     }
 
     @Test
     void savesOnlyTheResourceMatchingTheSelectedDeck() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "selected-id");
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV, "selected-id");
         CardmarketDeck selected = deck("Selected");
         CardmarketDeck other = deck("Other");
         when(deckRepository.findById("selected-id")).thenReturn(Optional.of(deck("Selected")));
-        when(deckFileReader.read()).thenReturn(List.of(other, selected));
+        when(deckCsvFileReader.read()).thenReturn(List.of(other, selected));
 
         service.process(event);
 
@@ -83,22 +84,23 @@ class SaveDecksFromResourceServiceTest {
 
     @Test
     void failsWhenSelectedDeckDoesNotExist() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "missing-id");
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV, "missing-id");
         when(deckRepository.findById("missing-id")).thenReturn(Optional.empty());
-        when(deckFileReader.read()).thenReturn(List.of());
+        when(deckCsvFileReader.read()).thenReturn(List.of());
 
         service.process(event);
 
         assertEquals(EventStatus.ERROR, event.getStatus());
         verify(notificationPublisher)
-                .publish(null, FrontendNotificationType.ERROR, "Failed to save decks: Deck not found: missing-id");
+                .publish(
+                        null, FrontendNotificationType.ERROR, "Failed to import CSV decks: Deck not found: missing-id");
     }
 
     @Test
     void failsWhenSelectedDeckHasNoResourceFile() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE, "selected-id");
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV, "selected-id");
         when(deckRepository.findById("selected-id")).thenReturn(Optional.of(deck("Selected")));
-        when(deckFileReader.read()).thenReturn(List.of(deck("Other")));
+        when(deckCsvFileReader.read()).thenReturn(List.of(deck("Other")));
 
         service.process(event);
 
@@ -107,7 +109,7 @@ class SaveDecksFromResourceServiceTest {
                 .publish(
                         null,
                         FrontendNotificationType.ERROR,
-                        "Failed to save decks: No resource file found for deck: Selected");
+                        "Failed to import CSV decks: No CSV file found for deck: Selected");
         verify(deckSaver, never()).save(ArgumentMatchers.any());
     }
 

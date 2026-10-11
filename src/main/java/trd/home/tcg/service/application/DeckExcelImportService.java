@@ -14,7 +14,7 @@ public class DeckExcelImportService {
     private final FrontendNotificationPublisher notifications;
 
     public void importDecks() {
-        events.enqueue(EventType.SAVE_DECKS_FROM_XLSX, null);
+        events.enqueue(EventType.IMPORT_DECKS_FROM_XLSX, null);
         notifications.publish(FrontendNotificationType.WARNING, "XLSX deck importing has started.");
     }
 }

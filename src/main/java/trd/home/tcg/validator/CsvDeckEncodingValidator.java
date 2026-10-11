@@ -12,7 +12,7 @@ import trd.home.common.validator.ResourceValidator;
 import trd.home.tcg.exception.WrongDeckEncodingException;
 
 @Slf4j
-public class ResourceDeckEncodingValidator implements ResourceValidator {
+public class CsvDeckEncodingValidator implements ResourceValidator {
 
     @Override
     public void validateResource(Resource resource) {

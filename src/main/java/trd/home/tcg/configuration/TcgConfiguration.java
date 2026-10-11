@@ -4,12 +4,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import trd.home.tcg.service.file.DeckFileReader;
+import trd.home.tcg.service.file.DeckCsvFileReader;
 import trd.home.tcg.validator.CardSearchPagingValidator;
 import trd.home.tcg.validator.CardSearchPriceValidator;
-import trd.home.tcg.validator.ResourceDeckCardValidator;
-import trd.home.tcg.validator.ResourceDeckEncodingValidator;
-import trd.home.tcg.validator.ResourceDeckNameValidator;
+import trd.home.tcg.validator.CsvDeckCardValidator;
+import trd.home.tcg.validator.CsvDeckEncodingValidator;
+import trd.home.tcg.validator.CsvDeckNameValidator;
 
 @Configuration(proxyBeanMethods = false)
 public class TcgConfiguration {
@@ -25,28 +25,27 @@ public class TcgConfiguration {
     }
 
     @Bean
-    ResourceDeckEncodingValidator resourceDeckEncodingValidator() {
-        return new ResourceDeckEncodingValidator();
+    CsvDeckEncodingValidator csvDeckEncodingValidator() {
+        return new CsvDeckEncodingValidator();
     }
 
     @Bean
-    ResourceDeckNameValidator resourceDeckNameValidator() {
-        return new ResourceDeckNameValidator();
+    CsvDeckNameValidator csvDeckNameValidator() {
+        return new CsvDeckNameValidator();
     }
 
     @Bean
-    ResourceDeckCardValidator resourceDeckCardValidator() {
-        return new ResourceDeckCardValidator();
+    CsvDeckCardValidator csvDeckCardValidator() {
+        return new CsvDeckCardValidator();
     }
 
     @Bean
-    DeckFileReader deckFileReader(
-            ResourceDeckEncodingValidator resourceDeckEncodingValidator,
-            ResourceDeckNameValidator resourceDeckNameValidator,
-            ResourceDeckCardValidator resourceDeckCardValidator,
+    DeckCsvFileReader deckCsvFileReader(
+            CsvDeckEncodingValidator csvDeckEncodingValidator,
+            CsvDeckNameValidator csvDeckNameValidator,
+            CsvDeckCardValidator csvDeckCardValidator,
             @Value("${tcg.deck.resource-pattern}") String resourcePattern) {
-        return new DeckFileReader(
-                resourcePattern,
-                List.of(resourceDeckEncodingValidator, resourceDeckNameValidator, resourceDeckCardValidator));
+        return new DeckCsvFileReader(
+                resourcePattern, List.of(csvDeckEncodingValidator, csvDeckNameValidator, csvDeckCardValidator));
     }
 }

@@ -8,9 +8,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.ByteArrayResource;
 import trd.home.tcg.exception.WrongDeckNameException;
 
-class ResourceDeckNameValidatorTest {
+class CsvDeckNameValidatorTest {
 
-    private final ResourceDeckNameValidator validator = new ResourceDeckNameValidator();
+    private final CsvDeckNameValidator validator = new CsvDeckNameValidator();
 
     @ParameterizedTest
     @ValueSource(strings = {"KiloApogeeMind_v1.csv", "mydeck_V2.csv", "deck_3.csv"})

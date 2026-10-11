@@ -11,7 +11,7 @@ import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckVersion;
 
 @AllArgsConstructor
-public class DeckFileReader extends ResourceFileReader {
+public class DeckCsvFileReader extends ResourceFileReader {
 
     private final String resourcePattern;
 

@@ -12,9 +12,9 @@ import org.springframework.core.io.ByteArrayResource;
 import trd.home.common.exception.ResourceReadException;
 import trd.home.tcg.exception.WrongCardLineException;
 
-class ResourceDeckCardValidatorTest {
+class CsvDeckCardValidatorTest {
 
-    private final ResourceDeckCardValidator validator = new ResourceDeckCardValidator();
+    private final CsvDeckCardValidator validator = new CsvDeckCardValidator();
 
     @Test
     void acceptsValidCardLines() {

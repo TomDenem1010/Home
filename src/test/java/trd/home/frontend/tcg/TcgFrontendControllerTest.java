@@ -96,10 +96,10 @@ class TcgFrontendControllerTest {
     }
 
     @Test
-    void saveDecksFromResourceCallsTcgService() {
-        assertEquals("redirect:/tcg/deck-operations", controller.saveDecksFromResource());
+    void importDecksFromCsvCallsTcgService() {
+        assertEquals("redirect:/tcg/deck-operations", controller.importDecksFromCsv());
 
-        verify(tcgService).saveDecksFromResource();
+        verify(tcgService).importDecksFromCsv();
     }
 
     @Test
@@ -113,10 +113,10 @@ class TcgFrontendControllerTest {
     }
 
     @Test
-    void reloadDeckCreatesEventForSelectedDeck() {
-        assertEquals("redirect:/tcg/statistics", controller.reloadDeck("deck-id"));
+    void importDeckFromCsvCreatesEventForSelectedDeck() {
+        assertEquals("redirect:/tcg/statistics", controller.importDeckFromCsv("deck-id"));
 
-        verify(tcgService).saveDeckFromResource("deck-id");
+        verify(tcgService).importDeckFromCsv("deck-id");
     }
 
     @Test

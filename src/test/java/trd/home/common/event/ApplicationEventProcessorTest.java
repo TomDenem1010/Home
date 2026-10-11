@@ -31,7 +31,7 @@ class ApplicationEventProcessorTest {
 
     @Test
     void completesSuccessfulEventAndPublishesNotification() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
         @SuppressWarnings("unchecked")
         Supplier<String> operation = mock(Supplier.class);
         Mockito.when(operation.get()).thenReturn("Completed");
@@ -57,7 +57,7 @@ class ApplicationEventProcessorTest {
 
     @Test
     void failsEventWhenOperationFails() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
         @SuppressWarnings("unchecked")
         Supplier<String> operation = mock(Supplier.class);
         doThrow(new DeckImportException("resource missing")).when(operation).get();
@@ -73,7 +73,7 @@ class ApplicationEventProcessorTest {
 
     @Test
     void keepsCompletedEventDoneWhenNotificationFails() {
-        ApplicationEvent event = new ApplicationEvent(EventType.SAVE_DECKS_FROM_RESOURCE);
+        ApplicationEvent event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
         doThrow(new DeckImportException("notification unavailable"))
                 .when(notificationPublisher)
                 .publish(null, FrontendNotificationType.SUCCESS, "Completed");

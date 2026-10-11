@@ -12,7 +12,7 @@ import trd.home.tcg.repository.CardmarketDeckRepository;
 
 @Service
 @RequiredArgsConstructor
-public class CardmarketDeckSaver {
+public class DeckCsvSaver {
 
     private final CardmarketDeckRepository deckRepository;
     private final CardmarketCardRepository cardRepository;

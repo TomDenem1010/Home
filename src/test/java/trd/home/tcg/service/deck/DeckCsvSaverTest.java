@@ -24,7 +24,7 @@ import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckRepository;
 
 @ExtendWith(MockitoExtension.class)
-class CardmarketDeckSaverTest {
+class DeckCsvSaverTest {
 
     @Mock
     private CardmarketDeckRepository deckRepository;
@@ -33,7 +33,7 @@ class CardmarketDeckSaverTest {
     private CardmarketCardRepository cardRepository;
 
     @InjectMocks
-    private CardmarketDeckSaver saver;
+    private DeckCsvSaver saver;
 
     @Test
     void doesNotSaveDeckThatAlreadyExists() {

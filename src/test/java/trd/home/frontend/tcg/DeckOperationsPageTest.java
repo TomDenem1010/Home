@@ -40,26 +40,29 @@ class DeckOperationsPageTest {
                 html.selectFirst("form[action='/tcg/deck-operations/export'][method=get] button")
                         .text());
         assertEquals(
-                "Save CSV",
-                html.selectFirst("form[action='/tcg/deck-operations/refresh'] button")
+                "Import CSV",
+                html.selectFirst("form[action='/tcg/deck-operations/import-decks-from-csv'] button")
                         .text());
         assertEquals(
                 "Clear",
                 html.selectFirst("form[action='/tcg/deck-operations/clear'] button")
                         .text());
         assertEquals(
-                "Save XLSX",
-                html.selectFirst("form[action='/tcg/deck-operations/save-decks-from-xlsx'] button")
+                "Import XLSX",
+                html.selectFirst("form[action='/tcg/deck-operations/import-decks-from-xlsx'] button")
                         .text());
         assertTrue(html.select("input[type=file]").isEmpty());
-        mvc.perform(post("/tcg/deck-operations/save-decks-from-xlsx"))
+        mvc.perform(post("/tcg/deck-operations/import-decks-from-xlsx"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/tcg/deck-operations"));
         verify(service).importDecksFromXlsx();
-        mvc.perform(post("/tcg/deck-operations/refresh"))
+        mvc.perform(post("/tcg/deck-operations/import-decks-from-csv"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/tcg/deck-operations"));
-        verify(service).saveDecksFromResource();
+        verify(service).importDecksFromCsv();
+        mvc.perform(get("/tcg/deck-operations/import-decks-from-csv")).andExpect(status().isMethodNotAllowed());
+        mvc.perform(get("/tcg/deck-operations/import-decks-from-xlsx")).andExpect(status().isMethodNotAllowed());
+        mvc.perform(post("/tcg/deck-operations/refresh")).andExpect(status().isNotFound());
         mvc.perform(post("/tcg/deck-operations/clear"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/tcg/deck-operations"));

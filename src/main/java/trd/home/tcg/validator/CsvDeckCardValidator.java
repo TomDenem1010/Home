@@ -11,7 +11,7 @@ import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.exception.WrongCardLineException;
 
 @Slf4j
-public class ResourceDeckCardValidator implements ResourceValidator {
+public class CsvDeckCardValidator implements ResourceValidator {
 
     @Override
     public void validateResource(Resource resource) {

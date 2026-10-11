@@ -39,15 +39,6 @@ class TcgApplicationServiceTest {
     private final CardmarketCardPriceRepository prices = mock(CardmarketCardPriceRepository.class);
 
     @Test
-    void createsSelectedDeckSaveEvent() {
-        new TcgCommandService(events, notifications).saveDecksFromResource("deck-id");
-
-        InOrder order = inOrder(events, notifications);
-        order.verify(events).enqueue(EventType.SAVE_DECKS_FROM_RESOURCE, "deck-id");
-        order.verify(notifications).publish(FrontendNotificationType.WARNING, "Deck saving has started.");
-    }
-
-    @Test
     void createsPriceRefreshEvent() {
         new TcgCommandService(events, notifications).refreshDeckPrices("deck-id");
 

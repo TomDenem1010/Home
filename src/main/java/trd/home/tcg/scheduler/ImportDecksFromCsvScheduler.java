@@ -5,17 +5,17 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import trd.home.common.constant.EventType;
 import trd.home.common.event.ApplicationEventQueue;
-import trd.home.tcg.service.event.SaveDecksFromResourceService;
+import trd.home.tcg.service.event.ImportDecksFromCsvService;
 
 @Component
 @RequiredArgsConstructor
-public class SaveDecksFromResourceScheduler {
+public class ImportDecksFromCsvScheduler {
 
     private final ApplicationEventQueue eventQueue;
-    private final SaveDecksFromResourceService service;
+    private final ImportDecksFromCsvService service;
 
-    @Scheduled(fixedDelayString = "${tcg.scheduler.save-decks.delay:5s}")
+    @Scheduled(fixedDelayString = "${tcg.scheduler.import-decks-from-csv.delay:10s}")
     public void processNextEvent() {
-        eventQueue.claimNext(EventType.SAVE_DECKS_FROM_RESOURCE).ifPresent(event -> service.process(event));
+        eventQueue.claimNext(EventType.IMPORT_DECKS_FROM_CSV).ifPresent(event -> service.process(event));
     }
 }

@@ -16,14 +16,14 @@ class DeckExcelImportServiceTest {
     void queuesDedicatedEventWithoutFilePayload() {
         commands.importDecks();
         var order = inOrder(events, notifications);
-        order.verify(events).enqueue(EventType.SAVE_DECKS_FROM_XLSX, null);
+        order.verify(events).enqueue(EventType.IMPORT_DECKS_FROM_XLSX, null);
         order.verify(notifications).publish(FrontendNotificationType.WARNING, "XLSX deck importing has started.");
     }
 
     @Test
     void doesNotNotifyWhenQueueingFails() {
         var failure = new IllegalStateException("database");
-        when(events.enqueue(EventType.SAVE_DECKS_FROM_XLSX, null)).thenThrow(failure);
+        when(events.enqueue(EventType.IMPORT_DECKS_FROM_XLSX, null)).thenThrow(failure);
         assertSame(failure, assertThrows(IllegalStateException.class, commands::importDecks));
         verifyNoInteractions(notifications);
     }
