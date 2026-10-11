@@ -18,10 +18,10 @@ import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.service.application.DeckCsvImportService;
+import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
-import trd.home.tcg.service.excel.DeckExcelExportService;
 import trd.home.tcg.validator.CardSearchFilterValidator;
 
 @Service
@@ -31,7 +31,7 @@ public class TcgService {
     private final TcgCommandService commands;
     private final TcgQueryService queries;
     private final List<CardSearchFilterValidator> cardSearchFilterValidators;
-    private final DeckExcelExportService deckExcelExportService;
+    private final DeckExcelExportCommandService deckExcelExportService;
     private final DeckExcelImportService deckExcelImportService;
     private final DeckCsvImportService deckCsvImportService;
 
@@ -40,8 +40,9 @@ public class TcgService {
         deckExcelImportService.importDecks();
     }
 
-    public byte[] exportActiveDecks() {
-        return deckExcelExportService.export(queries.getDeckExcelData());
+    @LogMethodCall
+    public void exportActiveDecks() {
+        deckExcelExportService.exportDecks();
     }
 
     @LogMethodCall

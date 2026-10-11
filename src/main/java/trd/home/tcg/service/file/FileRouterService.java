@@ -30,6 +30,15 @@ public class FileRouterService {
         return importResourcePattern("excel", "*.xlsx");
     }
 
+    public Path getExcelExportFilePath() {
+        String exportRoot = rootResourcePath;
+        if (exportRoot.startsWith("classpath*:") || exportRoot.startsWith("classpath:")) {
+            exportRoot = exportRoot.substring(exportRoot.indexOf(':') + 1).replaceAll("^/+", "");
+        }
+        Path directory = exportRoot.startsWith("file:") ? Path.of(URI.create(exportRoot)) : Path.of(exportRoot);
+        return directory.toAbsolutePath().normalize().resolve("excel").resolve("export");
+    }
+
     private String importResourcePattern(String format, String filePattern) {
         return rootResourcePath + format + "/import/" + filePattern;
     }

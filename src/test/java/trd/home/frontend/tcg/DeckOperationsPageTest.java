@@ -16,7 +16,7 @@ import trd.home.tcg.service.TcgService;
 
 class DeckOperationsPageTest {
     @Test
-    void rendersPostButtonsAndQueuesBothOperations() throws Exception {
+    void rendersPostButtonsAndQueuesOperations() throws Exception {
         var service = mock(TcgService.class);
         var templates = new ClassLoaderTemplateResolver();
         templates.setPrefix("templates/");
@@ -33,11 +33,11 @@ class DeckOperationsPageTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString());
-        assertEquals(3, html.select(".deck-operations form[method=post]").size());
+        assertEquals(4, html.select(".deck-operations form[method=post]").size());
         assertEquals(4, html.select(".deck-operations button").size());
         assertEquals(
-                "Download Excel",
-                html.selectFirst("form[action='/tcg/deck-operations/export'][method=get] button")
+                "Export XLSX",
+                html.selectFirst("form[action='/tcg/deck-operations/export-decks-to-xlsx'][method=post] button")
                         .text());
         assertEquals(
                 "Import CSV",
@@ -68,18 +68,12 @@ class DeckOperationsPageTest {
                 .andExpect(redirectedUrl("/tcg/deck-operations"));
         verify(service).clearDecks();
         mvc.perform(get("/tcg/deck-operations/clear")).andExpect(status().isMethodNotAllowed());
-        byte[] workbook = {80, 75, 3, 4};
-        when(service.exportActiveDecks()).thenReturn(workbook);
-        mvc.perform(get("/tcg/deck-operations/export"))
-                .andExpect(status().isOk())
-                .andExpect(header().string(
-                                "Content-Disposition",
-                                org.hamcrest.Matchers.matchesPattern(
-                                        "attachment; filename=\"active-decks_[0-9]{14}\\.xlsx\"")))
-                .andExpect(header().string("Cache-Control", "no-store"))
-                .andExpect(content().contentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .andExpect(content().bytes(workbook));
+        mvc.perform(post("/tcg/deck-operations/export-decks-to-xlsx"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/tcg/deck-operations"));
         verify(service).exportActiveDecks();
+        mvc.perform(get("/tcg/deck-operations/export-decks-to-xlsx")).andExpect(status().isMethodNotAllowed());
+        mvc.perform(get("/tcg/deck-operations/export")).andExpect(status().isNotFound());
         verifyNoMoreInteractions(service);
     }
 }

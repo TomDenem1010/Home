@@ -56,6 +56,18 @@ class FileRouterServiceTest {
     }
 
     @Test
+    void routesExportUnderTheSameFilesystemRoot() {
+        var router = new FileRouterService(directory.toUri().toString());
+        assertEquals(directory.resolve("excel/export"), router.getExcelExportFilePath());
+    }
+
+    @Test
+    void routesClasspathExportsToExternalDirectory() {
+        var router = new FileRouterService("classpath*:tcg/deck");
+        assertEquals(Path.of("tcg/deck/excel/export").toAbsolutePath().normalize(), router.getExcelExportFilePath());
+    }
+
+    @Test
     void rejectsBlankRoot() {
         assertThrows(IllegalArgumentException.class, () -> new FileRouterService(" "));
     }

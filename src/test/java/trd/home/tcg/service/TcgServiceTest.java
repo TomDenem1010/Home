@@ -22,13 +22,12 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
-import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.exception.InvalidCardSearchFilterException;
 import trd.home.tcg.service.application.DeckCsvImportService;
+import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
 import trd.home.tcg.service.application.TcgQueryService;
-import trd.home.tcg.service.excel.DeckExcelExportService;
 import trd.home.tcg.validator.CardSearchFilterValidator;
 import trd.home.tcg.validator.CardSearchPagingValidator;
 import trd.home.tcg.validator.CardSearchPriceValidator;
@@ -38,7 +37,7 @@ class TcgServiceTest {
     private final TcgCommandService commands = mock(TcgCommandService.class);
     private final TcgQueryService queries = mock(TcgQueryService.class);
     private final CardSearchFilterValidator validator = mock(CardSearchFilterValidator.class);
-    private final DeckExcelExportService exporter = mock(DeckExcelExportService.class);
+    private final DeckExcelExportCommandService exporter = mock(DeckExcelExportCommandService.class);
     private final DeckExcelImportService xlsxImports = mock(DeckExcelImportService.class);
     private final DeckCsvImportService csvImports = mock(DeckCsvImportService.class);
     private final TcgService service =
@@ -56,15 +55,10 @@ class TcgServiceTest {
     }
 
     @Test
-    void exportsActiveDeckDataThroughExcelService() {
-        var decks = List.of(new DeckExcelData("Deck", "v1", List.of()));
-        byte[] content = {1, 2, 3};
-        when(queries.getDeckExcelData()).thenReturn(decks);
-        when(exporter.export(decks)).thenReturn(content);
-        assertSame(content, service.exportActiveDecks());
-        var order = inOrder(queries, exporter);
-        order.verify(queries).getDeckExcelData();
-        order.verify(exporter).export(decks);
+    void queuesExcelExportWithoutReadingDecks() {
+        service.exportActiveDecks();
+        verify(exporter).exportDecks();
+        verifyNoInteractions(queries);
     }
 
     @Test

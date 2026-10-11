@@ -1,13 +1,6 @@
 package trd.home.frontend.tcg;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +17,6 @@ import trd.home.tcg.service.TcgService;
 @RequestMapping("/tcg")
 @RequiredArgsConstructor
 public class TcgFrontendController {
-
-    private static final DateTimeFormatter EXPORT_TIMESTAMP =
-            DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ROOT).withZone(ZoneOffset.UTC);
 
     private final TcgService tcgService;
     private final FrontendPageRenderer pageRenderer;
@@ -65,15 +55,10 @@ public class TcgFrontendController {
         return renderPage(model, "/tcg/deck-operations", "Deck operations", "Manage saved decks.");
     }
 
-    @GetMapping("/deck-operations/export")
-    public ResponseEntity<byte[]> exportActiveDecks() {
-        String filename = "active-decks_" + EXPORT_TIMESTAMP.format(Instant.now()) + ".xlsx";
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .contentType(
-                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(tcgService.exportActiveDecks());
+    @PostMapping("/deck-operations/export-decks-to-xlsx")
+    public String exportActiveDecks() {
+        tcgService.exportActiveDecks();
+        return "redirect:/tcg/deck-operations";
     }
 
     @PostMapping("/deck-operations/import-decks-from-csv")

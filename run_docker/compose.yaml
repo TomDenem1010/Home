@@ -28,4 +28,3 @@ services:
       - type: bind
         source: ${HOME_DATA_ROOT:-C:/DockerData/Home}/tcg
         target: /tcg
-        read_only: true
