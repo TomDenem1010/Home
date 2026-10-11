@@ -70,7 +70,8 @@ class MediaFileReaderTest {
 
     @Test
     void preservesInvalidVideoNameFailure() throws IOException {
-        try (var files = directoryFiles(directory.resolve("Actor - .mp4"))) {
+        var files = directoryFiles(directory.resolve("Actor - .mp4"));
+        try (files) {
             assertThrows(InvalidVideoNameException.class, () -> reader.read(root));
         }
     }
@@ -78,11 +79,12 @@ class MediaFileReaderTest {
     @Test
     void recursivelyReadsSupportedVideoFilesInSortedOrder() throws IOException {
         var movies = directory.resolve("Movies");
-        try (var files = directoryFiles(
+        var files = directoryFiles(
                 movies.resolve("Bob - Second.WEBM"),
                 movies.resolve("Alice - First.mp4"),
                 movies.resolve("ignored.txt"),
-                movies.resolve("no-extension"))) {
+                movies.resolve("no-extension"));
+        try (files) {
             var result = reader.read(root);
             assertEquals(
                     List.of("Alice - First.mp4", "Bob - Second.WEBM"),
@@ -104,7 +106,8 @@ class MediaFileReaderTest {
 
     @Test
     void readsVideoWithoutActors() throws IOException {
-        try (var files = directoryFiles(directory.resolve("Film.mp4"))) {
+        var files = directoryFiles(directory.resolve("Film.mp4"));
+        try (files) {
             var result = reader.read(root);
             assertEquals(1, result.size());
             assertEquals("Film", result.getFirst().video().name());
