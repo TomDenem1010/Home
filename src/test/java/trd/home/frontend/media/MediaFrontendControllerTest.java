@@ -5,13 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import trd.home.common.event.FrontendNotificationPublisher;
@@ -31,9 +28,6 @@ class MediaFrontendControllerTest {
             .setControllerAdvice(new HomeExceptionHandler(mock(FrontendNotificationPublisher.class)))
             .build();
 
-    @TempDir
-    Path directory;
-
     @Test
     void requestsMediaImportAndRedirectsImmediately() throws Exception {
         mvc.perform(post("/media/import").param("path", "C:\\Media"))
@@ -45,8 +39,7 @@ class MediaFrontendControllerTest {
 
     @Test
     void streamsRequestedByteRange() throws Exception {
-        Path video = Files.write(directory.resolve("video.mp4"), new byte[] {0, 1, 2, 3, 4});
-        when(service.videoResource("video")).thenReturn(new FileSystemResource(video));
+        when(service.videoResource("video")).thenReturn(resource("video.mp4", new byte[] {0, 1, 2, 3, 4}));
 
         mvc.perform(get("/media/videos/video/stream").header("Range", "bytes=1-3"))
                 .andExpect(status().isPartialContent())
@@ -112,12 +105,19 @@ class MediaFrontendControllerTest {
 
     @Test
     void usesVideoMediaTypeOnlyForVideoResources() throws Exception {
-        Path mp4 = Files.write(directory.resolve("film.mp4"), new byte[] {1});
-        Path text = Files.write(directory.resolve("film.txt"), new byte[] {1});
-        when(service.videoResource("mp4")).thenReturn(new FileSystemResource(mp4));
-        when(service.videoResource("text")).thenReturn(new FileSystemResource(text));
+        when(service.videoResource("mp4")).thenReturn(resource("film.mp4", new byte[] {1}));
+        when(service.videoResource("text")).thenReturn(resource("film.txt", new byte[] {1}));
 
         mvc.perform(get("/media/videos/mp4/stream")).andExpect(content().contentType("video/mp4"));
         mvc.perform(get("/media/videos/text/stream")).andExpect(content().contentType("application/octet-stream"));
+    }
+
+    private static ByteArrayResource resource(String filename, byte[] content) {
+        return new ByteArrayResource(content) {
+            @Override
+            public String getFilename() {
+                return filename;
+            }
+        };
     }
 }

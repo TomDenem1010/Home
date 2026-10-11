@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import trd.home.common.file.ResourceFileReader;
 import trd.home.tcg.dto.DeckExcelData;
@@ -14,21 +13,13 @@ import trd.home.tcg.exception.DeckImportException;
 import trd.home.tcg.service.excel.DeckXlsxReader;
 
 @Service
+@RequiredArgsConstructor
 public class DeckXlsxFileReader extends ResourceFileReader {
-    private final String resourcePattern;
+    private final FileRouterService fileRouterService;
     private final DeckXlsxReader reader;
 
-    public DeckXlsxFileReader(@Value("${tcg.deck.resource-pattern}") String csvResourcePattern, DeckXlsxReader reader) {
-        if (!csvResourcePattern.toLowerCase(Locale.ROOT).endsWith(".csv")) {
-            throw new DeckImportException(
-                    "Deck resource pattern must end with .csv to locate XLSX workbooks in the same path");
-        }
-        this.resourcePattern = csvResourcePattern.substring(0, csvResourcePattern.length() - 4) + ".xlsx";
-        this.reader = reader;
-    }
-
     public List<DeckExcelData> read() {
-        var resources = readResources(resourcePattern).stream()
+        var resources = readResources(fileRouterService.getExcelImportFilePath()).stream()
                 .sorted(Comparator.comparing(
                         resource -> Objects.requireNonNull(resource).getDescription()))
                 .toList();

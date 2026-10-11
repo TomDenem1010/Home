@@ -1,10 +1,10 @@
 package trd.home.tcg.configuration;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import trd.home.tcg.service.file.DeckCsvFileReader;
+import trd.home.tcg.service.file.FileRouterService;
 import trd.home.tcg.validator.CardSearchPagingValidator;
 import trd.home.tcg.validator.CardSearchPriceValidator;
 import trd.home.tcg.validator.CsvDeckCardValidator;
@@ -44,8 +44,8 @@ public class TcgConfiguration {
             CsvDeckEncodingValidator csvDeckEncodingValidator,
             CsvDeckNameValidator csvDeckNameValidator,
             CsvDeckCardValidator csvDeckCardValidator,
-            @Value("${tcg.deck.resource-pattern}") String resourcePattern) {
+            FileRouterService fileRouterService) {
         return new DeckCsvFileReader(
-                resourcePattern, List.of(csvDeckEncodingValidator, csvDeckNameValidator, csvDeckCardValidator));
+                fileRouterService, List.of(csvDeckEncodingValidator, csvDeckNameValidator, csvDeckCardValidator));
     }
 }

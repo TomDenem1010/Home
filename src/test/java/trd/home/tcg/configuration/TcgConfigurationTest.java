@@ -3,6 +3,7 @@ package trd.home.tcg.configuration;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
+import trd.home.tcg.service.file.FileRouterService;
 
 class TcgConfigurationTest {
 
@@ -20,6 +21,6 @@ class TcgConfigurationTest {
         assertNotNull(nameValidator);
         assertNotNull(cardValidator);
         assertNotNull(configuration.deckCsvFileReader(
-                encodingValidator, nameValidator, cardValidator, "classpath*:tcg/deck/*.csv"));
+                encodingValidator, nameValidator, cardValidator, new FileRouterService("data/tcg")));
     }
 }

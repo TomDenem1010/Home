@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,6 @@ import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dao.CardmarketDeck;
 
 class DeckCsvFileReaderTest {
-
     @Test
     void validatesResourceAndIgnoresBlankLines() {
         ResourceValidator validator = mock(ResourceValidator.class);
@@ -68,6 +68,12 @@ class DeckCsvFileReaderTest {
         assertThrows(ResourceReadException.class, () -> reader.read());
     }
 
+    private static FileRouterService csvRouter() {
+        var router = mock(FileRouterService.class);
+        when(router.getCsvImportFilePath()).thenReturn("file:/mounted/decks/*.csv");
+        return router;
+    }
+
     private static Resource resource(String content) {
         return new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8)) {
             @Override
@@ -82,7 +88,7 @@ class DeckCsvFileReaderTest {
         private final List<Resource> resources;
 
         TestDeckCsvFileReader(List<ResourceValidator> validators, Resource... resources) {
-            super("file:/mounted/decks/*.csv", validators);
+            super(csvRouter(), validators);
             this.resources = List.of(resources);
         }
 

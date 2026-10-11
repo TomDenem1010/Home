@@ -13,12 +13,12 @@ import trd.home.tcg.dao.CardmarketDeckVersion;
 @AllArgsConstructor
 public class DeckCsvFileReader extends ResourceFileReader {
 
-    private final String resourcePattern;
+    private final FileRouterService fileRouterService;
 
     private final List<ResourceValidator> resourceValidators;
 
     public List<CardmarketDeck> read() {
-        return readResources(resourcePattern).stream()
+        return readResources(fileRouterService.getCsvImportFilePath()).stream()
                 .map(resource -> readDeck(resource))
                 .toList();
     }
