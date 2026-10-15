@@ -329,22 +329,18 @@ public class TcgQueryService {
         var order = sort.stream().findFirst();
         String property = order.map(value -> value.getProperty()).orElse("name");
         boolean descending = order.map(value -> value.isDescending()).orElse(false);
-        Comparator<CardSearchResult> comparator =
-                switch (property) {
-                    case "foilType" ->
-                        compareSearchValue(card -> card.foilType().name(), String.CASE_INSENSITIVE_ORDER, descending);
-                    case "quantity" ->
-                        compareSearchValue(card -> card.quantity(), Comparator.<Long>naturalOrder(), descending);
-                    case "priceFrom" ->
-                        compareSearchValue(card -> card.priceFrom(), Comparator.<BigDecimal>naturalOrder(), descending);
-                    case "priceTrend" ->
-                        compareSearchValue(
-                                card -> card.priceTrend(), Comparator.<BigDecimal>naturalOrder(), descending);
-                    case "decks" ->
-                        compareSearchValue(
-                                card -> card.decks().getFirst().name(), String.CASE_INSENSITIVE_ORDER, descending);
-                    default -> compareSearchValue(card -> card.name(), String.CASE_INSENSITIVE_ORDER, descending);
-                };
+        Comparator<CardSearchResult> comparator = switch (property) {
+            case "foilType" ->
+                compareSearchValue(card -> card.foilType().name(), String.CASE_INSENSITIVE_ORDER, descending);
+            case "quantity" -> compareSearchValue(card -> card.quantity(), Comparator.<Long>naturalOrder(), descending);
+            case "priceFrom" ->
+                compareSearchValue(card -> card.priceFrom(), Comparator.<BigDecimal>naturalOrder(), descending);
+            case "priceTrend" ->
+                compareSearchValue(card -> card.priceTrend(), Comparator.<BigDecimal>naturalOrder(), descending);
+            case "decks" ->
+                compareSearchValue(card -> card.decks().getFirst().name(), String.CASE_INSENSITIVE_ORDER, descending);
+            default -> compareSearchValue(card -> card.name(), String.CASE_INSENSITIVE_ORDER, descending);
+        };
         return comparator.thenComparing(card -> card.id());
     }
 
