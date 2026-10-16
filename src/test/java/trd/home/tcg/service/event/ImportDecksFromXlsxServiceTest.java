@@ -38,6 +38,21 @@ class ImportDecksFromXlsxServiceTest {
     }
 
     @Test
+    void reportsAllImportedDecksWithoutUnchangedDecks() {
+        var deck = new DeckExcelData("Deck", "v1", List.of());
+        when(reader.read()).thenReturn(List.of(deck));
+        when(saver.save(deck)).thenReturn(true);
+        var event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_XLSX);
+        service.process(event);
+        assertEquals(EventStatus.DONE, event.getStatus());
+        verify(notifications)
+                .publish(
+                        null,
+                        FrontendNotificationType.SUCCESS,
+                        "XLSX deck importing completed: 1 imported, 0 unchanged.");
+    }
+
+    @Test
     void marksFailedWhenPersistenceFails() {
         var deck = new DeckExcelData("Deck", "v1", List.of());
         when(reader.read()).thenReturn(List.of(deck));

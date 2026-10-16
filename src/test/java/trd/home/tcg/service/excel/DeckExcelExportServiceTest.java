@@ -59,10 +59,14 @@ class DeckExcelExportServiceTest {
         try (var workbooks = mockConstruction(XSSFWorkbook.class, (workbook, context) -> {
             when(workbook.createSheet("Summary")).thenReturn(summary);
             when(workbook.getCreationHelper()).thenReturn(mock(XSSFCreationHelper.class, RETURNS_DEEP_STUBS));
+            when(workbook.getNumberOfSheets()).thenReturn(1);
+            when(workbook.getSheetAt(0)).thenReturn(summary);
         })) {
             exporter.export(List.of());
             verifyNoInteractions(deckSheets);
             verify(summarySheets).populate(summary, List.of());
+            verify(tables).fitColumns(summary);
+            verifyNoMoreInteractions(tables);
             verify(workbooks.constructed().getFirst()).close();
         }
     }

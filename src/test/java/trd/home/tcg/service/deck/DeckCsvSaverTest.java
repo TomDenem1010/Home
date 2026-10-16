@@ -83,7 +83,7 @@ class DeckCsvSaverTest {
                         .next()
                         .getCard()));
 
-        saver.save(importedDeck);
+        assertTrue(saver.save(importedDeck));
 
         assertEquals(2, existingDeck.getVersions().size());
         assertSame(importedDeck.getCurrentVersion(), existingDeck.getCurrentVersion());
@@ -99,7 +99,7 @@ class DeckCsvSaverTest {
         when(deckRepository.existsByName(importedDeck.getName())).thenReturn(true);
         when(deckRepository.findByName(importedDeck.getName())).thenReturn(Optional.of(existingDeck));
 
-        saver.save(importedDeck);
+        assertFalse(saver.save(importedDeck));
 
         assertEquals(1, existingDeck.getVersions().size());
         verify(deckRepository, never()).save(any());

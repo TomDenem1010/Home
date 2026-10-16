@@ -12,6 +12,8 @@ import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.exception.DeckImportException;
@@ -72,6 +74,51 @@ class DeckXlsxReaderTest {
     @Test
     void wrapsMalformedWorkbook() {
         assertThrows(DeckImportException.class, () -> reader.read(new ByteArrayInputStream(new byte[] {1, 2})));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "summary-header,Unexpected export header in sheet: Summary",
+        "deck-header,Unexpected export header in sheet: Deck0",
+        "missing-table,Expected one export table in sheet: Summary",
+        "extra-table,Expected one export table in sheet: Deck0",
+        "blank-name,Empty text in exported workbook",
+        "duplicate-deck,Duplicate deck in Excel summary: Deck",
+        "invalid-reference,Missing deck sheet reference: Deck",
+        "missing-link,Missing card link in sheet: Deck0",
+        "zero-quantity,Card quantity must be positive: Deck0",
+        "negative-quantity,Card quantity must be positive: Deck0",
+        "maximum-price,Invalid card price in exported workbook"
+    })
+    void rejectsInvalidWorkbookWithSpecificReason(String scenario, String message) throws Exception {
+        var deck = new DeckExcelData(
+                "Deck", "v1", List.of(new DeckExcelData.Card(1, "link", CardFoilType.NO, BigDecimal.ONE, null)));
+        var decks = scenario.equals("duplicate-deck") ? List.of(deck, deck) : List.of(deck);
+        try (var workbook = new XSSFWorkbook(new ByteArrayInputStream(export(decks)))) {
+            var summary = workbook.getSheetAt(0);
+            var sheet = workbook.getSheetAt(1);
+            switch (scenario) {
+                case "summary-header" -> summary.getRow(0).getCell(0).setCellValue("invalid");
+                case "deck-header" -> sheet.getRow(0).getCell(0).setCellValue("invalid");
+                case "missing-table" -> summary.removeTable(summary.getTables().getFirst());
+                case "extra-table" -> {
+                    var extra = sheet.createTable(new AreaReference(
+                            new CellReference(3, 0), new CellReference(4, 0), SpreadsheetVersion.EXCEL2007));
+                    extra.setName("Extra");
+                    extra.setDisplayName("Extra");
+                }
+                case "blank-name" -> summary.getRow(1).getCell(0).setCellValue(" ");
+                case "duplicate-deck" -> {}
+                case "invalid-reference" -> summary.getRow(1).getCell(1).setCellFormula("1+1");
+                case "missing-link" -> sheet.getRow(1).getCell(1).setBlank();
+                case "zero-quantity" -> sheet.getRow(1).getCell(0).setCellValue(0);
+                case "negative-quantity" -> sheet.getRow(1).getCell(0).setCellValue(-1);
+                case "maximum-price" -> sheet.getRow(1).getCell(3).setCellValue(1000000);
+                default -> throw new AssertionError(scenario);
+            }
+            var error = assertThrows(DeckImportException.class, () -> reader.read(input(workbook)));
+            assertEquals(message, error.getMessage());
+        }
     }
 
     private static byte[] export(List<DeckExcelData> decks) {

@@ -58,6 +58,8 @@ class ExcelTableServiceTest {
             assertEquals(
                     "TableStyleMedium2", table.getCTTable().getTableStyleInfo().getName());
             assertTrue(table.getCTTable().getTableStyleInfo().getShowRowStripes());
+            assertEquals("DeckTable", table.getName());
+            assertEquals(1, sheet.getPaneInformation().getHorizontalSplitPosition());
         }
     }
 
@@ -80,6 +82,20 @@ class ExcelTableServiceTest {
             }
             assertEquals("#,##0.00", totals.getCell(1).getCellStyle().getDataFormatString());
             assertEquals("General", totals.getCell(0).getCellStyle().getDataFormatString());
+        }
+    }
+
+    @Test
+    void sizesFormulaColumnsUsingTheirCachedDisplayedValues() throws Exception {
+        try (var workbook = new XSSFWorkbook()) {
+            var sheet = workbook.createSheet("Deck");
+            tables.prepare(sheet, new String[] {"price"}, 1);
+            var cell = sheet.getRow(1).getCell(0);
+            cell.setCellFormula("123456.7891");
+            cell.setCellStyle(tables.priceStyle(workbook));
+            workbook.getCreationHelper().createFormulaEvaluator().evaluateAll();
+            tables.fitColumns(sheet);
+            assertEquals(("123,456.79".length() + 2) * 256, sheet.getColumnWidth(0));
         }
     }
 }

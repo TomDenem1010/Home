@@ -20,6 +20,7 @@ class DeckExcelSummarySheetServiceTest {
             for (int column = 0; column < 4; column++) row.createCell(column);
             var totals = sheet.createRow(3);
             var style = workbook.createCellStyle();
+            style.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
             when(tables.priceStyle(workbook)).thenReturn(style);
             when(tables.totals(sheet, 1, 4)).thenReturn(totals);
             service.populate(sheet, List.of(new DeckExcelSheetService.SheetSummary("Deck", "=1+1", "O'Brien", 5)));
@@ -33,6 +34,7 @@ class DeckExcelSummarySheetServiceTest {
             verify(tables).setEuroSum(totals, 1, 2);
             verify(tables).setEuroSum(totals, 2, 2);
             verify(tables).finish(sheet, "DeckSummary", 1, 4);
+            verify(tables).prepare(sheet, new String[] {"deckName", "sumFromEuro", "trendFromEuro", "version"}, 1);
         }
     }
 

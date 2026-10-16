@@ -96,21 +96,25 @@ class MediaFrontendControllerTest {
         when(service.activeFolders()).thenReturn(List.of(folder));
         when(service.videosByActor("actor-1")).thenReturn(List.of(video));
         when(service.videosByFolder("folder-1")).thenReturn(List.of(video));
+        when(pages.render(any(), eq("/media/by-actor"), eq("ByActor"), anyString(), eq("media/library")))
+                .thenReturn("actor-view");
+        when(pages.render(any(), eq("/media/by-folder"), eq("ByFolder"), anyString(), eq("media/library")))
+                .thenReturn("folder-view");
         var model = new ConcurrentModel();
-        controller.byActor(null, model);
+        assertEquals("actor-view", controller.byActor(null, model));
         assertEquals("by-actor", model.getAttribute("mode"));
         assertEquals(List.of(actor), model.getAttribute("actors"));
         assertEquals(List.of(), model.getAttribute("videos"));
         verify(service, never()).videosByActor(any());
-        controller.byActor("actor-1", model);
+        assertEquals("actor-view", controller.byActor("actor-1", model));
         assertEquals("actor-1", model.getAttribute("selectedId"));
         assertEquals(List.of(video), model.getAttribute("videos"));
-        controller.byFolder(null, model);
+        assertEquals("folder-view", controller.byFolder(null, model));
         assertEquals("by-folder", model.getAttribute("mode"));
         assertEquals(List.of(folder), model.getAttribute("folders"));
         assertEquals(List.of(), model.getAttribute("videos"));
         verify(service, never()).videosByFolder(any());
-        controller.byFolder("folder-1", model);
+        assertEquals("folder-view", controller.byFolder("folder-1", model));
         assertEquals("folder-1", model.getAttribute("selectedId"));
         assertEquals(List.of(video), model.getAttribute("videos"));
         verify(pages, times(2))

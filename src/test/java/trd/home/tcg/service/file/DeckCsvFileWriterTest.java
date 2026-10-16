@@ -49,6 +49,28 @@ class DeckCsvFileWriterTest {
     }
 
     @Test
+    void ordersEqualCardNamesByLinkAndThenFoilType() throws Exception {
+        when(router.getCsvExportFilePath()).thenReturn(directory);
+        var deck = new DeckCsvData(
+                "Deck",
+                "v1",
+                List.of(
+                        new DeckCsvData.Card("Same", 3, "https://www.cardmarket.com/Z", CardFoilType.NO),
+                        new DeckCsvData.Card("Same", 2, "https://www.cardmarket.com/Z", CardFoilType.FOIL),
+                        new DeckCsvData.Card("Same", 1, "https://www.cardmarket.com/A", CardFoilType.NO)));
+        byte[] expected = ("1,https://www.cardmarket.com/A,NO\n"
+                        + "2,https://www.cardmarket.com/Z,FOIL\n"
+                        + "3,https://www.cardmarket.com/Z,NO\n")
+                .getBytes(StandardCharsets.UTF_8);
+        try (var files = mockStatic(Files.class)) {
+            files.when(() -> Files.createTempFile(directory, "deck-", ".csv.pending"))
+                    .thenReturn(pending);
+            writer.write(deck);
+            files.verify(() -> Files.write(eq(pending), argThat((byte[] bytes) -> Arrays.equals(expected, bytes))));
+        }
+    }
+
+    @Test
     void writesEachDeckToItsOwnFilename() throws Exception {
         when(router.getCsvExportFilePath()).thenReturn(directory);
         try (var files = mockStatic(Files.class)) {

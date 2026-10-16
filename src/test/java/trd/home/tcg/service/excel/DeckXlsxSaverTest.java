@@ -36,6 +36,7 @@ class DeckXlsxSaverTest {
         var deckCard = deck.getCurrentVersion().getCards().iterator().next();
         assertEquals(3, deckCard.getQuantity());
         assertEquals("link", deckCard.getCard().getLink());
+        assertEquals(CardFoilType.NO, deckCard.getCard().getFoilType());
         var price = ArgumentCaptor.forClass(CardmarketCardPrice.class);
         verify(prices).save(price.capture());
         assertSame(deckCard.getCard(), price.getValue().getCard());
@@ -86,6 +87,16 @@ class DeckXlsxSaverTest {
         when(cards.save(any())).thenThrow(new IllegalStateException("database failure"));
         assertThrows(IllegalStateException.class, () -> saver.save(data("v1")));
         verify(decks, never()).save(any());
+    }
+
+    @Test
+    void persistsFoilTypeWhenCreatingPreviouslyUnknownCard() {
+        when(cards.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        assertTrue(saver.save(new DeckExcelData(
+                "Foils", "v1", List.of(new DeckExcelData.Card(1, "foil-link", CardFoilType.FOIL, null, null)))));
+        var saved = ArgumentCaptor.forClass(CardmarketCard.class);
+        verify(cards).save(saved.capture());
+        assertEquals(CardFoilType.FOIL, saved.getValue().getFoilType());
     }
 
     private CardmarketDeck existing(String version) {

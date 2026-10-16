@@ -5,7 +5,10 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.poi.ss.SpreadsheetVersion;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +44,7 @@ class DeckExcelSheetServiceTest {
     void populatesValuesHyperlinksPriceStylesAndQuantityFormulas() throws Exception {
         try (var workbook = new XSSFWorkbook()) {
             var style = workbook.createCellStyle();
+            style.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
             when(tables.priceStyle(workbook)).thenReturn(style);
             var card = new DeckExcelData.Card(
                     3, "https://example.test/Card", CardFoilType.FOIL, new BigDecimal("1.2345"), new BigDecimal("2.5"));
@@ -109,5 +113,30 @@ class DeckExcelSheetServiceTest {
                 verify(tables).finish(workbook.getSheetAt(index), expected.get(index), 0, 7);
             }
         }
+    }
+
+    @Test
+    void avoidsExistingTableNamesRegardlessOfCaseAndTruncatesSuffixes() throws Exception {
+        try (var workbook = new XSSFWorkbook()) {
+            addTable(workbook, "DECK");
+            addTable(workbook, "Deck_2");
+            var result = service.create(workbook, new DeckExcelData("Deck", "v1", List.of()));
+            verify(tables).finish(workbook.getSheet(result.sheetName()), "Deck_3", 0, 7);
+            String longName = "x".repeat(255);
+            addTable(workbook, longName);
+            addTable(workbook, "x".repeat(253) + "_2");
+            result = service.create(workbook, new DeckExcelData(longName, "v1", List.of()));
+            verify(tables).finish(workbook.getSheet(result.sheetName()), "x".repeat(253) + "_3", 0, 7);
+        }
+    }
+
+    private static void addTable(XSSFWorkbook workbook, String name) {
+        var sheet = workbook.createSheet("Existing" + workbook.getNumberOfSheets());
+        sheet.createRow(0).createCell(0).setCellValue("header");
+        sheet.createRow(1).createCell(0);
+        var table = sheet.createTable(
+                new AreaReference(new CellReference(0, 0), new CellReference(1, 0), SpreadsheetVersion.EXCEL2007));
+        table.setName(name);
+        table.setDisplayName(name);
     }
 }
