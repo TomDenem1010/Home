@@ -19,6 +19,8 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckVersionHistory;
+import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.service.TcgService;
 
 class TcgFrontendControllerTest {
@@ -35,13 +37,13 @@ class TcgFrontendControllerTest {
     @Test
     void versionPagesAssembleDeckListAndHistory() {
         var model = new ConcurrentModel();
-        var decks = List.of(new trd.home.tcg.dto.DeckVersionListItem("deck-id", "Test deck"));
+        var decks = List.of(new DeckVersionListItem("deck-id", "Test deck"));
         when(tcgService.getVersionDecks()).thenReturn(decks);
         assertEquals("index", controller.versions(model));
         assertEquals(decks, model.getAttribute("decks"));
         assertEquals("/tcg/version", model.getAttribute("activePath"));
         assertEquals("tcg/versions", model.getAttribute("contentTemplate"));
-        var history = new trd.home.tcg.dto.DeckVersionHistory("Test deck", List.of());
+        var history = new DeckVersionHistory("Test deck", List.of());
         when(tcgService.getDeckVersionHistory("deck-id")).thenReturn(history);
         assertEquals("index", controller.deckVersions("deck-id", model));
         assertEquals(history, model.getAttribute("history"));

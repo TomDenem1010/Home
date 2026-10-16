@@ -1,14 +1,21 @@
 package trd.home.common.file;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import trd.home.common.exception.ResourceReadException;
 
 class ResourceFileReaderTest {
@@ -17,13 +24,14 @@ class ResourceFileReaderTest {
 
     @Test
     void wrapsResolutionFailureAndPreservesCause() throws Exception {
-        var cause = new java.io.IOException("unavailable");
-        try (var resolvers = org.mockito.Mockito.mockConstruction(
-                org.springframework.core.io.support.PathMatchingResourcePatternResolver.class,
-                (resolver, context) -> org.mockito.Mockito.when(resolver.getResources("file:/decks/*.csv"))
-                        .thenThrow(cause))) {
+        var cause = new IOException("unavailable");
+        try (var resolvers = mockConstruction(
+                PathMatchingResourcePatternResolver.class,
+                (resolver, context) ->
+                        when(resolver.getResources("file:/decks/*.csv")).thenThrow(cause))) {
             var error = assertThrows(ResourceReadException.class, () -> reader.resources("file:/decks/*.csv"));
-            org.junit.jupiter.api.Assertions.assertSame(cause, error.getCause());
+            assertSame(cause, error.getCause());
+            verify(resolvers.constructed().getFirst()).getResources("file:/decks/*.csv");
         }
     }
 
@@ -42,13 +50,13 @@ class ResourceFileReaderTest {
 
     @Test
     void delegatesPatternResolutionWithoutAccessingFilesystem() throws Exception {
-        var resource = org.mockito.Mockito.mock(Resource.class);
-        try (var resolvers = org.mockito.Mockito.mockConstruction(
-                org.springframework.core.io.support.PathMatchingResourcePatternResolver.class,
-                (resolver, context) -> org.mockito.Mockito.when(resolver.getResources("file:/decks/*.csv"))
-                        .thenReturn(new Resource[] {resource}))) {
+        var resource = mock(Resource.class);
+        try (var resolvers = mockConstruction(
+                PathMatchingResourcePatternResolver.class,
+                (resolver, context) ->
+                        when(resolver.getResources("file:/decks/*.csv")).thenReturn(new Resource[] {resource}))) {
             assertEquals(List.of(resource), reader.resources("file:/decks/*.csv"));
-            org.mockito.Mockito.verify(resolvers.constructed().getFirst()).getResources("file:/decks/*.csv");
+            verify(resolvers.constructed().getFirst()).getResources("file:/decks/*.csv");
         }
     }
 

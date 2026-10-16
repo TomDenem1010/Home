@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import trd.home.tcg.constant.CardFoilType;
+import trd.home.tcg.constant.DeckStatus;
 import trd.home.tcg.dao.CardmarketCard;
 import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckVersion;
+import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckCardRepository;
@@ -82,12 +84,9 @@ class DeckVersionQueryTest {
         var second = new CardmarketDeck();
         second.setId("b");
         second.setName("Beta");
-        when(decks.findAllByStatusOrderByName(trd.home.tcg.constant.DeckStatus.ACTIVE))
-                .thenReturn(List.of(first, second));
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(first, second));
         assertEquals(
-                List.of(
-                        new trd.home.tcg.dto.DeckVersionListItem("a", "Alpha"),
-                        new trd.home.tcg.dto.DeckVersionListItem("b", "Beta")),
+                List.of(new DeckVersionListItem("a", "Alpha"), new DeckVersionListItem("b", "Beta")),
                 queries.getVersionDecks());
         assertEquals("Alpha", queries.getVersionDecks().getFirst().name());
     }

@@ -1,6 +1,7 @@
 package trd.home.tcg.service.file;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -8,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import trd.home.tcg.constant.CardFoilType;
@@ -41,9 +43,7 @@ class DeckCsvFileWriterTest {
             var target = directory.resolve("Árvíz Deck_v12.csv");
             assertEquals(target, writer.write(deck));
             files.verify(() -> Files.createDirectories(directory));
-            files.verify(() -> Files.write(
-                    eq(pending),
-                    org.mockito.ArgumentMatchers.<byte[]>argThat(bytes -> java.util.Arrays.equals(expected, bytes))));
+            files.verify(() -> Files.write(eq(pending), argThat((byte[] bytes) -> Arrays.equals(expected, bytes))));
             files.verify(() -> Files.move(pending, target, StandardCopyOption.REPLACE_EXISTING));
         }
     }

@@ -22,7 +22,10 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckVersionHistory;
+import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.exception.InvalidCardSearchFilterException;
+import trd.home.tcg.service.application.DeckCsvExportCommandService;
 import trd.home.tcg.service.application.DeckCsvImportService;
 import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
@@ -40,15 +43,14 @@ class TcgServiceTest {
     private final DeckExcelExportCommandService exporter = mock(DeckExcelExportCommandService.class);
     private final DeckExcelImportService xlsxImports = mock(DeckExcelImportService.class);
     private final DeckCsvImportService csvImports = mock(DeckCsvImportService.class);
-    private final trd.home.tcg.service.application.DeckCsvExportCommandService csvExporter =
-            mock(trd.home.tcg.service.application.DeckCsvExportCommandService.class);
+    private final DeckCsvExportCommandService csvExporter = mock(DeckCsvExportCommandService.class);
     private final TcgService service =
             new TcgService(commands, queries, List.of(validator), exporter, xlsxImports, csvImports, csvExporter);
 
     @Test
     void returnsVersionDecksAndSelectedDeckHistory() {
-        var decks = List.of(new trd.home.tcg.dto.DeckVersionListItem("id", "Deck"));
-        var history = new trd.home.tcg.dto.DeckVersionHistory("Deck", List.of());
+        var decks = List.of(new DeckVersionListItem("id", "Deck"));
+        var history = new DeckVersionHistory("Deck", List.of());
         when(queries.getVersionDecks()).thenReturn(decks);
         when(queries.getDeckVersionHistory("id")).thenReturn(history);
         assertSame(decks, service.getVersionDecks());

@@ -15,6 +15,7 @@ import trd.home.tcg.dao.CardmarketDeck;
 import trd.home.tcg.dao.CardmarketDeckCard;
 import trd.home.tcg.dao.CardmarketDeckVersion;
 import trd.home.tcg.dto.CardSearchPrice;
+import trd.home.tcg.exception.DeckCsvExportException;
 import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckCardRepository;
@@ -156,7 +157,7 @@ class DeckExcelQueryTest {
         var deck = new CardmarketDeck();
         deck.setName("Missing version");
         when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
-        assertThrows(trd.home.tcg.exception.DeckCsvExportException.class, service::getDeckCsvData);
+        assertThrows(DeckCsvExportException.class, service::getDeckCsvData);
         verifyNoInteractions(deckCards, cards, prices);
     }
 

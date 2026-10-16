@@ -26,8 +26,8 @@ public class DeckCsvFileWriter {
             throw new DeckCsvExportException("Invalid CSV export filename: " + filename);
         }
         String content = deck.cards().stream()
-                .sorted(Comparator.comparing(DeckCsvData.Card::name, String.CASE_INSENSITIVE_ORDER)
-                        .thenComparing(DeckCsvData.Card::link)
+                .sorted(Comparator.comparing((DeckCsvData.Card card) -> card.name(), String.CASE_INSENSITIVE_ORDER)
+                        .thenComparing(card -> card.link())
                         .thenComparing(card -> card.foilType().name()))
                 .map(card -> card.quantity() + "," + card.link() + ","
                         + card.foilType().name() + "\n")

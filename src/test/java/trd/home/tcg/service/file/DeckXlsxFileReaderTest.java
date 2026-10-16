@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
@@ -24,7 +25,7 @@ class DeckXlsxFileReaderTest {
         var firstResource = resource("a.xlsx", new byte[] {1});
         var secondResource = resource("b.xlsx", new byte[] {2});
         when(parser.read(any())).thenAnswer(invocation -> {
-            java.io.InputStream input = invocation.getArgument(0);
+            InputStream input = invocation.getArgument(0);
             return input.read() == 1 ? List.of(first) : List.of(second);
         });
         var reader = reader(parser, List.of(secondResource, firstResource));

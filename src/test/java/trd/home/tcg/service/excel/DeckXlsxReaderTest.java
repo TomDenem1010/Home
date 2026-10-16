@@ -6,6 +6,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.poi.ss.SpreadsheetVersion;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import trd.home.tcg.constant.CardFoilType;
@@ -111,18 +115,17 @@ class DeckXlsxReaderTest {
         }
     }
 
-    private static void prepare(
-            org.apache.poi.xssf.usermodel.XSSFSheet sheet, String[] headers, int rows, String tableName) {
+    private static void prepare(XSSFSheet sheet, String[] headers, int rows, String tableName) {
         for (int row = 0; row <= Math.max(1, rows); row++) {
             var cells = sheet.createRow(row);
             for (int column = 0; column < headers.length; column++) cells.createCell(column);
         }
         for (int column = 0; column < headers.length; column++)
             sheet.getRow(0).getCell(column).setCellValue(headers[column]);
-        var area = new org.apache.poi.ss.util.AreaReference(
-                new org.apache.poi.ss.util.CellReference(0, 0),
-                new org.apache.poi.ss.util.CellReference(Math.max(1, rows), headers.length - 1),
-                org.apache.poi.ss.SpreadsheetVersion.EXCEL2007);
+        var area = new AreaReference(
+                new CellReference(0, 0),
+                new CellReference(Math.max(1, rows), headers.length - 1),
+                SpreadsheetVersion.EXCEL2007);
         var table = sheet.createTable(area);
         table.setName(tableName);
         table.setDisplayName(tableName);
