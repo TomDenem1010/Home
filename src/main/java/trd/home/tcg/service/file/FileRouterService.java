@@ -7,19 +7,14 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class FileRouterService {
-    private final String rootResourcePath;
+    private final Path rootDirectory;
 
     public FileRouterService(@Value("${tcg.file.root-path}") String rootPath) {
         if (rootPath.isBlank()) {
             throw new IllegalArgumentException("TCG file root path must not be blank");
         }
-        if (rootPath.startsWith("classpath*:") || rootPath.startsWith("classpath:")) {
-            this.rootResourcePath = rootPath.replaceAll("/+$", "") + "/";
-        } else {
-            Path directory = rootPath.startsWith("file:") ? Path.of(URI.create(rootPath)) : Path.of(rootPath);
-            String resourcePath = directory.toAbsolutePath().normalize().toUri().toString();
-            this.rootResourcePath = resourcePath.endsWith("/") ? resourcePath : resourcePath + "/";
-        }
+        Path directory = rootPath.startsWith("file:") ? Path.of(URI.create(rootPath)) : Path.of(rootPath);
+        this.rootDirectory = directory.toAbsolutePath().normalize();
     }
 
     public String getCsvImportFilePath() {
@@ -31,15 +26,12 @@ public class FileRouterService {
     }
 
     public Path getExcelExportFilePath() {
-        String exportRoot = rootResourcePath;
-        if (exportRoot.startsWith("classpath*:") || exportRoot.startsWith("classpath:")) {
-            exportRoot = exportRoot.substring(exportRoot.indexOf(':') + 1).replaceAll("^/+", "");
-        }
-        Path directory = exportRoot.startsWith("file:") ? Path.of(URI.create(exportRoot)) : Path.of(exportRoot);
-        return directory.toAbsolutePath().normalize().resolve("excel").resolve("export");
+        return rootDirectory.resolve("excel").resolve("export");
     }
 
     private String importResourcePattern(String format, String filePattern) {
-        return rootResourcePath + format + "/import/" + filePattern;
+        String resourcePath =
+                rootDirectory.resolve(format).resolve("import").toUri().toString();
+        return (resourcePath.endsWith("/") ? resourcePath : resourcePath + "/") + filePattern;
     }
 }

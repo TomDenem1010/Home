@@ -1,8 +1,9 @@
 package trd.home.tcg.service.deck;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -41,7 +42,7 @@ class DeckCsvSaverTest {
         deck.setName("Kilo Apogee Mind");
         when(deckRepository.existsByName(deck.getName())).thenReturn(true);
 
-        assertDoesNotThrow(() -> saver.save(deck));
+        assertFalse(saver.save(deck));
 
         verify(deckRepository).existsByName("Kilo Apogee Mind");
         verify(deckRepository, never()).save(any());
@@ -57,7 +58,7 @@ class DeckCsvSaverTest {
         when(cardRepository.findByLinkAndFoilType(importedCard.getLink(), importedCard.getFoilType()))
                 .thenReturn(Optional.of(existingCard));
 
-        saver.save(deck);
+        assertTrue(saver.save(deck));
 
         CardmarketDeckCard deckCard =
                 deck.getCurrentVersion().getCards().iterator().next();
@@ -115,7 +116,7 @@ class DeckCsvSaverTest {
                 .thenReturn(Optional.empty());
         when(cardRepository.save(importedCard)).thenReturn(persistedCard);
 
-        saver.save(deck);
+        assertTrue(saver.save(deck));
 
         verify(cardRepository).save(importedCard);
         assertSame(

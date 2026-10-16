@@ -22,6 +22,7 @@ class FileRouterServiceTest {
         var router =
                 new FileRouterService(Path.of("data", "previous", "..", "tcg").toString());
         var root = Path.of("data", "tcg").toAbsolutePath().normalize();
+        assertEquals(root.resolve("excel/export"), router.getExcelExportFilePath());
         assertEquals(
                 root.resolve("csv/import").toUri().toString().replaceAll("/$", "") + "/*.csv",
                 router.getCsvImportFilePath());
@@ -39,15 +40,6 @@ class FileRouterServiceTest {
     }
 
     @Test
-    void supportsClasspathRootsWithoutConvertingThemToFilesystemPaths() {
-        for (var prefix : new String[] {"classpath:", "classpath*:"}) {
-            var router = new FileRouterService(prefix + "tcg/deck/");
-            assertEquals(prefix + "tcg/deck/csv/import/*.csv", router.getCsvImportFilePath());
-            assertEquals(prefix + "tcg/deck/excel/import/*.xlsx", router.getExcelImportFilePath());
-        }
-    }
-
-    @Test
     void acceptsFileUriRoots() {
         var root = directory.resolve("TCG files");
         var router = new FileRouterService(root.toUri().toString());
@@ -62,9 +54,13 @@ class FileRouterServiceTest {
     }
 
     @Test
-    void routesClasspathExportsToExternalDirectory() {
-        var router = new FileRouterService("classpath*:tcg/deck");
-        assertEquals(Path.of("tcg/deck/excel/export").toAbsolutePath().normalize(), router.getExcelExportFilePath());
+    void acceptsRootWithoutFileUriPrefix() {
+        var root = Path.of("C:/DockerData/Home/tcg").toAbsolutePath().normalize();
+        var router = new FileRouterService("C:/DockerData/Home/tcg");
+
+        assertEquals(
+                root.resolve("csv/import").toUri().toString().replaceAll("/$", "") + "/*.csv",
+                router.getCsvImportFilePath());
     }
 
     @Test

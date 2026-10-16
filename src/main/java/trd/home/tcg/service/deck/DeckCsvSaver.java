@@ -18,23 +18,28 @@ public class DeckCsvSaver {
     private final CardmarketCardRepository cardRepository;
 
     @Transactional
-    public void save(CardmarketDeck deck) {
+    public boolean save(CardmarketDeck deck) {
         if (deckRepository.existsByName(deck.getName())) {
-            deckRepository.findByName(deck.getName()).ifPresent(existingDeck -> {
-                CardmarketDeckVersion importedVersion = deck.getCurrentVersion();
-                if (isNewer(
-                        importedVersion.getVersion(),
-                        existingDeck.getCurrentVersion().getVersion())) {
-                    saveCards(importedVersion);
-                    existingDeck.addVersion(importedVersion);
-                    deckRepository.save(existingDeck);
-                }
-            });
-            return;
+            return deckRepository
+                    .findByName(deck.getName())
+                    .map(existingDeck -> {
+                        CardmarketDeckVersion importedVersion = deck.getCurrentVersion();
+                        if (isNewer(
+                                importedVersion.getVersion(),
+                                existingDeck.getCurrentVersion().getVersion())) {
+                            saveCards(importedVersion);
+                            existingDeck.addVersion(importedVersion);
+                            deckRepository.save(existingDeck);
+                            return true;
+                        }
+                        return false;
+                    })
+                    .orElse(false);
         }
 
         deck.getVersions().forEach(version -> saveCards(version));
         deckRepository.save(deck);
+        return true;
     }
 
     private void saveCards(CardmarketDeckVersion version) {

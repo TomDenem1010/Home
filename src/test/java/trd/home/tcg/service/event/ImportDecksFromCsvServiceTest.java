@@ -56,6 +56,8 @@ class ImportDecksFromCsvServiceTest {
         CardmarketDeck firstDeck = new CardmarketDeck();
         CardmarketDeck secondDeck = new CardmarketDeck();
         when(deckCsvFileReader.read()).thenReturn(List.of(firstDeck, secondDeck));
+        when(deckSaver.save(firstDeck)).thenReturn(true);
+        when(deckSaver.save(secondDeck)).thenReturn(true);
 
         service.process(event);
 
@@ -64,7 +66,10 @@ class ImportDecksFromCsvServiceTest {
         order.verify(deckSaver).save(secondDeck);
         assertEquals(EventStatus.DONE, event.getStatus());
         verify(notificationPublisher)
-                .publish(null, FrontendNotificationType.SUCCESS, "CSV deck importing completed successfully.");
+                .publish(
+                        null,
+                        FrontendNotificationType.SUCCESS,
+                        "CSV deck importing completed: 2 imported, 0 unchanged.");
     }
 
     @Test
@@ -74,6 +79,7 @@ class ImportDecksFromCsvServiceTest {
         CardmarketDeck other = deck("Other");
         when(deckRepository.findById("selected-id")).thenReturn(Optional.of(deck("Selected")));
         when(deckCsvFileReader.read()).thenReturn(List.of(other, selected));
+        when(deckSaver.save(selected)).thenReturn(true);
 
         service.process(event);
 
@@ -111,6 +117,29 @@ class ImportDecksFromCsvServiceTest {
                         FrontendNotificationType.ERROR,
                         "Failed to import CSV decks: No CSV file found for deck: Selected");
         verify(deckSaver, never()).save(ArgumentMatchers.any());
+    }
+
+    @Test
+    void failsWhenNoDeckWasImported() {
+        when(deckCsvFileReader.read()).thenReturn(List.of());
+        var event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
+        service.process(event);
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        assertEquals("No CSV decks imported: 0 imported, 0 unchanged.", event.getErrorMessage());
+        verify(notificationPublisher)
+                .publish(
+                        null,
+                        FrontendNotificationType.ERROR,
+                        "Failed to import CSV decks: No CSV decks imported: 0 imported, 0 unchanged.");
+    }
+
+    @Test
+    void failsWhenAllDecksAreUnchanged() {
+        when(deckCsvFileReader.read()).thenReturn(List.of(deck("Unchanged")));
+        var event = new ApplicationEvent(EventType.IMPORT_DECKS_FROM_CSV);
+        service.process(event);
+        assertEquals(EventStatus.ERROR, event.getStatus());
+        assertEquals("No CSV decks imported: 0 imported, 1 unchanged.", event.getErrorMessage());
     }
 
     private static CardmarketDeck deck(String name) {

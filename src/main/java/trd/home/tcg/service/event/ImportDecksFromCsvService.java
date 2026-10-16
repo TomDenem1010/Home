@@ -15,7 +15,6 @@ import trd.home.tcg.service.file.DeckCsvFileReader;
 @RequiredArgsConstructor
 public class ImportDecksFromCsvService {
 
-    private static final String SUCCESS_MESSAGE = "CSV deck importing completed successfully.";
     private static final String FAILURE_MESSAGE_PREFIX = "Failed to import CSV decks: ";
 
     private final ApplicationEventProcessor eventProcessor;
@@ -24,13 +23,7 @@ public class ImportDecksFromCsvService {
     private final CardmarketDeckRepository deckRepository;
 
     public void process(ApplicationEvent event) {
-        eventProcessor.process(
-                event,
-                () -> {
-                    importDecks(selectedDecks(event.getMessage()));
-                    return SUCCESS_MESSAGE;
-                },
-                FAILURE_MESSAGE_PREFIX);
+        eventProcessor.process(event, () -> importDecks(selectedDecks(event.getMessage())), FAILURE_MESSAGE_PREFIX);
     }
 
     private List<CardmarketDeck> selectedDecks(String deckId) {
@@ -51,13 +44,23 @@ public class ImportDecksFromCsvService {
         return selectedDecks;
     }
 
-    private void importDecks(List<CardmarketDeck> decks) {
+    private String importDecks(List<CardmarketDeck> decks) {
+        int imported = 0;
+        int skipped = 0;
         try {
             for (CardmarketDeck deck : decks) {
-                deckSaver.save(deck);
+                if (deckSaver.save(deck)) {
+                    imported++;
+                } else {
+                    skipped++;
+                }
             }
         } catch (RuntimeException exception) {
             throw new DeckImportException("Unable to import decks from CSV", exception);
         }
+        if (imported == 0) {
+            throw new DeckImportException("No CSV decks imported: 0 imported, " + skipped + " unchanged.");
+        }
+        return "CSV deck importing completed: " + imported + " imported, " + skipped + " unchanged.";
     }
 }

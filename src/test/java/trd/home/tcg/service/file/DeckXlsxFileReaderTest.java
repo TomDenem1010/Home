@@ -13,7 +13,7 @@ import trd.home.tcg.exception.DeckImportException;
 import trd.home.tcg.service.excel.*;
 
 class DeckXlsxFileReaderTest {
-    private static final String PATTERN = "classpath*:tcg/deck/excel/import/*.xlsx";
+    private static final String PATTERN = "file:/tcg/excel/import/*.xlsx";
     private final FileRouterService router = mock(FileRouterService.class);
 
     @Test
