@@ -13,6 +13,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 class MenuModelAdviceTest {
+
+    private final MenuModelAdvice advice = new MenuModelAdvice();
+
     @Test
     void keepsHistoryScopeStableWithinOneApplicationInstance() {
         String scope = advice.frontendEventHistoryScope();
@@ -20,8 +23,6 @@ class MenuModelAdviceTest {
         assertEquals(scope, UUID.fromString(scope).toString());
         Assertions.assertNotEquals(scope, new MenuModelAdvice().frontendEventHistoryScope());
     }
-
-    private final MenuModelAdvice advice = new MenuModelAdvice();
 
     @Test
     void adminCanSeeAuthAndHelperMenus() {

@@ -16,8 +16,15 @@ class ResourceFileReaderTest {
     private final TestResourceFileReader reader = new TestResourceFileReader();
 
     @Test
-    void wrapsInvalidResourcePattern() {
-        assertThrows(ResourceReadException.class, () -> reader.resources(null));
+    void wrapsResolutionFailureAndPreservesCause() throws Exception {
+        var cause = new java.io.IOException("unavailable");
+        try (var resolvers = org.mockito.Mockito.mockConstruction(
+                org.springframework.core.io.support.PathMatchingResourcePatternResolver.class,
+                (resolver, context) -> org.mockito.Mockito.when(resolver.getResources("file:/decks/*.csv"))
+                        .thenThrow(cause))) {
+            var error = assertThrows(ResourceReadException.class, () -> reader.resources("file:/decks/*.csv"));
+            org.junit.jupiter.api.Assertions.assertSame(cause, error.getCause());
+        }
     }
 
     @Test
@@ -34,11 +41,15 @@ class ResourceFileReaderTest {
     }
 
     @Test
-    void resolvesResourcesMatchingClasspathPattern() {
-        List<Resource> resources = reader.resources("classpath*:application.properties");
-
-        assertEquals(1, resources.size());
-        assertEquals("application.properties", resources.getFirst().getFilename());
+    void delegatesPatternResolutionWithoutAccessingFilesystem() throws Exception {
+        var resource = org.mockito.Mockito.mock(Resource.class);
+        try (var resolvers = org.mockito.Mockito.mockConstruction(
+                org.springframework.core.io.support.PathMatchingResourcePatternResolver.class,
+                (resolver, context) -> org.mockito.Mockito.when(resolver.getResources("file:/decks/*.csv"))
+                        .thenReturn(new Resource[] {resource}))) {
+            assertEquals(List.of(resource), reader.resources("file:/decks/*.csv"));
+            org.mockito.Mockito.verify(resolvers.constructed().getFirst()).getResources("file:/decks/*.csv");
+        }
     }
 
     private static class TestResourceFileReader extends ResourceFileReader {

@@ -17,6 +17,7 @@ import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
+import trd.home.tcg.service.application.DeckCsvExportCommandService;
 import trd.home.tcg.service.application.DeckCsvImportService;
 import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
@@ -34,6 +35,12 @@ public class TcgService {
     private final DeckExcelExportCommandService deckExcelExportService;
     private final DeckExcelImportService deckExcelImportService;
     private final DeckCsvImportService deckCsvImportService;
+    private final DeckCsvExportCommandService deckCsvExportService;
+
+    @LogMethodCall
+    public void exportActiveDecksToCsv() {
+        deckCsvExportService.exportDecks();
+    }
 
     @LogMethodCall
     public void importDecksFromXlsx() {

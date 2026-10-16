@@ -40,8 +40,10 @@ class TcgServiceTest {
     private final DeckExcelExportCommandService exporter = mock(DeckExcelExportCommandService.class);
     private final DeckExcelImportService xlsxImports = mock(DeckExcelImportService.class);
     private final DeckCsvImportService csvImports = mock(DeckCsvImportService.class);
+    private final trd.home.tcg.service.application.DeckCsvExportCommandService csvExporter =
+            mock(trd.home.tcg.service.application.DeckCsvExportCommandService.class);
     private final TcgService service =
-            new TcgService(commands, queries, List.of(validator), exporter, xlsxImports, csvImports);
+            new TcgService(commands, queries, List.of(validator), exporter, xlsxImports, csvImports, csvExporter);
 
     @Test
     void returnsVersionDecksAndSelectedDeckHistory() {
@@ -52,6 +54,13 @@ class TcgServiceTest {
         assertSame(decks, service.getVersionDecks());
         assertSame(history, service.getDeckVersionHistory("id"));
         verify(queries).getDeckVersionHistory("id");
+    }
+
+    @Test
+    void queuesCsvExportWithoutReadingDecks() {
+        service.exportActiveDecksToCsv();
+        verify(csvExporter).exportDecks();
+        verifyNoInteractions(queries);
     }
 
     @Test
@@ -89,7 +98,13 @@ class TcgServiceTest {
     @Test
     void invalidFilterPreventsQuery() {
         var validatingService = new TcgService(
-                commands, queries, List.of(new CardSearchPriceValidator()), exporter, xlsxImports, csvImports);
+                commands,
+                queries,
+                List.of(new CardSearchPriceValidator()),
+                exporter,
+                xlsxImports,
+                csvImports,
+                csvExporter);
         var filter = new CardSearchFilter(null, null, null, new BigDecimal("-1"), null, null);
         assertThrows(
                 InvalidCardSearchFilterException.class,
@@ -105,7 +120,8 @@ class TcgServiceTest {
                 List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()),
                 exporter,
                 xlsxImports,
-                csvImports);
+                csvImports,
+                csvExporter);
         var filter = new CardSearchFilter(null, null, null, null, null, null);
         for (int[] paging : List.of(new int[] {-1, 50}, new int[] {0, 0}, new int[] {0, 201})) {
             assertThrows(

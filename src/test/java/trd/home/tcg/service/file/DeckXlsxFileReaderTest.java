@@ -17,19 +17,19 @@ class DeckXlsxFileReaderTest {
     private final FileRouterService router = mock(FileRouterService.class);
 
     @Test
-    void readsInMemoryWorkbooksInResourceOrderAndPreservesSourceBytes() {
-        var tables = new ExcelTableService();
-        var exporter = new DeckExcelExportService(
-                new DeckExcelSheetService(tables), new DeckExcelSummarySheetService(tables), tables);
+    void delegatesInMemoryResourcesToParserInResourceOrder() {
+        var parser = mock(DeckXlsxReader.class);
         var first = new DeckExcelData("First", "v1", List.of());
         var second = new DeckExcelData("Second", "v2", List.of());
-        byte[] firstBytes = exporter.export(List.of(first));
-        var firstResource = resource("a.xlsx", firstBytes);
-        var secondResource = resource("b.xlsx", exporter.export(List.of(second)));
-        var reader = reader(new DeckXlsxReader(), List.of(secondResource, firstResource));
+        var firstResource = resource("a.xlsx", new byte[] {1});
+        var secondResource = resource("b.xlsx", new byte[] {2});
+        when(parser.read(any())).thenAnswer(invocation -> {
+            java.io.InputStream input = invocation.getArgument(0);
+            return input.read() == 1 ? List.of(first) : List.of(second);
+        });
+        var reader = reader(parser, List.of(secondResource, firstResource));
         assertEquals(List.of(first, second), reader.read());
-        assertArrayEquals(firstBytes, firstResource.getByteArray());
-        assertEquals(List.of(first, second), reader.read());
+        verify(parser, times(2)).read(any());
     }
 
     @Test

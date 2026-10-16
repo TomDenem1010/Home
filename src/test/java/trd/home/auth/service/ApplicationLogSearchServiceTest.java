@@ -32,6 +32,10 @@ import trd.home.common.dao.ApplicationLog;
 import trd.home.common.repository.ApplicationLogRepository;
 
 class ApplicationLogSearchServiceTest {
+
+    private final ApplicationLogRepository repository = mock(ApplicationLogRepository.class);
+    private final ApplicationLogSearchService service = new ApplicationLogSearchService(repository);
+
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     @SuppressWarnings("unchecked")
@@ -106,9 +110,6 @@ class ApplicationLogSearchServiceTest {
         assertEquals(0, predicates.getValue().length);
         verifyNoMoreInteractions(builder);
     }
-
-    private final ApplicationLogRepository repository = mock(ApplicationLogRepository.class);
-    private final ApplicationLogSearchService service = new ApplicationLogSearchService(repository);
 
     @ParameterizedTest
     @CsvSource({"ASC, CREATED_AT", "DESC, CREATED_AT", "ASC, DURATION_MS", "DESC, DURATION_MS"})

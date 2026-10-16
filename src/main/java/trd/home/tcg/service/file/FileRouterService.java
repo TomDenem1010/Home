@@ -29,6 +29,10 @@ public class FileRouterService {
         return rootDirectory.resolve("excel").resolve("export");
     }
 
+    public Path getCsvExportFilePath() {
+        return rootDirectory.resolve("csv").resolve("export");
+    }
+
     private String importResourcePattern(String format, String filePattern) {
         String resourcePath =
                 rootDirectory.resolve(format).resolve("import").toUri().toString();

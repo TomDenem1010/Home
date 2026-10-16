@@ -17,6 +17,10 @@ import trd.home.auth.exception.InvalidCredentialException;
 import trd.home.auth.repository.UserRepository;
 
 class DatabaseUserDetailsServiceTest {
+
+    private final UserRepository userRepository = mock(UserRepository.class);
+    private final DatabaseUserDetailsService service = new DatabaseUserDetailsService(userRepository);
+
     @Test
     void rejectsNullRoleInStoredUser() {
         var user = new User();
@@ -27,9 +31,6 @@ class DatabaseUserDetailsServiceTest {
         var exception = assertThrows(InvalidCredentialException.class, () -> service.loadUserByUsername("alice"));
         assertEquals("User role must not be null", exception.getMessage());
     }
-
-    private final UserRepository userRepository = mock(UserRepository.class);
-    private final DatabaseUserDetailsService service = new DatabaseUserDetailsService(userRepository);
 
     @Test
     void loadsUserAndMapsRolesToAuthorities() {

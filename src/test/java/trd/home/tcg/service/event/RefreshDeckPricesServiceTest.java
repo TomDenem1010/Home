@@ -32,6 +32,20 @@ import trd.home.tcg.repository.CardmarketDeckRepository;
 import trd.home.tcg.service.playwright.CardmarketCardPriceSaver;
 
 class RefreshDeckPricesServiceTest {
+
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
+    private final CardmarketCardPriceSaver cardPriceSaver = mock(CardmarketCardPriceSaver.class);
+    private final CardmarketCardRepository cardRepository = mock(CardmarketCardRepository.class);
+    private final CardmarketDeckCardRepository deckCardRepository = mock(CardmarketDeckCardRepository.class);
+    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
+    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
+    private final RefreshDeckPricesService service = new RefreshDeckPricesService(
+            new ApplicationEventProcessor(eventQueue, notificationPublisher),
+            cardPriceSaver,
+            cardRepository,
+            deckCardRepository,
+            deckRepository);
+
     @Test
     void refreshesDeckWithoutCurrentVersion() {
         var deck = new CardmarketDeck();
@@ -55,19 +69,6 @@ class RefreshDeckPricesServiceTest {
         assertEquals("Unable to refresh prices for deck: id", event.getErrorMessage());
         verifyNoInteractions(cardPriceSaver);
     }
-
-    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
-    private final CardmarketCardPriceSaver cardPriceSaver = mock(CardmarketCardPriceSaver.class);
-    private final CardmarketCardRepository cardRepository = mock(CardmarketCardRepository.class);
-    private final CardmarketDeckCardRepository deckCardRepository = mock(CardmarketDeckCardRepository.class);
-    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
-    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final RefreshDeckPricesService service = new RefreshDeckPricesService(
-            new ApplicationEventProcessor(eventQueue, notificationPublisher),
-            cardPriceSaver,
-            cardRepository,
-            deckCardRepository,
-            deckRepository);
 
     @Test
     void refreshesOnlyDeckStoredInEvent() {

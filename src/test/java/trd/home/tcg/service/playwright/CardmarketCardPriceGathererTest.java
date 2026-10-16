@@ -17,6 +17,12 @@ import trd.home.tcg.exception.CardmarketPriceNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CardmarketCardPriceGathererTest {
+    @Mock
+    private CardmarketCaller caller;
+
+    @Mock
+    private Browser browser;
+
     @Test
     void preservesCauseForNonNumericPrice() {
         when(caller.callWithPlaywright("https://example.test/card", browser))
@@ -28,12 +34,6 @@ class CardmarketCardPriceGathererTest {
         Assertions.assertInstanceOf(NumberFormatException.class, exception.getCause());
         assertEquals("Unable to parse Cardmarket 'From' price for: https://example.test/card", exception.getMessage());
     }
-
-    @Mock
-    private CardmarketCaller caller;
-
-    @Mock
-    private Browser browser;
 
     @Test
     void extractsEuroPricesFromCardmarketPage() {

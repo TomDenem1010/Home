@@ -125,6 +125,41 @@ class DeckExcelQueryTest {
                         .toList());
     }
 
+    @Test
+    void csvExportsActiveCurrentVersionsWithoutPriceQueries() {
+        var first = deck("First", "current-first", "v2");
+        var entry = card(
+                first, "card", "https://www.cardmarket.com/Magic/Products/Singles/Set/Alpha", 4, CardFoilType.FOIL);
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(first));
+        when(deckCards.findAllByDeckVersionIdIn(List.of("current-first"))).thenReturn(List.of(entry));
+        var result = service.getDeckCsvData();
+        assertEquals(1, result.size());
+        assertEquals("First", result.getFirst().name());
+        assertEquals("v2", result.getFirst().version());
+        var exported = result.getFirst().cards().getFirst();
+        assertEquals("Alpha", exported.name());
+        assertEquals(4, exported.quantity());
+        assertEquals(entry.getCard().getLink(), exported.link());
+        assertEquals(CardFoilType.FOIL, exported.foilType());
+        verifyNoInteractions(cards, prices);
+    }
+
+    @Test
+    void csvEmptyLibraryAvoidsCardAndPriceQueries() {
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of());
+        assertTrue(service.getDeckCsvData().isEmpty());
+        verifyNoInteractions(deckCards, cards, prices);
+    }
+
+    @Test
+    void csvRejectsActiveDeckWithoutCurrentVersion() {
+        var deck = new CardmarketDeck();
+        deck.setName("Missing version");
+        when(decks.findAllByStatusOrderByName(DeckStatus.ACTIVE)).thenReturn(List.of(deck));
+        assertThrows(trd.home.tcg.exception.DeckCsvExportException.class, service::getDeckCsvData);
+        verifyNoInteractions(deckCards, cards, prices);
+    }
+
     private static CardmarketDeck deck(String name, String versionId, String versionName) {
         var deck = new CardmarketDeck();
         deck.setName(name);

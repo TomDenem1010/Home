@@ -27,6 +27,12 @@ class TcgFrontendControllerTest {
     private final TcgFrontendController controller = new TcgFrontendController(tcgService, new FrontendPageRenderer());
 
     @Test
+    void exportsCsvThroughModuleFacadeAndRedirects() {
+        assertEquals("redirect:/tcg/deck-operations", controller.exportActiveDecksToCsv());
+        verify(tcgService).exportActiveDecksToCsv();
+    }
+
+    @Test
     void versionPagesAssembleDeckListAndHistory() {
         var model = new ConcurrentModel();
         var decks = List.of(new trd.home.tcg.dto.DeckVersionListItem("deck-id", "Test deck"));
@@ -93,6 +99,18 @@ class TcgFrontendControllerTest {
         assertEquals("/tcg", model.getAttribute("activePath"));
         assertEquals("/css/tcg.css", model.getAttribute("featureStylesheet"));
         assertEquals("/js/tcg.js", model.getAttribute("featureScript"));
+    }
+
+    @Test
+    void importsXlsxThroughFacadeAndRedirects() {
+        assertEquals("redirect:/tcg/deck-operations", controller.importDecksFromXlsx());
+        verify(tcgService).importDecksFromXlsx();
+    }
+
+    @Test
+    void exportsXlsxThroughFacadeAndRedirects() {
+        assertEquals("redirect:/tcg/deck-operations", controller.exportActiveDecks());
+        verify(tcgService).exportActiveDecks();
     }
 
     @Test

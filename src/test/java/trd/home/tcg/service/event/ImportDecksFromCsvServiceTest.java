@@ -26,6 +26,18 @@ import trd.home.tcg.service.deck.DeckCsvSaver;
 import trd.home.tcg.service.file.DeckCsvFileReader;
 
 class ImportDecksFromCsvServiceTest {
+
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
+    private final DeckCsvSaver deckSaver = mock(DeckCsvSaver.class);
+    private final DeckCsvFileReader deckCsvFileReader = mock(DeckCsvFileReader.class);
+    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
+    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
+    private final ImportDecksFromCsvService service = new ImportDecksFromCsvService(
+            new ApplicationEventProcessor(eventQueue, notificationPublisher),
+            deckSaver,
+            deckCsvFileReader,
+            deckRepository);
+
     @Test
     void reportsWrappedDeckSaveFailure() {
         var deck = new CardmarketDeck();
@@ -38,17 +50,6 @@ class ImportDecksFromCsvServiceTest {
         assertEquals(EventStatus.ERROR, event.getStatus());
         assertEquals("Unable to import decks from CSV", event.getErrorMessage());
     }
-
-    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
-    private final DeckCsvSaver deckSaver = mock(DeckCsvSaver.class);
-    private final DeckCsvFileReader deckCsvFileReader = mock(DeckCsvFileReader.class);
-    private final CardmarketDeckRepository deckRepository = mock(CardmarketDeckRepository.class);
-    private final FrontendNotificationPublisher notificationPublisher = mock(FrontendNotificationPublisher.class);
-    private final ImportDecksFromCsvService service = new ImportDecksFromCsvService(
-            new ApplicationEventProcessor(eventQueue, notificationPublisher),
-            deckSaver,
-            deckCsvFileReader,
-            deckRepository);
 
     @Test
     void readsAndImportsEveryCsvDeck() {

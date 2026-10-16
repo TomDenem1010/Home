@@ -30,6 +30,13 @@
             <button type="submit">Export XLSX</button>
         </form>
     </article>
+    <article>
+        <h2>Export active decks to CSV</h2>
+        <p>Save each active deck to csv/export as name_version.csv, with cards sorted by name and rows containing quantity, link and foil type.</p>
+        <form th:action="@{/tcg/deck-operations/export-decks-to-csv}" method="post">
+            <button type="submit">Export CSV</button>
+        </form>
+    </article>
 </section>
 </body>
 </html>

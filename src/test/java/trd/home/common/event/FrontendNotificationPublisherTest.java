@@ -15,6 +15,11 @@ import trd.home.common.constant.EventType;
 import trd.home.common.exception.UnableToSerializeNotificationException;
 
 class FrontendNotificationPublisherTest {
+
+    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
+    private final FrontendNotificationPublisher publisher =
+            new FrontendNotificationPublisher(eventQueue, JsonMapper.builder().build(), () -> Optional.of("alice"));
+
     @Test
     void preservesSerializationFailureWithoutEnqueueingNotification() {
         var mapper = mock(ObjectMapper.class);
@@ -27,10 +32,6 @@ class FrontendNotificationPublisherTest {
         Assertions.assertSame(cause, exception.getCause());
         Mockito.verifyNoInteractions(eventQueue);
     }
-
-    private final ApplicationEventQueue eventQueue = mock(ApplicationEventQueue.class);
-    private final FrontendNotificationPublisher publisher =
-            new FrontendNotificationPublisher(eventQueue, JsonMapper.builder().build(), () -> Optional.of("alice"));
 
     @Test
     void serializesNotificationIntoApplicationEvent() {

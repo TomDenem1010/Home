@@ -55,6 +55,12 @@ public class TcgFrontendController {
         return renderPage(model, "/tcg/deck-operations", "Deck operations", "Manage saved decks.");
     }
 
+    @PostMapping("/deck-operations/export-decks-to-csv")
+    public String exportActiveDecksToCsv() {
+        tcgService.exportActiveDecksToCsv();
+        return "redirect:/tcg/deck-operations";
+    }
+
     @PostMapping("/deck-operations/export-decks-to-xlsx")
     public String exportActiveDecks() {
         tcgService.exportActiveDecks();

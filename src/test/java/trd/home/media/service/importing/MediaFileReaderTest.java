@@ -18,6 +18,12 @@ import trd.home.media.dto.ParsedVideoName;
 import trd.home.media.exception.*;
 
 class MediaFileReaderTest {
+
+    private final MediaNameParser parser = Mockito.mock(MediaNameParser.class);
+    private final MediaFileReader reader = new MediaFileReader(parser);
+    private final Path directory = Path.of("media-tests").toAbsolutePath().normalize();
+    private final Path root = Mockito.mock(Path.class);
+
     @ParameterizedTest
     @CsvSource({"1001, 10, 10", "10, 1001, 10", "10, 10, 256", "10, 10, -1"})
     void rejectsUnsupportedPathComponentsBeforeParsing(int parentLength, int fileLength, int folderLength)
@@ -45,11 +51,6 @@ class MediaFileReaderTest {
         }
     }
 
-    private final MediaFileReader reader = new MediaFileReader(new MediaNameParser());
-
-    private final Path directory = Path.of("media-tests").toAbsolutePath().normalize();
-    private final Path root = Mockito.mock(Path.class);
-
     @Test
     void wrapsDirectoryReadFailureAndPreservesCause() throws IOException {
         var cause = new IOException("Directory unavailable");
@@ -70,6 +71,7 @@ class MediaFileReaderTest {
 
     @Test
     void preservesInvalidVideoNameFailure() throws IOException {
+        Mockito.when(parser.parse("Actor - .mp4")).thenThrow(new InvalidVideoNameException("Invalid name"));
         var files = directoryFiles(directory.resolve("Actor - .mp4"));
         try (files) {
             assertThrows(InvalidVideoNameException.class, () -> reader.read(root));
@@ -78,6 +80,8 @@ class MediaFileReaderTest {
 
     @Test
     void recursivelyReadsSupportedVideoFilesInSortedOrder() throws IOException {
+        Mockito.when(parser.parse("Alice - First.mp4")).thenReturn(new ParsedVideoName("First", Set.of("Alice")));
+        Mockito.when(parser.parse("Bob - Second.WEBM")).thenReturn(new ParsedVideoName("Second", Set.of("Bob")));
         var movies = directory.resolve("Movies");
         var files = directoryFiles(
                 movies.resolve("Bob - Second.WEBM"),
@@ -106,6 +110,7 @@ class MediaFileReaderTest {
 
     @Test
     void readsVideoWithoutActors() throws IOException {
+        Mockito.when(parser.parse("Film.mp4")).thenReturn(new ParsedVideoName("Film", Set.of()));
         var files = directoryFiles(directory.resolve("Film.mp4"));
         try (files) {
             var result = reader.read(root);

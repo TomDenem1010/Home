@@ -9,7 +9,27 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 
 class ExcelTableServiceTest {
+
     private final ExcelTableService tables = new ExcelTableService();
+
+    @Test
+    void fitsColumnsToDisplayedContentWithFoilPaddingAndExcelWidthLimit() throws Exception {
+        try (var workbook = new XSSFWorkbook()) {
+            var sheet = workbook.createSheet("Deck");
+            tables.prepare(sheet, new String[] {"link", "foilType", "price"}, 1);
+            sheet.getRow(1).getCell(0).setCellValue("x".repeat(300));
+            String foil = "OIL_SLICK_RAISED_FOIL";
+            sheet.getRow(1).getCell(1).setCellValue(foil);
+            var price = sheet.getRow(1).getCell(2);
+            price.setCellValue(123456.7891);
+            price.setCellStyle(tables.priceStyle(workbook));
+            tables.fitColumns(sheet);
+            assertEquals(255 * 256, sheet.getColumnWidth(0));
+            assertEquals(((int) Math.ceil(foil.length() * 1.25) + 3) * 256, sheet.getColumnWidth(1));
+            assertEquals(("123,456.79".length() + 2) * 256, sheet.getColumnWidth(2));
+            assertEquals("#,##0.00", price.getCellStyle().getDataFormatString());
+        }
+    }
 
     @Test
     void createsStyledHeadersExactRowWidthsFiltersAndStripedTable() throws Exception {

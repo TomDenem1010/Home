@@ -20,6 +20,10 @@ import trd.home.common.dao.ApplicationEvent;
 import trd.home.common.repository.ApplicationEventRepository;
 
 class ApplicationEventQueueTest {
+
+    private final ApplicationEventRepository repository = mock(ApplicationEventRepository.class);
+    private final ApplicationEventQueue queue = new ApplicationEventQueue(repository);
+
     @Test
     void returnsRepositoryResultsForQueueOperations() {
         var event = new ApplicationEvent(EventType.IMPORT_MEDIA, "path");
@@ -37,9 +41,6 @@ class ApplicationEventQueueTest {
         Assertions.assertSame(event, queue.save(event));
         Assertions.assertSame(events, queue.saveAll(events));
     }
-
-    private final ApplicationEventRepository repository = mock(ApplicationEventRepository.class);
-    private final ApplicationEventQueue queue = new ApplicationEventQueue(repository);
 
     @Test
     void enqueuesTypedEvent() {

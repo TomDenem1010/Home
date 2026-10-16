@@ -35,10 +35,12 @@ import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckCardPriceSummary;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckCsvData;
 import trd.home.tcg.dto.DeckExcelData;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.dto.DeckVersionSummary;
+import trd.home.tcg.exception.DeckCsvExportException;
 import trd.home.tcg.repository.CardmarketCardPriceRepository;
 import trd.home.tcg.repository.CardmarketCardRepository;
 import trd.home.tcg.repository.CardmarketDeckCardRepository;
@@ -149,6 +151,33 @@ public class TcgQueryService {
                                     .sorted(Comparator.comparing((DeckExcelData.Card card) -> card.link())
                                             .thenComparing(
                                                     card -> card.foilType().name()))
+                                    .toList());
+                })
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<DeckCsvData> getDeckCsvData() {
+        var decks = deckRepository.findAllByStatusOrderByName(DeckStatus.ACTIVE);
+        var cardsByVersion = cardsByCurrentVersion(decks);
+        return decks.stream()
+                .map(deck -> {
+                    var version = deck.getCurrentVersion();
+                    if (version == null) {
+                        throw new DeckCsvExportException("Active deck has no current version: " + deck.getName());
+                    }
+                    return new DeckCsvData(
+                            deck.getName(),
+                            version.getVersion(),
+                            cardsByVersion.getOrDefault(version.getId(), List.of()).stream()
+                                    .map(entry -> {
+                                        var card = entry.getCard();
+                                        return new DeckCsvData.Card(
+                                                cardName(card.getLink()),
+                                                entry.getQuantity(),
+                                                card.getLink(),
+                                                card.getFoilType());
+                                    })
                                     .toList());
                 })
                 .toList();

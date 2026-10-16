@@ -18,6 +18,11 @@ import trd.home.tcg.exception.FailedToLaunchBrowser;
 import trd.home.tcg.exception.HtmlParseException;
 
 class CardmarketCallerTest {
+
+    private final PlaywrightPageReader pageReader = mock(PlaywrightPageReader.class);
+    private final CardmarketCaller caller = new CardmarketCaller(pageReader);
+    private final Browser browser = mock(Browser.class);
+
     @Test
     void preservesHtmlParsingFailureAndItsCause() {
         givenPage(200, "broken");
@@ -29,10 +34,6 @@ class CardmarketCallerTest {
             Assertions.assertSame(cause, exception.getCause());
         }
     }
-
-    private final PlaywrightPageReader pageReader = mock(PlaywrightPageReader.class);
-    private final CardmarketCaller caller = new CardmarketCaller(pageReader);
-    private final Browser browser = mock(Browser.class);
 
     @Test
     void parsesBrowserPageContent() {

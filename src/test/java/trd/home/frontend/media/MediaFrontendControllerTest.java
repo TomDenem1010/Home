@@ -1,18 +1,15 @@
 package trd.home.frontend.media;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import trd.home.common.event.FrontendNotificationPublisher;
-import trd.home.common.exception.HomeExceptionHandler;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.ui.ConcurrentModel;
 import trd.home.frontend.FrontendPageRenderer;
 import trd.home.media.constant.MediaStatus;
 import trd.home.media.dto.ActorDto;
@@ -23,101 +20,122 @@ import trd.home.media.service.MediaService;
 
 class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
-    private final MockMvc mvc = MockMvcBuilders.standaloneSetup(
-                    new MediaFrontendController(service, new FrontendPageRenderer()))
-            .setControllerAdvice(new HomeExceptionHandler(mock(FrontendNotificationPublisher.class)))
-            .build();
+    private final FrontendPageRenderer pages = mock(FrontendPageRenderer.class);
+    private final MediaFrontendController controller = new MediaFrontendController(service, pages);
 
     @Test
-    void requestsMediaImportAndRedirectsImmediately() throws Exception {
-        mvc.perform(post("/media/import").param("path", "C:\\Media"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/media/server-folder-path"));
-
+    void requestsMediaImportAndRedirectsImmediately() {
+        assertEquals("redirect:/media/server-folder-path", controller.importPath("C:\\Media"));
         verify(service).importPath("C:\\Media");
     }
 
     @Test
-    void streamsRequestedByteRange() throws Exception {
-        when(service.videoResource("video")).thenReturn(resource("video.mp4", new byte[] {0, 1, 2, 3, 4}));
-
-        mvc.perform(get("/media/videos/video/stream").header("Range", "bytes=1-3"))
-                .andExpect(status().isPartialContent())
-                .andExpect(header().string("Content-Range", "bytes 1-3/5"))
-                .andExpect(content().bytes(new byte[] {1, 2, 3}));
+    void returnsVideoResourceWithStreamingHeadersWithoutReadingContent() throws Exception {
+        var resource = mock(Resource.class);
+        when(resource.getFilename()).thenReturn("video.mp4");
+        when(resource.contentLength()).thenReturn(5L);
+        when(service.videoResource("video")).thenReturn(resource);
+        var response = controller.stream("video");
+        assertEquals(200, response.getStatusCode().value());
+        assertSame(resource, response.getBody());
+        assertEquals(MediaType.valueOf("video/mp4"), response.getHeaders().getContentType());
+        assertEquals(5, response.getHeaders().getContentLength());
+        assertEquals("bytes", response.getHeaders().getFirst("Accept-Ranges"));
+        assertEquals("no-store", response.getHeaders().getCacheControl());
+        verify(resource, never()).getInputStream();
     }
 
     @Test
-    void delegatesUnavailableVideoToHomeExceptionHandler() throws Exception {
-        when(service.videoResource("missing")).thenThrow(new MediaVideoNotFoundException("Video is unavailable."));
-
-        mvc.perform(get("/media/videos/missing/stream"))
-                .andExpect(status().isNoContent())
-                .andExpect(content().string(""));
+    void propagatesUnavailableVideo() {
+        var failure = new MediaVideoNotFoundException("Video is unavailable.");
+        when(service.videoResource("missing")).thenThrow(failure);
+        assertSame(failure, assertThrows(MediaVideoNotFoundException.class, () -> controller.stream("missing")));
     }
 
     @Test
-    void redirectsMediaRootToActorBrowser() throws Exception {
-        mvc.perform(get("/media")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/media/by-actor"));
+    void propagatesResourceMetadataFailure() throws Exception {
+        var resource = mock(Resource.class);
+        when(resource.getFilename()).thenReturn("film.mp4");
+        var failure = new IOException("unavailable");
+        when(resource.contentLength()).thenThrow(failure);
+        when(service.videoResource("video")).thenReturn(resource);
+        assertSame(failure, assertThrows(IOException.class, () -> controller.stream("video")));
     }
 
     @Test
-    void rendersServerFolderPathPage() throws Exception {
-        mvc.perform(get("/media/server-folder-path"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attribute("activePath", "/media/server-folder-path"))
-                .andExpect(model().attribute("contentTemplate", "media/server-folder-path"));
+    void redirectsMediaRootToActorBrowser() {
+        assertEquals("redirect:/media/by-actor", controller.index());
     }
 
     @Test
-    void rendersActorAndFolderBrowsersWithAndWithoutSelection() throws Exception {
-        ActorDto actor = new ActorDto("actor-1", "Alice", MediaStatus.ACTIVE);
-        FolderDto folder = new FolderDto("folder-1", "media", "Movies", MediaStatus.ACTIVE);
-        VideoDto video = new VideoDto("video-1", "Film", folder, Set.of(actor), MediaStatus.ACTIVE);
+    void rendersServerFolderPathPage() {
+        var model = new ConcurrentModel();
+        when(pages.render(
+                        model,
+                        "/media/server-folder-path",
+                        "MEDIA / Server folder path",
+                        "Enter a server folder path to import videos.",
+                        "media/server-folder-path"))
+                .thenReturn("index");
+        assertEquals("index", controller.serverFolderPath(model));
+        verify(pages)
+                .render(
+                        model,
+                        "/media/server-folder-path",
+                        "MEDIA / Server folder path",
+                        "Enter a server folder path to import videos.",
+                        "media/server-folder-path");
+    }
+
+    @Test
+    void assemblesActorAndFolderBrowsersWithAndWithoutSelection() {
+        var actor = new ActorDto("actor-1", "Alice", MediaStatus.ACTIVE);
+        var folder = new FolderDto("folder-1", "media", "Movies", MediaStatus.ACTIVE);
+        var video = new VideoDto("video-1", "Film", folder, Set.of(actor), MediaStatus.ACTIVE);
         when(service.activeActors()).thenReturn(List.of(actor));
         when(service.activeFolders()).thenReturn(List.of(folder));
         when(service.videosByActor("actor-1")).thenReturn(List.of(video));
         when(service.videosByFolder("folder-1")).thenReturn(List.of(video));
-
-        mvc.perform(get("/media/by-actor"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attribute("mode", "by-actor"))
-                .andExpect(model().attribute("actors", List.of(actor)))
-                .andExpect(model().attribute("videos", List.of()));
-        mvc.perform(get("/media/by-actor").param("actorId", "actor-1"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attribute("selectedId", "actor-1"))
-                .andExpect(model().attribute("videos", List.of(video)))
-                .andExpect(model().attribute("pageContent", "Select an actor or folder, then choose a video to play."));
-        mvc.perform(get("/media/by-folder").param("folderId", "folder-1"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("index"))
-                .andExpect(model().attribute("mode", "by-folder"))
-                .andExpect(model().attribute("folders", List.of(folder)))
-                .andExpect(model().attribute("selectedId", "folder-1"))
-                .andExpect(model().attribute("videos", List.of(video)));
-        verify(service).videosByActor("actor-1");
-        verify(service).videosByFolder("folder-1");
+        var model = new ConcurrentModel();
+        controller.byActor(null, model);
+        assertEquals("by-actor", model.getAttribute("mode"));
+        assertEquals(List.of(actor), model.getAttribute("actors"));
+        assertEquals(List.of(), model.getAttribute("videos"));
+        verify(service, never()).videosByActor(any());
+        controller.byActor("actor-1", model);
+        assertEquals("actor-1", model.getAttribute("selectedId"));
+        assertEquals(List.of(video), model.getAttribute("videos"));
+        controller.byFolder(null, model);
+        assertEquals("by-folder", model.getAttribute("mode"));
+        assertEquals(List.of(folder), model.getAttribute("folders"));
+        assertEquals(List.of(), model.getAttribute("videos"));
+        verify(service, never()).videosByFolder(any());
+        controller.byFolder("folder-1", model);
+        assertEquals("folder-1", model.getAttribute("selectedId"));
+        assertEquals(List.of(video), model.getAttribute("videos"));
+        verify(pages, times(2))
+                .render(
+                        model,
+                        "/media/by-actor",
+                        "ByActor",
+                        "Select an actor or folder, then choose a video to play.",
+                        "media/library");
+        verify(pages, times(2))
+                .render(
+                        model,
+                        "/media/by-folder",
+                        "ByFolder",
+                        "Select an actor or folder, then choose a video to play.",
+                        "media/library");
     }
 
     @Test
-    void usesVideoMediaTypeOnlyForVideoResources() throws Exception {
-        when(service.videoResource("mp4")).thenReturn(resource("film.mp4", new byte[] {1}));
-        when(service.videoResource("text")).thenReturn(resource("film.txt", new byte[] {1}));
-
-        mvc.perform(get("/media/videos/mp4/stream")).andExpect(content().contentType("video/mp4"));
-        mvc.perform(get("/media/videos/text/stream")).andExpect(content().contentType("application/octet-stream"));
-    }
-
-    private static ByteArrayResource resource(String filename, byte[] content) {
-        return new ByteArrayResource(content) {
-            @Override
-            public String getFilename() {
-                return filename;
-            }
-        };
+    void usesBinaryContentTypeForNonVideoResource() throws Exception {
+        var resource = mock(Resource.class);
+        when(resource.getFilename()).thenReturn("film.txt");
+        when(service.videoResource("text")).thenReturn(resource);
+        assertEquals(
+                MediaType.APPLICATION_OCTET_STREAM,
+                controller.stream("text").getHeaders().getContentType());
     }
 }
