@@ -25,7 +25,7 @@ class MediaFrontendControllerTest {
 
     @Test
     void requestsMediaImportAndRedirectsImmediately() {
-        assertEquals("redirect:/media/server-folder-path", controller.importPath("C:\\Media"));
+        assertEquals("redirect:/media/video-operations", controller.importPath("C:\\Media"));
         verify(service).importPath("C:\\Media");
     }
 
@@ -68,23 +68,23 @@ class MediaFrontendControllerTest {
     }
 
     @Test
-    void rendersServerFolderPathPage() {
+    void rendersVideoOperationsPage() {
         var model = new ConcurrentModel();
         when(pages.render(
                         model,
-                        "/media/server-folder-path",
-                        "MEDIA / Server folder path",
-                        "Enter a server folder path to import videos.",
-                        "media/server-folder-path"))
+                        "/media/video-operations",
+                        "Video operations",
+                        "Manage videos.",
+                        "media/video-operations"))
                 .thenReturn("index");
-        assertEquals("index", controller.serverFolderPath(model));
+        assertEquals("index", controller.videoOperations(model));
         verify(pages)
                 .render(
                         model,
-                        "/media/server-folder-path",
-                        "MEDIA / Server folder path",
-                        "Enter a server folder path to import videos.",
-                        "media/server-folder-path");
+                        "/media/video-operations",
+                        "Video operations",
+                        "Manage videos.",
+                        "media/video-operations");
     }
 
     @Test

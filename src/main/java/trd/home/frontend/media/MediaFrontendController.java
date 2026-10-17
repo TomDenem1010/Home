@@ -31,14 +31,10 @@ public class MediaFrontendController {
         return "redirect:/media/by-actor";
     }
 
-    @GetMapping("/server-folder-path")
-    public String serverFolderPath(Model model) {
+    @GetMapping("/video-operations")
+    public String videoOperations(Model model) {
         return pageRenderer.render(
-                model,
-                "/media/server-folder-path",
-                "MEDIA / Server folder path",
-                "Enter a server folder path to import videos.",
-                "media/server-folder-path");
+                model, "/media/video-operations", "Video operations", "Manage videos.", "media/video-operations");
     }
 
     @GetMapping("/by-actor")
@@ -60,7 +56,7 @@ public class MediaFrontendController {
     @PostMapping("/import")
     public String importPath(@RequestParam String path) {
         mediaService.importPath(path);
-        return "redirect:/media/server-folder-path";
+        return "redirect:/media/video-operations";
     }
 
     @GetMapping("/videos/{id}/stream")

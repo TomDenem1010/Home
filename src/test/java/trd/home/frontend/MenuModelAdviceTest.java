@@ -117,6 +117,14 @@ class MenuModelAdviceTest {
                 menu(menus, "HELPER").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());
+        assertEquals(
+                List.of("/media/video-operations", "/media/by-actor", "/media/by-folder"),
+                menu(menus, "MEDIA").submenuItems().stream()
+                        .map(item -> item.path())
+                        .toList());
+        assertEquals(
+                "video operations",
+                menu(menus, "MEDIA").submenuItems().getFirst().label());
     }
 
     private static UsernamePasswordAuthenticationToken authentication(String authority) {

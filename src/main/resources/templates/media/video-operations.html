@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="media-page video-operations" th:fragment="content" aria-label="Video operations">
+    <link rel="stylesheet" th:href="@{/css/media.css}">
+    <article>
+        <h2>Server folder path</h2>
+        <p>Import videos from a server folder. Videos outside this path become inactive.</p>
+        <form th:action="@{/media/import}" method="post" class="media-import">
+            <input id="media-path" name="path" type="text" required placeholder="/media/videos" aria-label="Server folder path">
+            <button type="submit">Import videos</button>
+        </form>
+    </article>
+</section>
+</body>
+</html>
