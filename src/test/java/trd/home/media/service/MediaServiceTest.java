@@ -6,15 +6,27 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
+import trd.home.media.dto.VideoTagDto;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
+import trd.home.media.service.tag.VideoTagAssignmentService;
 import trd.home.media.service.tag.VideoTagService;
 
 class MediaServiceTest {
     private final MediaQueryService query = mock(MediaQueryService.class);
     private final MediaCommandService commands = mock(MediaCommandService.class);
     private final VideoTagService videoTags = mock(VideoTagService.class);
-    private final MediaService service = new MediaService(query, commands, videoTags);
+    private final VideoTagAssignmentService assignments = mock(VideoTagAssignmentService.class);
+    private final MediaService service = new MediaService(query, commands, videoTags, assignments);
+
+    @Test
+    void delegatesTagAssignmentsAndQueries() {
+        var tags = List.of(new VideoTagDto("tag", "TRAVEL", true));
+        when(assignments.tagsForVideo("video")).thenReturn(tags);
+        assertSame(tags, service.videoTags("video"));
+        service.setVideoTagAssigned("video", "tag", true);
+        verify(assignments).setAssigned("video", "tag", true);
+    }
 
     @Test
     void delegatesVideoTagCreation() {

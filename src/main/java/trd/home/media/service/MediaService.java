@@ -8,8 +8,10 @@ import trd.home.common.logging.LogMethodCall;
 import trd.home.media.dto.ActorDto;
 import trd.home.media.dto.FolderDto;
 import trd.home.media.dto.VideoDto;
+import trd.home.media.dto.VideoTagDto;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
+import trd.home.media.service.tag.VideoTagAssignmentService;
 import trd.home.media.service.tag.VideoTagService;
 
 @Service
@@ -18,6 +20,15 @@ public class MediaService {
     private final MediaQueryService query;
     private final MediaCommandService commands;
     private final VideoTagService videoTags;
+    private final VideoTagAssignmentService tagAssignments;
+
+    public List<VideoTagDto> videoTags(String videoId) {
+        return tagAssignments.tagsForVideo(videoId);
+    }
+
+    public void setVideoTagAssigned(String videoId, String tagId, boolean assigned) {
+        tagAssignments.setAssigned(videoId, tagId, assigned);
+    }
 
     @LogMethodCall
     public void createVideoTag(String name) {

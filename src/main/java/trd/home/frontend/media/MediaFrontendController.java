@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import trd.home.frontend.FrontendPageRenderer;
+import trd.home.media.dto.VideoTagDto;
 import trd.home.media.service.MediaService;
 
 @Controller
@@ -63,6 +65,19 @@ public class MediaFrontendController {
     public String importPath(@RequestParam String path) {
         mediaService.importPath(path);
         return "redirect:/media/video-operations";
+    }
+
+    @GetMapping("/videos/{id}/tags")
+    @ResponseBody
+    public List<VideoTagDto> videoTags(@PathVariable String id) {
+        return mediaService.videoTags(id);
+    }
+
+    @PostMapping("/videos/{id}/tags/{tagId}")
+    public ResponseEntity<Void> setVideoTagAssigned(
+            @PathVariable String id, @PathVariable String tagId, @RequestParam boolean assigned) {
+        mediaService.setVideoTagAssigned(id, tagId, assigned);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/videos/{id}/stream")

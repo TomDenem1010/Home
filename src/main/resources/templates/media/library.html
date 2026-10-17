@@ -34,7 +34,7 @@
             <p th:if="${#lists.isEmpty(videos)}">No videos to display. Select an actor or folder.</p>
             <ul class="media-list">
                 <li th:each="video : ${videos}">
-                    <button type="button" class="media-video" th:attr="data-stream=@{/media/videos/{id}/stream(id=${video.id})},data-name=${video.name}">
+                    <button type="button" class="media-video" th:attr="data-stream=@{/media/videos/{id}/stream(id=${video.id})},data-tags=@{/media/videos/{id}/tags(id=${video.id})},data-name=${video.name}">
                     <span th:text="${video.name}">Video</span>
                     <small><span th:each="actor, loop : ${video.actors}" th:text="${actor.name + (loop.last ? '' : ' & ')}"></span></small>
                     <small th:text="${video.folder.path}"></small>
@@ -48,6 +48,12 @@
             <h2 id="media-playing">Video player</h2>
             <video id="media-player" controls preload="metadata">Your browser does not support video playback.</video>
             <p id="media-playback-status" role="status">Choose a video from the list.</p>
+            <section id="media-tags" hidden aria-labelledby="media-tags-title">
+                <h2 id="media-tags-title">Video tags</h2>
+                <p id="media-tag-status" role="status"></p>
+                <div id="media-tag-list" class="media-tag-list"></div>
+                <input type="hidden" id="media-tag-csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:attr="data-header=${_csrf.headerName}">
+            </section>
         </div>
     </div>
 </section>

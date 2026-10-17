@@ -12,6 +12,11 @@
 .media-list small { display: block; margin-top: .25rem; color: #64748b; font-size: .78rem; font-weight: 400; }
 .media-scroll:focus-visible, .media-list a:focus-visible, .media-list button:focus-visible { outline: 2px solid #2d6cdf; outline-offset: -2px; }
 .media-player { min-width: 0; }
+.media-tag-list { display: flex; flex-wrap: wrap; gap: .5rem; }
+.media-tag { padding: .5rem .85rem; border: 1px solid #b8c2d1; border-radius: 1rem; color: #25324a; background: #f5f7fb; font: inherit; cursor: pointer; overflow-wrap: anywhere; }
+.media-tag[aria-pressed="true"] { color: white; background: #2d6cdf; border-color: #2d6cdf; }
+.media-tag:focus-visible { outline: 2px solid #2d6cdf; outline-offset: 3px; }
+.media-tag:disabled { opacity: .6; cursor: wait; }
 .media-player h2 { font-size: 1.1rem; overflow-wrap: anywhere; }
 .media-player video { display: block; width: 100%; max-height: 60vh; border-radius: .8rem; background: #000; }
 .video-operations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }

@@ -15,6 +15,7 @@ import trd.home.media.constant.MediaStatus;
 import trd.home.media.dto.ActorDto;
 import trd.home.media.dto.FolderDto;
 import trd.home.media.dto.VideoDto;
+import trd.home.media.dto.VideoTagDto;
 import trd.home.media.exception.MediaVideoNotFoundException;
 import trd.home.media.service.MediaService;
 
@@ -22,6 +23,42 @@ class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
     private final FrontendPageRenderer pages = mock(FrontendPageRenderer.class);
     private final MediaFrontendController controller = new MediaFrontendController(service, pages);
+
+    @Test
+    void returnsVideoTagsFromModuleFacade() {
+        var tags = List.of(new VideoTagDto("tag", "TRAVEL", true));
+        when(service.videoTags("video")).thenReturn(tags);
+        assertSame(tags, controller.videoTags("video"));
+    }
+
+    @Test
+    void assignsAndRemovesVideoTagThroughModuleFacade() {
+        assertEquals(
+                200,
+                controller
+                        .setVideoTagAssigned("video", "tag", true)
+                        .getStatusCode()
+                        .value());
+        assertEquals(
+                200,
+                controller
+                        .setVideoTagAssigned("video", "tag", false)
+                        .getStatusCode()
+                        .value());
+        verify(service).setVideoTagAssigned("video", "tag", true);
+        verify(service).setVideoTagAssigned("video", "tag", false);
+    }
+
+    @Test
+    void propagatesTagAssignmentFailure() {
+        var failure = new MediaVideoNotFoundException("Unavailable");
+        doThrow(failure).when(service).setVideoTagAssigned("missing", "tag", true);
+        assertSame(
+                failure,
+                assertThrows(
+                        MediaVideoNotFoundException.class,
+                        () -> controller.setVideoTagAssigned("missing", "tag", true)));
+    }
 
     @Test
     void createsVideoTagAndRedirectsToOperations() {
