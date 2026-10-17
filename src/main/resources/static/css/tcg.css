@@ -1,7 +1,8 @@
 .tcg-page .table-container { overflow-x: auto; }
-.deck-operations { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1.5rem; }
+.deck-operations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
 .deck-operations article { padding: 1.25rem; border: 1px solid #dce3ed; border-radius: .75rem; background: white; }
 .deck-operations button { padding: .7rem 1.25rem; border: 0; border-radius: .45rem; color: white; background: #2d6cdf; font: inherit; cursor: pointer; }
+.deck-operations .clear-decks { grid-column: 1 / -1; }
 .deck-operations .clear-decks button { background: #973b3b; }
 .deck-operations button:focus-visible { outline: 2px solid #25324a; outline-offset: 3px; }
 .version-entry { margin-top: 1.5rem; }

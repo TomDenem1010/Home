@@ -4,37 +4,37 @@
 <section class="tcg-page deck-operations" th:fragment="content" aria-label="Deck operations">
     <article>
         <h2>Import decks from CSV</h2>
-        <p>Read CSV deck files from the configured resource path in the background.</p>
+        <p>Import decks from CSV files.</p>
         <form th:action="@{/tcg/deck-operations/import-decks-from-csv}" method="post">
             <button type="submit">Import CSV</button>
         </form>
     </article>
     <article>
         <h2>Import decks from XLSX</h2>
-        <p>Read XLSX deck files from the configured resource path in the background.</p>
+        <p>Import decks from XLSX files.</p>
         <form th:action="@{/tcg/deck-operations/import-decks-from-xlsx}" method="post">
             <button type="submit">Import XLSX</button>
         </form>
     </article>
-    <article class="clear-decks">
-        <h2>Clear decks</h2>
-        <p>Permanently delete all saved decks, their versions and deck card entries in the background. Cards and their prices are kept.</p>
-        <form th:action="@{/tcg/deck-operations/clear}" method="post">
-            <button type="submit">Clear</button>
+    <article>
+        <h2>Export active decks to CSV</h2>
+        <p>Export each active deck to a separate CSV file.</p>
+        <form th:action="@{/tcg/deck-operations/export-decks-to-csv}" method="post">
+            <button type="submit">Export CSV</button>
         </form>
     </article>
     <article>
-        <h2>Export active decks</h2>
-        <p>Save an Excel workbook with current card prices, deck totals and a summary sheet to the configured export directory in the background.</p>
+        <h2>Export active decks to XLSX</h2>
+        <p>Export active decks with prices, totals and a summary.</p>
         <form th:action="@{/tcg/deck-operations/export-decks-to-xlsx}" method="post">
             <button type="submit">Export XLSX</button>
         </form>
     </article>
-    <article>
-        <h2>Export active decks to CSV</h2>
-        <p>Save each active deck to csv/export as name_version.csv, with cards sorted by name and rows containing quantity, link and foil type.</p>
-        <form th:action="@{/tcg/deck-operations/export-decks-to-csv}" method="post">
-            <button type="submit">Export CSV</button>
+    <article class="clear-decks">
+        <h2>Clear all decks</h2>
+        <p>Permanently delete all decks and versions. Keep cards and prices.</p>
+        <form th:action="@{/tcg/deck-operations/clear}" method="post">
+            <button type="submit">Clear all decks</button>
         </form>
     </article>
 </section>
