@@ -19,6 +19,9 @@ public interface VideoRepository extends JpaRepository<Video, String> {
     @EntityGraph(attributePaths = {"folder", "actors"})
     List<Video> findDistinctByStatusAndFolderIdOrderByName(MediaStatus status, String folderId);
 
+    @EntityGraph(attributePaths = {"folder", "actors"})
+    List<Video> findDistinctByStatusAndTagsIdOrderByName(MediaStatus status, String tagId);
+
     @EntityGraph(attributePaths = "folder")
     Optional<Video> findByIdAndStatus(String id, MediaStatus status);
 }

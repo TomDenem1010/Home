@@ -52,6 +52,12 @@ public class MediaQueryService {
                 .toList();
     }
 
+    public List<VideoDto> videosByTag(String id) {
+        return videos.findDistinctByStatusAndTagsIdOrderByName(MediaStatus.ACTIVE, id).stream()
+                .map(VideoDto::from)
+                .toList();
+    }
+
     public Path videoPath(String id) {
         var video = videos.findByIdAndStatus(id, MediaStatus.ACTIVE)
                 .orElseThrow(() -> new MediaVideoNotFoundException("Video is unavailable: " + id));

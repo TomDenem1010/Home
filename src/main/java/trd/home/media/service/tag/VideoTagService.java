@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import trd.home.media.dao.VideoTag;
+import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.repository.VideoTagRepository;
 import trd.home.media.validator.VideoTagNameValidator;
 
@@ -14,6 +15,13 @@ import trd.home.media.validator.VideoTagNameValidator;
 public class VideoTagService {
     private final VideoTagRepository repository;
     private final List<VideoTagNameValidator> validators;
+
+    @Transactional(readOnly = true)
+    public List<VideoTagSummaryDto> allTags() {
+        return repository.findAllByOrderByNameAsc().stream()
+                .map(tag -> new VideoTagSummaryDto(tag.getId(), tag.getName()))
+                .toList();
+    }
 
     @Transactional
     public void create(String name) {

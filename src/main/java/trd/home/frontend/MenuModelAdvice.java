@@ -50,7 +50,8 @@ public class MenuModelAdvice {
                                 new SubmenuItem(
                                         "video operations", "/media/video-operations", SubmenuItem.Type.PAGE, media),
                                 new SubmenuItem("by actor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
-                                new SubmenuItem("by folder", "/media/by-folder", SubmenuItem.Type.PAGE, media))),
+                                new SubmenuItem("by folder", "/media/by-folder", SubmenuItem.Type.PAGE, media),
+                                new SubmenuItem("by tag", "/media/by-tag", SubmenuItem.Type.PAGE, media))),
                 new MenuItem(
                         "HELPER",
                         helper,

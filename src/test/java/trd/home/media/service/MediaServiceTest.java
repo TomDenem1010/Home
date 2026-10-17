@@ -7,6 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import trd.home.media.dto.VideoTagDto;
+import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
 import trd.home.media.service.tag.VideoTagAssignmentService;
@@ -26,6 +27,16 @@ class MediaServiceTest {
         assertSame(tags, service.videoTags("video"));
         service.setVideoTagAssigned("video", "tag", true);
         verify(assignments).setAssigned("video", "tag", true);
+    }
+
+    @Test
+    void delegatesTagBrowserQueries() {
+        var tags = List.of(new VideoTagSummaryDto("tag", "TRAVEL"));
+        when(videoTags.allTags()).thenReturn(tags);
+        when(query.videosByTag("tag")).thenReturn(List.of());
+        assertSame(tags, service.allVideoTags());
+        assertEquals(List.of(), service.videosByTag("tag"));
+        verify(query).videosByTag("tag");
     }
 
     @Test

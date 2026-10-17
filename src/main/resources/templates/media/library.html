@@ -7,7 +7,7 @@
     <div class="media-layout">
         <div class="media-browser">
             <section class="media-panel" aria-labelledby="media-selector-title">
-            <h2 id="media-selector-title" th:text="${mode == 'by-actor' ? 'Actors' : 'Folders'}">Actors</h2>
+            <h2 id="media-selector-title" th:text="${mode == 'by-actor' ? 'Actors' : (mode == 'by-tag' ? 'Tags' : 'Folders')}">Actors</h2>
             <div class="media-scroll" tabindex="0" role="region" aria-labelledby="media-selector-title">
             <ul class="media-list" th:if="${mode == 'by-actor'}">
                 <li th:each="actor : ${actors}">
@@ -26,12 +26,19 @@
                 </li>
             </ul>
             <p th:if="${mode == 'by-folder' and #lists.isEmpty(folders)}">No active folders.</p>
+            <ul class="media-list" th:if="${mode == 'by-tag'}">
+                <li th:each="tag : ${tags}">
+                    <a th:href="@{/media/by-tag(tagId=${tag.id})}" th:text="${tag.name}"
+                       th:attr="aria-current=${tag.id == selectedId} ? 'true' : null">Tag</a>
+                </li>
+            </ul>
+            <p th:if="${mode == 'by-tag' and #lists.isEmpty(tags)}">No tags yet.</p>
             </div>
             </section>
             <section class="media-panel" aria-labelledby="media-videos-title">
             <h2 id="media-videos-title">Videos</h2>
             <div class="media-scroll" tabindex="0" role="region" aria-labelledby="media-videos-title">
-            <p th:if="${#lists.isEmpty(videos)}">No videos to display. Select an actor or folder.</p>
+            <p th:if="${#lists.isEmpty(videos)}" th:text="${mode == 'by-tag' ? (selectedId == null ? 'Select a tag to display videos.' : 'No active videos for this tag.') : 'No videos to display. Select an actor or folder.'}">No videos to display.</p>
             <ul class="media-list">
                 <li th:each="video : ${videos}">
                     <button type="button" class="media-video" th:attr="data-stream=@{/media/videos/{id}/stream(id=${video.id})},data-tags=@{/media/videos/{id}/tags(id=${video.id})},data-name=${video.name}">

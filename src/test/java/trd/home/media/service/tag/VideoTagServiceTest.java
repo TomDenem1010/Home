@@ -5,6 +5,8 @@ import static org.mockito.Mockito.*;
 
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import trd.home.media.dao.VideoTag;
+import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.exception.InvalidVideoTagException;
 import trd.home.media.repository.VideoTagRepository;
 import trd.home.media.validator.VideoTagNameValidator;
@@ -14,6 +16,22 @@ class VideoTagServiceTest {
     private final VideoTagNameValidator first = mock(VideoTagNameValidator.class);
     private final VideoTagNameValidator second = mock(VideoTagNameValidator.class);
     private final VideoTagService service = new VideoTagService(repository, List.of(first, second));
+
+    @Test
+    void mapsTagsInRepositoryOrder() {
+        var tag = new VideoTag();
+        tag.setId("tag");
+        tag.setName("TRAVEL");
+        when(repository.findAllByOrderByNameAsc()).thenReturn(List.of(tag));
+        assertEquals(List.of(new VideoTagSummaryDto("tag", "TRAVEL")), service.allTags());
+        verifyNoInteractions(first, second);
+    }
+
+    @Test
+    void returnsEmptyTagList() {
+        when(repository.findAllByOrderByNameAsc()).thenReturn(List.of());
+        assertEquals(List.of(), service.allTags());
+    }
 
     @Test
     void passesUppercaseTrimmedNameToEveryValidatorBeforeSaving() {

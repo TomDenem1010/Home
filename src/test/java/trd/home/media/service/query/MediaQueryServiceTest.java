@@ -41,6 +41,25 @@ class MediaQueryServiceTest {
     }
 
     @Test
+    void mapsActiveVideosForSelectedTag() {
+        var video = video("video", "Film", folder("folder", "media", "Movies"));
+        when(videos.findDistinctByStatusAndTagsIdOrderByName(MediaStatus.ACTIVE, "tag"))
+                .thenReturn(List.of(video));
+        var result = service.videosByTag("tag");
+        assertEquals(1, result.size());
+        assertEquals("video", result.getFirst().id());
+        assertEquals("Film", result.getFirst().name());
+        assertEquals("folder", result.getFirst().folder().id());
+    }
+
+    @Test
+    void returnsEmptyVideosForTagWithoutMatches() {
+        when(videos.findDistinctByStatusAndTagsIdOrderByName(MediaStatus.ACTIVE, "empty"))
+                .thenReturn(List.of());
+        assertEquals(List.of(), service.videosByTag("empty"));
+    }
+
+    @Test
     void resolvesNormalizedVideoPath() {
         Folder folder = folder("folder-1", "media", "media");
         Video video = video("video-1", "Film", folder);

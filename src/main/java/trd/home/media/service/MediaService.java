@@ -9,6 +9,7 @@ import trd.home.media.dto.ActorDto;
 import trd.home.media.dto.FolderDto;
 import trd.home.media.dto.VideoDto;
 import trd.home.media.dto.VideoTagDto;
+import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
 import trd.home.media.service.tag.VideoTagAssignmentService;
@@ -58,6 +59,16 @@ public class MediaService {
     @LogMethodCall
     public List<VideoDto> videosByFolder(String id) {
         return query.videosByFolder(id);
+    }
+
+    @LogMethodCall
+    public List<VideoTagSummaryDto> allVideoTags() {
+        return videoTags.allTags();
+    }
+
+    @LogMethodCall
+    public List<VideoDto> videosByTag(String id) {
+        return query.videosByTag(id);
     }
 
     public Resource videoResource(String id) {

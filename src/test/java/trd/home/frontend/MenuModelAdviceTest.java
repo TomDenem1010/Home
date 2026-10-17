@@ -118,7 +118,7 @@ class MenuModelAdviceTest {
                         .map(item -> item.path())
                         .toList());
         assertEquals(
-                List.of("/media/video-operations", "/media/by-actor", "/media/by-folder"),
+                List.of("/media/video-operations", "/media/by-actor", "/media/by-folder", "/media/by-tag"),
                 menu(menus, "MEDIA").submenuItems().stream()
                         .map(item -> item.path())
                         .toList());

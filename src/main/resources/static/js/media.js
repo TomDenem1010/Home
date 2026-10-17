@@ -1,7 +1,7 @@
 (() => {
     const player = document.getElementById("media-player");
     if (!player) return;
-    player.volume = 0.5;
+    player.volume = 0.1;
     const status = document.getElementById("media-playback-status");
     const tagPanel = document.getElementById("media-tags");
     const tagList = document.getElementById("media-tag-list");

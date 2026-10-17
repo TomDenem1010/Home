@@ -16,6 +16,7 @@ import trd.home.media.dto.ActorDto;
 import trd.home.media.dto.FolderDto;
 import trd.home.media.dto.VideoDto;
 import trd.home.media.dto.VideoTagDto;
+import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.exception.MediaVideoNotFoundException;
 import trd.home.media.service.MediaService;
 
@@ -23,6 +24,35 @@ class MediaFrontendControllerTest {
     private final MediaService service = mock(MediaService.class);
     private final FrontendPageRenderer pages = mock(FrontendPageRenderer.class);
     private final MediaFrontendController controller = new MediaFrontendController(service, pages);
+
+    @Test
+    void rendersTagBrowserWithoutQueryingVideosBeforeSelection() {
+        var tags = List.of(new VideoTagSummaryDto("tag", "TRAVEL"));
+        when(service.allVideoTags()).thenReturn(tags);
+        when(pages.render(any(), eq("/media/by-tag"), eq("ByTag"), anyString(), eq("media/library")))
+                .thenReturn("index");
+        var model = new ConcurrentModel();
+        assertEquals("index", controller.byTag(null, model));
+        assertEquals("by-tag", model.getAttribute("mode"));
+        assertEquals(tags, model.getAttribute("tags"));
+        assertEquals(List.of(), model.getAttribute("videos"));
+        assertNull(model.getAttribute("selectedId"));
+        verify(service, never()).videosByTag(any());
+    }
+
+    @Test
+    void loadsVideosForSelectedTag() {
+        var folder = new FolderDto("folder", "media", "Movies", MediaStatus.ACTIVE);
+        var video = new VideoDto("video", "Film", folder, Set.of(), MediaStatus.ACTIVE);
+        when(service.allVideoTags()).thenReturn(List.of());
+        when(service.videosByTag("tag")).thenReturn(List.of(video));
+        var model = new ConcurrentModel();
+        controller.byTag("tag", model);
+        assertEquals("tag", model.getAttribute("selectedId"));
+        assertEquals(List.of(video), model.getAttribute("videos"));
+        verify(pages)
+                .render(model, "/media/by-tag", "ByTag", "Select a tag, then choose a video to play.", "media/library");
+    }
 
     @Test
     void returnsVideoTagsFromModuleFacade() {
@@ -175,14 +205,14 @@ class MediaFrontendControllerTest {
                         model,
                         "/media/by-actor",
                         "ByActor",
-                        "Select an actor or folder, then choose a video to play.",
+                        "Select an actor, then choose a video to play.",
                         "media/library");
         verify(pages, times(2))
                 .render(
                         model,
                         "/media/by-folder",
                         "ByFolder",
-                        "Select an actor or folder, then choose a video to play.",
+                        "Select a folder, then choose a video to play.",
                         "media/library");
     }
 

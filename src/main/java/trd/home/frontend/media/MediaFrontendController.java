@@ -44,7 +44,9 @@ public class MediaFrontendController {
         model.addAttribute("actors", mediaService.activeActors());
         model.addAttribute("videos", actorId == null ? List.of() : mediaService.videosByActor(actorId));
         model.addAttribute("selectedId", actorId);
-        return page(model, "by-actor", "ByActor");
+        model.addAttribute("mode", "by-actor");
+        return pageRenderer.render(
+                model, "/media/by-actor", "ByActor", "Select an actor, then choose a video to play.", "media/library");
     }
 
     @GetMapping("/by-folder")
@@ -52,7 +54,23 @@ public class MediaFrontendController {
         model.addAttribute("folders", mediaService.activeFolders());
         model.addAttribute("videos", folderId == null ? List.of() : mediaService.videosByFolder(folderId));
         model.addAttribute("selectedId", folderId);
-        return page(model, "by-folder", "ByFolder");
+        model.addAttribute("mode", "by-folder");
+        return pageRenderer.render(
+                model,
+                "/media/by-folder",
+                "ByFolder",
+                "Select a folder, then choose a video to play.",
+                "media/library");
+    }
+
+    @GetMapping("/by-tag")
+    public String byTag(@RequestParam(required = false) String tagId, Model model) {
+        model.addAttribute("tags", mediaService.allVideoTags());
+        model.addAttribute("videos", tagId == null ? List.of() : mediaService.videosByTag(tagId));
+        model.addAttribute("selectedId", tagId);
+        model.addAttribute("mode", "by-tag");
+        return pageRenderer.render(
+                model, "/media/by-tag", "ByTag", "Select a tag, then choose a video to play.", "media/library");
     }
 
     @PostMapping("/video-operations/tags")
@@ -92,15 +110,5 @@ public class MediaFrontendController {
                 .header(HttpHeaders.ACCEPT_RANGES, "bytes")
                 .cacheControl(CacheControl.noStore())
                 .body(resource);
-    }
-
-    private String page(Model model, String mode, String title) {
-        model.addAttribute("mode", mode);
-        return pageRenderer.render(
-                model,
-                "/media/" + mode,
-                title,
-                "Select an actor or folder, then choose a video to play.",
-                "media/library");
     }
 }
