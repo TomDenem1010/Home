@@ -8,11 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
+import trd.home.media.service.tag.VideoTagService;
 
 class MediaServiceTest {
     private final MediaQueryService query = mock(MediaQueryService.class);
     private final MediaCommandService commands = mock(MediaCommandService.class);
-    private final MediaService service = new MediaService(query, commands);
+    private final VideoTagService videoTags = mock(VideoTagService.class);
+    private final MediaService service = new MediaService(query, commands, videoTags);
+
+    @Test
+    void delegatesVideoTagCreation() {
+        service.createVideoTag("Travel");
+        verify(videoTags).create("Travel");
+    }
 
     @Test
     void createsMediaImportEvent() {

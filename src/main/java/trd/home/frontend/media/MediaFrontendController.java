@@ -53,6 +53,12 @@ public class MediaFrontendController {
         return page(model, "by-folder", "ByFolder");
     }
 
+    @PostMapping("/video-operations/tags")
+    public String createVideoTag(@RequestParam String name) {
+        mediaService.createVideoTag(name);
+        return "redirect:/media/video-operations";
+    }
+
     @PostMapping("/import")
     public String importPath(@RequestParam String path) {
         mediaService.importPath(path);

@@ -10,12 +10,19 @@ import trd.home.media.dto.FolderDto;
 import trd.home.media.dto.VideoDto;
 import trd.home.media.service.application.MediaCommandService;
 import trd.home.media.service.query.MediaQueryService;
+import trd.home.media.service.tag.VideoTagService;
 
 @Service
 @RequiredArgsConstructor
 public class MediaService {
     private final MediaQueryService query;
     private final MediaCommandService commands;
+    private final VideoTagService videoTags;
+
+    @LogMethodCall
+    public void createVideoTag(String name) {
+        videoTags.create(name);
+    }
 
     @LogMethodCall
     public void importPath(String path) {

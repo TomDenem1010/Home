@@ -24,6 +24,22 @@ class MediaFrontendControllerTest {
     private final MediaFrontendController controller = new MediaFrontendController(service, pages);
 
     @Test
+    void createsVideoTagAndRedirectsToOperations() {
+        assertEquals("redirect:/media/video-operations", controller.createVideoTag("Travel"));
+        verify(service).createVideoTag("Travel");
+    }
+
+    @Test
+    void propagatesVideoTagCreationFailure() {
+        var failure = new trd.home.media.exception.InvalidVideoTagException("Invalid name");
+        doThrow(failure).when(service).createVideoTag(" ");
+        assertSame(
+                failure,
+                assertThrows(
+                        trd.home.media.exception.InvalidVideoTagException.class, () -> controller.createVideoTag(" ")));
+    }
+
+    @Test
     void requestsMediaImportAndRedirectsImmediately() {
         assertEquals("redirect:/media/video-operations", controller.importPath("C:\\Media"));
         verify(service).importPath("C:\\Media");

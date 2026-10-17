@@ -46,6 +46,18 @@ public class Video extends AuditedEntity {
     @NonNull
     private Set<Actor> actors = new HashSet<>();
 
+    @ManyToMany
+    @JoinTable(
+            name = "media_video_tag_assignment",
+            joinColumns = @JoinColumn(name = "video_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", nullable = false),
+            uniqueConstraints =
+                    @UniqueConstraint(
+                            name = "pk_media_video_tag_assignment",
+                            columnNames = {"video_id", "tag_id"}))
+    @NonNull
+    private Set<VideoTag> tags = new HashSet<>();
+
     @Column(name = "file_name", nullable = false, length = 1000)
     @NonNull
     private String fileName;
