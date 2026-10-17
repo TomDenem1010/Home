@@ -186,6 +186,9 @@
 					<targetClasses>
 						<param>trd.home.*</param>
 					</targetClasses>
+					<excludedClasses>
+						<param>trd.home.*.configuration.*</param>
+					</excludedClasses>
 
 					<outputFormats>
 						<param>HTML</param>

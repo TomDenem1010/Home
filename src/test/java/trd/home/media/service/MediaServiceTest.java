@@ -4,8 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
+import trd.home.media.constant.MediaStatus;
+import trd.home.media.dto.FolderDto;
+import trd.home.media.dto.VideoDto;
 import trd.home.media.dto.VideoTagDto;
 import trd.home.media.dto.VideoTagSummaryDto;
 import trd.home.media.service.application.MediaCommandService;
@@ -32,10 +36,12 @@ class MediaServiceTest {
     @Test
     void delegatesTagBrowserQueries() {
         var tags = List.of(new VideoTagSummaryDto("tag", "TRAVEL"));
+        var folder = new FolderDto("folder", "media", "Movies", MediaStatus.ACTIVE);
+        var videos = List.of(new VideoDto("video", "Film", folder, Set.of(), MediaStatus.ACTIVE));
         when(videoTags.allTags()).thenReturn(tags);
-        when(query.videosByTag("tag")).thenReturn(List.of());
+        when(query.videosByTag("tag")).thenReturn(videos);
         assertSame(tags, service.allVideoTags());
-        assertEquals(List.of(), service.videosByTag("tag"));
+        assertSame(videos, service.videosByTag("tag"));
         verify(query).videosByTag("tag");
     }
 

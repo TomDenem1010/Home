@@ -54,6 +54,31 @@ class VideoTagAssignmentServiceTest {
     }
 
     @Test
+    void doesNotDuplicateAssignmentWhenRepositoryReturnsAnotherInstanceOfSameTag() {
+        var video = activeVideo();
+        var existing = tag("tag");
+        video.getTags().add(existing);
+        when(tags.findById("tag")).thenReturn(Optional.of(tag("tag")));
+
+        service.setAssigned("video", "tag", true);
+
+        assertEquals(java.util.Set.of(existing), video.getTags());
+    }
+
+    @Test
+    void addsNewTagWhenAnotherTagIsAlreadyAssigned() {
+        var video = activeVideo();
+        var existing = tag("existing");
+        var added = tag("new");
+        video.getTags().add(existing);
+        when(tags.findById("new")).thenReturn(Optional.of(added));
+
+        service.setAssigned("video", "new", true);
+
+        assertEquals(java.util.Set.of(existing, added), video.getTags());
+    }
+
+    @Test
     void removesTagByIdAndKeepsOtherAssignments() {
         var video = activeVideo();
         video.getTags().add(tag("tag"));
