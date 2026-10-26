@@ -1,5 +1,6 @@
 package trd.home.frontend.tcg;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import trd.home.frontend.FrontendPageRenderer;
+import trd.home.tcg.constant.CardFoilType;
 import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.service.TcgService;
 
@@ -128,6 +130,42 @@ public class TcgFrontendController {
         model.addAttribute("deckPriceHistorySummary", tcgService.getDeckPriceHistorySummary(deckId));
         model.addAttribute("contentTemplate", "tcg/statistics-uuid");
         return renderPage(model, "/tcg/statistics", "Deck price history", "Latest known card prices for this deck.");
+    }
+
+    @GetMapping("/edit-decks")
+    public String editDecks(Model model) {
+        model.addAttribute("decks", tcgService.getVersionDecks());
+        model.addAttribute("contentTemplate", "tcg/edit-decks");
+        return renderPage(model, "/tcg/edit-decks", "Edit decks", "Select a deck to edit.");
+    }
+
+    @GetMapping("/edit-decks/{deckId}")
+    public String editDeck(@PathVariable String deckId, Model model) {
+        var deck = tcgService.getEditableDeck(deckId);
+        model.addAttribute("deck", deck);
+        model.addAttribute("foilTypes", tcgService.getCardFoilTypes());
+        model.addAttribute("contentTemplate", "tcg/edit-deck");
+        return renderPage(model, "/tcg/edit-decks", "Edit: " + deck.name(), "Each change creates a new version.");
+    }
+
+    @PostMapping("/edit-decks/{deckId}/remove")
+    public String removeDeckCards(
+            @PathVariable String deckId,
+            @RequestParam String versionId,
+            @RequestParam(required = false) List<String> cardIds) {
+        tcgService.removeDeckCards(deckId, versionId, cardIds);
+        return "redirect:/tcg/edit-decks/" + deckId;
+    }
+
+    @PostMapping("/edit-decks/{deckId}/add")
+    public String addDeckCard(
+            @PathVariable String deckId,
+            @RequestParam String versionId,
+            @RequestParam int quantity,
+            @RequestParam String link,
+            @RequestParam CardFoilType foilType) {
+        tcgService.addDeckCard(deckId, versionId, quantity, link, foilType);
+        return "redirect:/tcg/edit-decks/" + deckId;
     }
 
     private String renderPage(Model model, String activePath, String title, String content) {

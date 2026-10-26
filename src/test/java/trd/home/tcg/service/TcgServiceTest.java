@@ -27,6 +27,7 @@ import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.exception.InvalidCardSearchFilterException;
 import trd.home.tcg.service.application.DeckCsvExportCommandService;
 import trd.home.tcg.service.application.DeckCsvImportService;
+import trd.home.tcg.service.application.DeckEditService;
 import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
@@ -44,8 +45,15 @@ class TcgServiceTest {
     private final DeckExcelImportService xlsxImports = mock(DeckExcelImportService.class);
     private final DeckCsvImportService csvImports = mock(DeckCsvImportService.class);
     private final DeckCsvExportCommandService csvExporter = mock(DeckCsvExportCommandService.class);
-    private final TcgService service =
-            new TcgService(commands, queries, List.of(validator), exporter, xlsxImports, csvImports, csvExporter);
+    private final TcgService service = new TcgService(
+            mock(DeckEditService.class),
+            commands,
+            queries,
+            List.of(validator),
+            exporter,
+            xlsxImports,
+            csvImports,
+            csvExporter);
 
     @Test
     void returnsVersionDecksAndSelectedDeckHistory() {
@@ -100,6 +108,7 @@ class TcgServiceTest {
     @Test
     void invalidFilterPreventsQuery() {
         var validatingService = new TcgService(
+                mock(DeckEditService.class),
                 commands,
                 queries,
                 List.of(new CardSearchPriceValidator()),
@@ -117,6 +126,7 @@ class TcgServiceTest {
     @Test
     void invalidPagingPreventsQuery() {
         var validatingService = new TcgService(
+                mock(DeckEditService.class),
                 commands,
                 queries,
                 List.of(new CardSearchPriceValidator(), new CardSearchPagingValidator()),

@@ -15,10 +15,12 @@ import trd.home.tcg.dto.CardSearchFilter;
 import trd.home.tcg.dto.CardSearchResult;
 import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
+import trd.home.tcg.dto.DeckEditor;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
 import trd.home.tcg.service.application.DeckCsvExportCommandService;
 import trd.home.tcg.service.application.DeckCsvImportService;
+import trd.home.tcg.service.application.DeckEditService;
 import trd.home.tcg.service.application.DeckExcelExportCommandService;
 import trd.home.tcg.service.application.DeckExcelImportService;
 import trd.home.tcg.service.application.TcgCommandService;
@@ -29,6 +31,7 @@ import trd.home.tcg.validator.CardSearchFilterValidator;
 @RequiredArgsConstructor
 public class TcgService {
 
+    private final DeckEditService deckEdits;
     private final TcgCommandService commands;
     private final TcgQueryService queries;
     private final List<CardSearchFilterValidator> cardSearchFilterValidators;
@@ -36,6 +39,21 @@ public class TcgService {
     private final DeckExcelImportService deckExcelImportService;
     private final DeckCsvImportService deckCsvImportService;
     private final DeckCsvExportCommandService deckCsvExportService;
+
+    @LogMethodCall
+    public DeckEditor getEditableDeck(String id) {
+        return deckEdits.getDeck(id);
+    }
+
+    @LogMethodCall
+    public void removeDeckCards(String id, String versionId, List<String> selected) {
+        deckEdits.removeCards(id, versionId, selected);
+    }
+
+    @LogMethodCall
+    public void addDeckCard(String id, String versionId, int quantity, String link, CardFoilType foilType) {
+        deckEdits.addCard(id, versionId, quantity, link, foilType);
+    }
 
     @LogMethodCall
     public void exportActiveDecksToCsv() {

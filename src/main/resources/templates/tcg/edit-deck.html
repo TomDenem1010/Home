@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="tcg-page deck-history deck-editor" th:fragment="content" aria-label="Edit deck">
+    <div class="price-summary-row">
+        <article class="price-card">
+            <span>Current version</span>
+            <strong th:text="${deck.version}">v1</strong>
+        </article>
+        <article class="price-card">
+            <span>Distinct cards</span>
+            <strong th:text="${deck.cards.size()}">0</strong>
+        </article>
+        <a class="back-link" th:href="@{/tcg/edit-decks}">&larr; Back to decks</a>
+    </div>
+
+    <form th:action="@{/tcg/edit-decks/{id}/remove(id=${deck.id})}" method="post">
+        <input type="hidden" name="versionId" th:value="${deck.versionId}">
+        <div class="table-container history-table-container" th:if="${!deck.cards.empty}">
+            <table class="history-table" data-sortable-table>
+                <thead>
+                <tr>
+                    <th scope="col" class="selection-column">Select</th>
+                    <th scope="col" class="card-name" data-sort-type="text"><button class="sort-button" type="button">Card</button></th>
+                    <th scope="col" data-sort-type="number"><button class="sort-button" type="button">Quantity</button></th>
+                    <th scope="col" data-sort-type="text"><button class="sort-button" type="button">Foil</button></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="card : ${deck.cards}">
+                    <td class="selection-column">
+                        <input type="checkbox" name="cardIds" th:value="${card.id}"
+                               th:aria-label="${'Select ' + card.link.substring(card.link.lastIndexOf('/') + 1) + ' ' + card.foilType}">
+                    </td>
+                    <td class="card-name" th:attr="data-sort-value=${card.link.substring(card.link.lastIndexOf('/') + 1)}">
+                        <a class="card-link" th:href="${card.link}"
+                           th:text="${card.link.substring(card.link.lastIndexOf('/') + 1)}"
+                           target="_blank" rel="noopener noreferrer">Card name</a>
+                    </td>
+                    <td class="quantity" th:attr="data-sort-value=${card.quantity}" th:text="${card.quantity}">0</td>
+                    <td th:attr="data-sort-value=${card.foilType}" th:text="${card.foilType}">NO</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p th:if="${deck.cards.empty}">This deck contains no cards.</p>
+        <div class="deck-edit-actions">
+            <p>Removing a selected card removes all its copies from the new version.</p>
+            <button class="remove-cards-button" type="submit" th:disabled="${deck.cards.empty}">Remove selected cards</button>
+        </div>
+    </form>
+
+    <article class="deck-add-card">
+        <h2>Add card</h2>
+        <p>Add a card to a new version. For an existing card and foil type, the quantity will be increased.</p>
+        <form class="card-search-form" th:action="@{/tcg/edit-decks/{id}/add(id=${deck.id})}" method="post">
+            <input type="hidden" name="versionId" th:value="${deck.versionId}">
+            <label>Quantity <input type="number" name="quantity" min="1" max="2147483647" value="1" required></label>
+            <label class="card-url-field">Cardmarket URL <input type="url" name="link" maxlength="255" placeholder="https://www.cardmarket.com/..." required></label>
+            <label>Foil
+                <select name="foilType" required>
+                    <option th:each="foil : ${foilTypes}" th:value="${foil}" th:text="${foil}" th:selected="${foil.name() == 'NO'}">NO</option>
+                </select>
+            </label>
+            <button type="submit">Add card</button>
+        </form>
+    </article>
+</section>
+</body>
+</html>

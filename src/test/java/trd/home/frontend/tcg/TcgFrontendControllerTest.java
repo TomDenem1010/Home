@@ -1,6 +1,8 @@
 package trd.home.frontend.tcg;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,12 +23,55 @@ import trd.home.tcg.dto.CardmarketDeckPriceHistorySummary;
 import trd.home.tcg.dto.CardmarketDeckPriceSummary;
 import trd.home.tcg.dto.DeckVersionHistory;
 import trd.home.tcg.dto.DeckVersionListItem;
+import trd.home.tcg.exception.DeckEditException;
 import trd.home.tcg.service.TcgService;
 
 class TcgFrontendControllerTest {
 
     private final TcgService tcgService = mock(TcgService.class);
     private final TcgFrontendController controller = new TcgFrontendController(tcgService, new FrontendPageRenderer());
+
+    @Test
+    void editorPagesUseModuleFacadeAndExistingRenderer() {
+        var model = new ConcurrentModel();
+        var decks = List.of(new DeckVersionListItem("deck", "Deck"));
+        when(tcgService.getVersionDecks()).thenReturn(decks);
+        assertEquals("index", controller.editDecks(model));
+        assertEquals(decks, model.getAttribute("decks"));
+        assertEquals("tcg/edit-decks", model.getAttribute("contentTemplate"));
+        var deck = new trd.home.tcg.dto.DeckEditor("deck", "Deck", "v-id", "v1", List.of());
+        when(tcgService.getEditableDeck("deck")).thenReturn(deck);
+        assertEquals("index", controller.editDeck("deck", model));
+        assertEquals(deck, model.getAttribute("deck"));
+        assertEquals("/tcg/edit-decks", model.getAttribute("activePath"));
+        assertEquals("tcg/edit-deck", model.getAttribute("contentTemplate"));
+    }
+
+    @Test
+    void editsDelegateAndRedirectToSelectedDeck() {
+        assertEquals("redirect:/tcg/edit-decks/deck", controller.removeDeckCards("deck", "version", List.of("card")));
+        verify(tcgService).removeDeckCards("deck", "version", List.of("card"));
+        assertEquals(
+                "redirect:/tcg/edit-decks/deck",
+                controller.addDeckCard("deck", "version", 2, "url", CardFoilType.FOIL));
+        verify(tcgService).addDeckCard("deck", "version", 2, "url", CardFoilType.FOIL);
+    }
+
+    @Test
+    void editErrorsPropagateToCentralHomeExceptionHandler() {
+        var removalError = new DeckEditException("Select cards");
+        Mockito.doThrow(removalError).when(tcgService).removeDeckCards("deck", "version", null);
+        assertSame(
+                removalError,
+                assertThrows(DeckEditException.class, () -> controller.removeDeckCards("deck", "version", null)));
+        var additionError = new DeckEditException("Invalid card");
+        Mockito.doThrow(additionError).when(tcgService).addDeckCard("deck", "version", 0, "url", CardFoilType.NO);
+        assertSame(
+                additionError,
+                assertThrows(
+                        DeckEditException.class,
+                        () -> controller.addDeckCard("deck", "version", 0, "url", CardFoilType.NO)));
+    }
 
     @Test
     void exportsCsvThroughModuleFacadeAndRedirects() {

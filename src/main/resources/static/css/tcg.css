@@ -45,9 +45,9 @@
 .tcg-page td:not(:first-child), .tcg-page th:not(:first-child) { text-align: right; }
 .tcg-page .sort-button { display: inline-flex; align-items: center; justify-content: inherit; gap: .45rem; width: 100%; padding: 0; border: 0; color: inherit; font: inherit; font-weight: 700; text-align: inherit; background: transparent; cursor: pointer; }
 .tcg-page th:not(:first-child) .sort-button { justify-content: flex-end; }
-.tcg-page .sort-button::after { content: "↕"; color: #aebbd0; font-size: .85rem; }
-.tcg-page th[aria-sort="ascending"] .sort-button::after { content: "↑"; color: white; }
-.tcg-page th[aria-sort="descending"] .sort-button::after { content: "↓"; color: white; }
+.tcg-page .sort-button::after { content: "\2195"; color: #aebbd0; font-size: .85rem; }
+.tcg-page th[aria-sort="ascending"] .sort-button::after { content: "\2191"; color: white; }
+.tcg-page th[aria-sort="descending"] .sort-button::after { content: "\2193"; color: white; }
 .tcg-page .sort-button:hover, .tcg-page .sort-button:focus-visible { color: #d9e7ff; }
 
 @media (max-width: 640px) { .tcg-page .price-summary-row { grid-template-columns: 1fr; } }
@@ -66,3 +66,18 @@
     .card-search-results { max-height: none; }
     .tcg-page th, .tcg-page td { padding: .65rem .75rem; }
 }
+
+ .deck-editor .history-table .card-name { text-align: left; overflow-wrap: anywhere; }
+.deck-editor .history-table .card-name .sort-button { justify-content: flex-start; }
+.deck-editor .selection-column { width: 3rem; text-align: center; }
+.deck-editor input[type="checkbox"] { width: 1.1rem; height: 1.1rem; accent-color: #2d6cdf; cursor: pointer; }
+.deck-edit-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1rem; }
+.deck-edit-actions p, .deck-add-card > p { color: #667085; font-size: .9rem; }
+.deck-editor .remove-cards-button { padding: .7rem 1.25rem; border: 0; border-radius: .45rem; color: white; background: #973b3b; font: inherit; cursor: pointer; }
+.deck-editor .remove-cards-button:disabled { opacity: .5; cursor: default; }
+.deck-editor button:focus-visible, .deck-editor input:focus-visible, .deck-editor select:focus-visible { outline: 2px solid #2d6cdf; outline-offset: 3px; }
+.deck-add-card { margin-top: 2rem; padding: 1.25rem; border: 1px solid #dce3ed; border-top: 4px solid #2d6cdf; border-radius: .75rem; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 7%); }
+.deck-add-card h2 { margin-top: 0; }
+.deck-add-card .card-search-form { grid-template-columns: minmax(5rem, .5fr) minmax(12rem, 2fr) minmax(10rem, 1fr) auto; margin-bottom: 0; }
+@media (max-width: 900px) { .deck-add-card .card-search-form { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .deck-add-card .card-search-form { grid-template-columns: 1fr; } }

@@ -41,6 +41,7 @@ public class MenuModelAdvice {
                         List.of(
                                 new SubmenuItem("deck operations", "/tcg/deck-operations", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("statistics", "/tcg/statistics", SubmenuItem.Type.PAGE, tcg),
+                                new SubmenuItem("edit decks", "/tcg/edit-decks", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("versions", "/tcg/version", SubmenuItem.Type.PAGE, tcg),
                                 new SubmenuItem("search card", "/tcg/search-card", SubmenuItem.Type.PAGE, tcg))),
                 new MenuItem(
