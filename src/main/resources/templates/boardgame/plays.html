@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="boardgame-page" th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/boardgame.css}">
+    <p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+    <p class="message success" role="status" th:if="${success}" th:text="${success}"></p>
+    <form th:action="@{/boardgame/plays}" method="get" class="search-form">
+        <label>Game name <input type="search" name="name" th:value="${filter.name}" maxlength="255"></label>
+        <label>From <input type="datetime-local" name="from" th:value="${filter.from}"></label>
+        <label>To <input type="datetime-local" name="to" th:value="${filter.to}"></label>
+        <label>Minimum rating <input type="number" name="ratingMin" th:value="${filter.ratingMin}" min="1" max="5" step="1"></label>
+        <label>Maximum rating <input type="number" name="ratingMax" th:value="${filter.ratingMax}" min="1" max="5" step="1"></label>
+        <button type="submit">Search</button>
+        <a th:href="@{/boardgame/plays}">Reset</a>
+    </form>
+    <div class="toolbar"><a class="button" th:href="@{/boardgame/plays/new}">Record play</a></div>
+    <p th:if="${results.empty}">No plays found.</p>
+    <div class="table-container" th:unless="${results.empty}">
+        <table>
+            <thead><tr><th>Game</th><th>Played at</th><th>Rating</th></tr></thead>
+            <tbody><tr th:each="play : ${results.content}">
+                <td th:text="${play.boardGameName}"></td>
+                <td th:text="${#temporals.format(play.time, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="|${play.rating} / 5|"></td>
+            </tr></tbody>
+        </table>
+    </div>
+    <nav class="pagination" aria-label="Play pages" th:if="${results.totalPages > 0}">
+        <a th:if="${results.hasPrevious()}" th:href="@{/boardgame/plays(page=${results.number - 1},name=${filter.name},from=${filter.from},to=${filter.to},ratingMin=${filter.ratingMin},ratingMax=${filter.ratingMax})}">Previous</a>
+        <span th:text="|Page ${results.number + 1} of ${results.totalPages} · ${results.totalElements} plays|"></span>
+        <a th:if="${results.hasNext()}" th:href="@{/boardgame/plays(page=${results.number + 1},name=${filter.name},from=${filter.from},to=${filter.to},ratingMin=${filter.ratingMin},ratingMax=${filter.ratingMax})}">Next</a>
+    </nav>
+</section>
+</body>
+</html>

@@ -91,7 +91,7 @@ class MenuModelAdviceTest {
     void createsExpectedMenuStructure() {
         var menus = advice.menuItems(authentication("ROLE_ADMIN"));
 
-        assertEquals(4, menus.size());
+        assertEquals(5, menus.size());
         assertEquals(
                 List.of(
                         "/auth/users",
@@ -135,6 +135,22 @@ class MenuModelAdviceTest {
         assertEquals(
                 "video operations",
                 menu(menus, "MEDIA").submenuItems().getFirst().label());
+    }
+
+    @Test
+    void boardGameMenuRequiresItsOwnRole() {
+        var authorized = menu(advice.menuItems(authentication("ROLE_BOARDGAME")), "BOARDGAME");
+        assertTrue(authorized.authorized());
+        assertTrue(authorized.submenuItems().stream().allMatch(item -> item.authorized()));
+        assertEquals(
+                List.of("/boardgame/games", "/boardgame/games/new", "/boardgame/plays", "/boardgame/plays/new"),
+                authorized.submenuItems().stream().map(item -> item.path()).toList());
+        for (String role : List.of("ROLE_ADMIN", "ROLE_TCG", "ROLE_MEDIA")) {
+            var denied = menu(advice.menuItems(authentication(role)), "BOARDGAME");
+            assertFalse(denied.authorized());
+            assertTrue(denied.submenuItems().stream().noneMatch(item -> item.authorized()));
+        }
+        assertFalse(menu(advice.menuItems(null), "BOARDGAME").authorized());
     }
 
     private static UsernamePasswordAuthenticationToken authentication(String authority) {

@@ -21,6 +21,7 @@ public class MenuModelAdvice {
         boolean admin = hasRole(authentication, "ADMIN");
         boolean tcg = hasRole(authentication, "TCG");
         boolean media = hasRole(authentication, "MEDIA");
+        boolean boardgame = hasRole(authentication, "BOARDGAME");
         boolean helper = authentication != null && authentication.isAuthenticated();
 
         return List.of(
@@ -53,6 +54,15 @@ public class MenuModelAdvice {
                                 new SubmenuItem("by actor", "/media/by-actor", SubmenuItem.Type.PAGE, media),
                                 new SubmenuItem("by folder", "/media/by-folder", SubmenuItem.Type.PAGE, media),
                                 new SubmenuItem("by tag", "/media/by-tag", SubmenuItem.Type.PAGE, media))),
+                new MenuItem(
+                        "BOARDGAME",
+                        boardgame,
+                        List.of(
+                                new SubmenuItem("games", "/boardgame/games", SubmenuItem.Type.PAGE, boardgame),
+                                new SubmenuItem("add game", "/boardgame/games/new", SubmenuItem.Type.PAGE, boardgame),
+                                new SubmenuItem("plays", "/boardgame/plays", SubmenuItem.Type.PAGE, boardgame),
+                                new SubmenuItem(
+                                        "record play", "/boardgame/plays/new", SubmenuItem.Type.PAGE, boardgame))),
                 new MenuItem(
                         "HELPER",
                         helper,

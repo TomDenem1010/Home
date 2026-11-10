@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="boardgame-page" th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/boardgame.css}">
+    <p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+    <p class="message success" role="status" th:if="${success}" th:text="${success}"></p>
+    <form th:action="@{/boardgame/games}" method="get" class="search-form">
+        <label>Name <input type="search" name="name" th:value="${filter.name}" maxlength="255"></label>
+        <label>State <select name="state">
+            <option value="">All states</option>
+            <option th:each="state : ${states}" th:value="${state}" th:selected="${filter.state == state}" th:text="${state.label}"></option>
+        </select></label>
+        <label>Type <select name="type">
+            <option value="">All types</option>
+            <option th:each="type : ${types}" th:value="${type}" th:selected="${filter.type == type}" th:text="${type.label}"></option>
+        </select></label>
+        <button type="submit">Search</button>
+        <a th:href="@{/boardgame/games}">Reset</a>
+    </form>
+    <div class="toolbar"><a class="button" th:href="@{/boardgame/games/new}">Add game</a></div>
+    <p th:if="${results.empty}">No games found.</p>
+    <div class="table-container" th:unless="${results.empty}">
+        <table>
+            <thead><tr><th>Name</th><th>State</th><th>Type</th><th>BGG</th><th>Actions</th></tr></thead>
+            <tbody><tr th:each="game : ${results.content}">
+                <td th:text="${game.name}"></td>
+                <td th:text="${game.state.label}"></td>
+                <td th:text="${game.type.label}"></td>
+                <td><a th:if="${game.bggLink != null}" th:href="${game.bggLink}" target="_blank" rel="noopener noreferrer">BoardGameGeek</a></td>
+                <td class="actions"><a th:href="@{/boardgame/games/{id}/edit(id=${game.id})}">Edit</a>
+                    <a th:href="@{/boardgame/plays/new(boardGameId=${game.id})}">Record play</a></td>
+            </tr></tbody>
+        </table>
+    </div>
+    <nav class="pagination" aria-label="Game pages" th:if="${results.totalPages > 0}">
+        <a th:if="${results.hasPrevious()}" th:href="@{/boardgame/games(page=${results.number - 1},name=${filter.name},state=${filter.state},type=${filter.type})}">Previous</a>
+        <span th:text="|Page ${results.number + 1} of ${results.totalPages} · ${results.totalElements} games|"></span>
+        <a th:if="${results.hasNext()}" th:href="@{/boardgame/games(page=${results.number + 1},name=${filter.name},state=${filter.state},type=${filter.type})}">Next</a>
+    </nav>
+</section>
+</body>
+</html>

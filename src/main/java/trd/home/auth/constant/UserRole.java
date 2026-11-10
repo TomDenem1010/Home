@@ -3,5 +3,6 @@ package trd.home.auth.constant;
 public enum UserRole {
     ADMIN,
     TCG,
-    MEDIA;
+    MEDIA,
+    BOARDGAME;
 }

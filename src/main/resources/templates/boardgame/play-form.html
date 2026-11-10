@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<section class="boardgame-page" th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/boardgame.css}">
+    <p class="message error" role="alert" th:if="${error}" th:text="${error}"></p>
+    <p th:if="${games.empty}">Add a board game before recording a play. <a th:href="@{/boardgame/games/new}">Add game</a></p>
+    <form th:unless="${games.empty}" th:action="@{/boardgame/plays}" method="post" class="form-card">
+        <label>Game <select name="boardGameId" required>
+            <option value="">Select game</option>
+            <option th:each="game : ${games}" th:value="${game.id}" th:selected="${form.boardGameId == game.id}" th:text="|${game.name} (${game.type.label}, ${game.state.label})|"></option>
+        </select></label>
+        <label>Played at <input type="datetime-local" name="time" th:value="${form.time}" required></label>
+        <label>Rating (1–5) <input type="number" name="rating" th:value="${form.rating}" required min="1" max="5" step="1"></label>
+        <div class="actions"><button type="submit">Record play</button><a th:href="@{/boardgame/plays}">Cancel</a></div>
+    </form>
+</section>
+</body>
+</html>

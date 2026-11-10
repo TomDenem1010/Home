@@ -32,6 +32,8 @@ public class AuthConfiguration {
                         .hasRole("MEDIA")
                         .requestMatchers("/tcg/**")
                         .hasAnyRole("TCG")
+                        .requestMatchers("/boardgame", "/boardgame/**")
+                        .hasRole("BOARDGAME")
                         .anyRequest()
                         .authenticated())
                 .formLogin(form -> form.defaultSuccessUrl("/", true).permitAll())

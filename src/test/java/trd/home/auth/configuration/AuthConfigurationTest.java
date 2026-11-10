@@ -36,12 +36,23 @@ class AuthConfigurationTest {
         SessionRegistry sessions = mock(SessionRegistry.class);
         DefaultSecurityFilterChain chain = mock(DefaultSecurityFilterChain.class);
         when(http.build()).thenReturn(chain);
-        var authorize = mock(
+        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authorize = mock(
                 AuthorizeHttpRequestsConfigurer.AuthorizationManagerRequestMatcherRegistry.class,
                 Answers.RETURNS_DEEP_STUBS);
         var form = mock(FormLoginConfigurer.class, Answers.RETURNS_SELF);
         var logout = mock(LogoutConfigurer.class, Answers.RETURNS_SELF);
         var session = mock(SessionManagementConfigurer.class, Answers.RETURNS_DEEP_STUBS);
+        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl authorizedUrl =
+                mock(AuthorizeHttpRequestsConfigurer.AuthorizedUrl.class);
+        AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizedUrl boardGameUrl =
+                mock(AuthorizeHttpRequestsConfigurer.AuthorizedUrl.class);
+        when(authorize.dispatcherTypeMatchers(ASYNC, ERROR)).thenReturn(authorizedUrl);
+        when(authorize.requestMatchers(any(String[].class))).thenReturn(authorizedUrl);
+        when(authorize.requestMatchers("/boardgame", "/boardgame/**")).thenReturn(boardGameUrl);
+        when(authorizedUrl.permitAll()).thenReturn(authorize);
+        when(authorizedUrl.hasAnyRole(any(String[].class))).thenReturn(authorize);
+        when(authorizedUrl.hasRole(anyString())).thenReturn(authorize);
+        when(boardGameUrl.hasRole("BOARDGAME")).thenReturn(authorize);
         doAnswer(invocation -> {
                     invocation.<Customizer>getArgument(0).customize(authorize);
                     return http;
@@ -67,12 +78,15 @@ class AuthConfigurationTest {
                 .when(http)
                 .sessionManagement(any());
 
+        clearInvocations(authorize, authorizedUrl, boardGameUrl);
         assertSame(chain, configuration.securityFilterChain(http, sessions));
         verify(http).authorizeHttpRequests(any());
         verify(http).formLogin(any());
         verify(http).logout(any());
         verify(http).sessionManagement(any());
         verify(authorize).dispatcherTypeMatchers(ASYNC, ERROR);
+        verify(authorize).requestMatchers("/boardgame", "/boardgame/**");
+        verify(boardGameUrl).hasRole("BOARDGAME");
         verify(form).defaultSuccessUrl("/", true);
         verify(form).permitAll();
         verify(logout).logoutSuccessUrl("/login");

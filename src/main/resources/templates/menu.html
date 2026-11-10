@@ -7,6 +7,7 @@
                  th:open="${(menuItem.label == 'TCG' and #strings.startsWith(activePath, '/tcg'))
                            or (menuItem.label == 'AUTH' and #strings.startsWith(activePath, '/auth'))
                            or (menuItem.label == 'MEDIA' and #strings.startsWith(activePath, '/media'))
+                           or (menuItem.label == 'BOARDGAME' and #strings.startsWith(activePath, '/boardgame'))
                            or (menuItem.label == 'HELPER' and #strings.startsWith(activePath, '/helper'))}">
             <summary class="main-menu-item">
                 <span th:text="${menuItem.label}">Menüpont</span>

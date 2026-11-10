@@ -1,0 +1,18 @@
+.boardgame-page { min-width: 0; }
+.boardgame-page .search-form { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin: 1rem 0; }
+.boardgame-page label { display: grid; gap: .45rem; min-width: 0; }
+.boardgame-page .search-form label { flex: 1 1 10rem; }
+.boardgame-page input, .boardgame-page select, .boardgame-page button, .boardgame-page .button { padding: .7rem .8rem; border: 1px solid #b8c2d1; border-radius: .45rem; font: inherit; }
+.boardgame-page input, .boardgame-page select { width: 100%; min-width: 0; background: white; }
+.boardgame-page button, .boardgame-page .button { display: inline-block; color: white; background: #2d6cdf; cursor: pointer; text-decoration: none; }
+.boardgame-page .toolbar { margin: 1rem 0; }
+.boardgame-page .form-card { display: grid; gap: 1rem; max-width: 36rem; padding: 1.5rem; border: 1px solid #dce3ed; border-radius: .75rem; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 7%); }
+.boardgame-page .table-container { overflow-x: auto; }
+.boardgame-page table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 .25rem 1rem rgb(23 32 51 / 8%); }
+.boardgame-page th, .boardgame-page td { padding: .85rem 1rem; border-bottom: 1px solid #e2e7ef; text-align: left; overflow-wrap: anywhere; }
+.boardgame-page th { color: white; background: #25324a; }
+.boardgame-page .actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.boardgame-page .pagination { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; }
+.boardgame-page .message { padding: .75rem; border-radius: .45rem; }
+.boardgame-page .error { color: #b42318; background: #fff0ee; }
+.boardgame-page .success { color: #146c39; background: #eaf8ef; }

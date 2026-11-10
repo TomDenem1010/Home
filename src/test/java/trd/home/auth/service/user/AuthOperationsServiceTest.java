@@ -53,7 +53,9 @@ class AuthOperationsServiceTest {
 
     @Test
     void returnsEveryAvailableRole() {
-        assertEquals(Set.of(UserRole.ADMIN, UserRole.TCG, UserRole.MEDIA), authService.getAvailableRoles());
+        assertEquals(
+                Set.of(UserRole.ADMIN, UserRole.TCG, UserRole.MEDIA, UserRole.BOARDGAME),
+                authService.getAvailableRoles());
     }
 
     @Test
